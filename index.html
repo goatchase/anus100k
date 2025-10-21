@@ -5,13 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anus Words v. Subs</title>
 <style>
-/* Windows 95/97 style font and background */
 body {
   font-family: "MS Sans Serif", Tahoma, sans-serif;
   background: #008080;
   color: black;
   margin: 0;
-  padding-bottom: 50px; /* space for Start bar */
+  padding-bottom: 40px; /* leave space for Start bar */
   text-align: center;
 }
 
@@ -30,6 +29,7 @@ body {
   padding-left: 5px;
   box-sizing: border-box;
 }
+
 #startBar button {
   font-family: "MS Sans Serif";
   font-weight: bold;
@@ -50,6 +50,7 @@ body {
   background: #c0c0c0;
   z-index: 10;
 }
+
 #subscriberBox .title-bar {
   background: #000080;
   color: white;
@@ -60,6 +61,7 @@ body {
   justify-content: space-between;
   align-items: center;
 }
+
 #subscriberBox .title-bar button {
   width: 18px;
   height: 16px;
@@ -69,6 +71,7 @@ body {
   background: #c0c0c0;
   cursor: pointer;
 }
+
 #subscriberBox .content {
   padding: 5px;
   font-size: 14px;
@@ -77,6 +80,7 @@ body {
   gap: 5px;
   justify-content: center;
 }
+
 #subscriberBox svg {
   width: 20px;
   height: 14px;
@@ -87,7 +91,7 @@ body {
 /* Main window */
 .window {
   width: 600px;
-  max-width: 95%;
+  max-width: 90%;
   margin: 60px auto 20px;
   border: 2px solid #000;
   box-shadow: 4px 4px #808080;
@@ -95,6 +99,7 @@ body {
   z-index: 1;
   position: relative;
 }
+
 .title-bar {
   background: #000080;
   color: white;
@@ -105,6 +110,7 @@ body {
   justify-content: space-between;
   align-items: center;
 }
+
 .title-bar button {
   width: 20px;
   height: 18px;
@@ -114,28 +120,33 @@ body {
   background: #c0c0c0;
   cursor: pointer;
 }
+
 .content {
   padding: 10px;
   background: #c0c0c0;
 }
+
 input#wordInput {
   padding: 4px;
   font-size: 14px;
-  width: 95%;
+  width: 100%;
   max-width: 580px;
   border: 2px inset #fff;
-  margin-bottom: 5px;
+  box-sizing: border-box;
 }
+
 #counter {
   margin: 10px 0;
   font-weight: bold;
   font-size: 16px;
 }
+
 #message {
   color: red;
   font-weight: bold;
   margin-top: 5px;
 }
+
 #wordList {
   max-height: 250px;
   overflow-y: auto;
@@ -146,6 +157,7 @@ input#wordInput {
   list-style: none;
   font-family: "MS Sans Serif";
 }
+
 li {
   border-bottom: 1px solid #808080;
   padding: 2px;
@@ -156,7 +168,7 @@ li {
   background: #c0c0c0;
   border: 2px solid #fff inset;
   width: 600px;
-  max-width: 95%;
+  max-width: 90%;
   height: 20px;
   margin: 10px auto 40px;
   padding: 2px;
@@ -164,6 +176,7 @@ li {
   align-items: center;
   position: relative;
 }
+
 .progress-bar {
   background: #000080;
   height: 100%;
@@ -175,6 +188,7 @@ li {
   overflow: hidden;
   position: relative;
 }
+
 .pixel {
   width: 4px;
   height: 100%;
@@ -187,12 +201,13 @@ li {
   position: fixed;
   top: 10px;
   left: 10px;
-  width: 200px;
+  width: 220px;
   border: 2px solid #000;
   box-shadow: 4px 4px #808080;
   background: #c0c0c0;
   z-index: 10;
 }
+
 #timerBox .title-bar {
   background: #000080;
   color: white;
@@ -203,6 +218,7 @@ li {
   justify-content: space-between;
   align-items: center;
 }
+
 #timerBox .title-bar button {
   width: 18px;
   height: 16px;
@@ -212,15 +228,20 @@ li {
   background: #c0c0c0;
   cursor: pointer;
 }
+
 #timerBox .content {
   padding: 5px;
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
 }
+
 #timerBox button {
-  margin: 2px;
-  font-size: 12px;
   font-family: "MS Sans Serif";
-  padding: 2px 5px;
+  font-weight: bold;
+  padding: 2px 6px;
   border: 2px outset #fff;
   background: #c0c0c0;
   cursor: pointer;
@@ -249,9 +270,11 @@ li {
   <div class="content">
     <div id="timerDisplay">00:00:00</div>
     <div id="statsDisplay">WPM: 0 | ETA: 00:00:00</div>
-    <button onclick="startTimer()">Start</button>
-    <button onclick="pauseTimer()">Pause</button>
-    <button onclick="resetTimer()">Reset</button>
+    <div>
+      <button onclick="startTimer()">Start</button>
+      <button onclick="pauseTimer()">Pause</button>
+      <button onclick="resetTimer()">Reset</button>
+    </div>
   </div>
 </div>
 
@@ -329,7 +352,7 @@ async function addWord() {
       await setDoc(doc(db, "words", newWord), { createdAt: serverTimestamp() });
       words.add(newWord);
       updateDisplay();
-      onWordAdded();
+      updateTimerDisplay(); // update WPM/ETA
     } catch (err) {
       console.error(err);
       message.textContent = "Error adding word.";
@@ -351,7 +374,7 @@ clearWordsBtn.addEventListener("click", async () => {
     await batch.commit();
     words.clear();
     updateDisplay();
-    resetTimer();
+    updateTimerDisplay();
     alert("All words cleared!");
   } catch (err) {
     console.error(err);
@@ -373,6 +396,7 @@ function updateDisplay() {
     list.appendChild(li);
   });
 
+  // Windows 95 style pixel progress bar
   const totalPixels = Math.floor(progressBar.clientWidth / 5);
   let progress = subscriberCount > 0 ? words.size / subscriberCount : 0;
   if (progress > 1) progress = 1;
@@ -414,7 +438,7 @@ async function fetchSubscribers() {
   }
 }
 
-// Timer functionality
+// Timer variables
 let timerInterval = null;
 let elapsed = 0;
 
@@ -435,28 +459,25 @@ function updateTimerDisplay() {
   document.getElementById("statsDisplay").textContent = `WPM: ${wpm} | ETA: ${formatTime(etaSec)}`;
 }
 
-function startTimer() {
+// Timer controls
+window.startTimer = function() {
   if (timerInterval) return;
   timerInterval = setInterval(() => {
     elapsed++;
     updateTimerDisplay();
   }, 1000);
-}
+};
 
-function pauseTimer() {
+window.pauseTimer = function() {
   if (timerInterval) clearInterval(timerInterval);
   timerInterval = null;
-}
+};
 
-function resetTimer() {
+window.resetTimer = function() {
   pauseTimer();
   elapsed = 0;
   updateTimerDisplay();
-}
-
-function onWordAdded() {
-  updateTimerDisplay();
-}
+};
 
 // Initialize
 fetchWords();
