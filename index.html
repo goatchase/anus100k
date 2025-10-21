@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anus Words v. Subs</title>
 <style>
-/* Windows 95/97 styling */
 body {
   font-family: "MS Sans Serif", Tahoma, sans-serif;
   background: #008080;
@@ -21,7 +20,8 @@ body {
 }
 #startBar button { font-family: "MS Sans Serif"; font-weight: bold; padding: 4px 10px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
 #clock { font-size: 12px; font-weight: bold; }
-/* Windows 95 dialog windows */
+
+/* Dialog windows */
 .window, #subscriberBox, #timerBox {
   border: 2px solid #000; box-shadow: 4px 4px #808080; background: #c0c0c0; position: relative;
 }
@@ -40,18 +40,30 @@ input#wordInput { padding: 4px; font-size: 14px; width: 100%; max-width: 580px; 
 #message { color: red; font-weight: bold; margin-top: 5px; }
 #wordList { max-height: 250px; overflow-y: auto; background: #fff; border: 2px inset #fff; margin-top: 10px; padding: 5px; list-style: none; font-family: "MS Sans Serif"; }
 li { border-bottom: 1px solid #808080; padding: 2px; }
+
 /* Progress bar */
 .progress-container { background: #c0c0c0; border: 2px solid #fff inset; width: 600px; max-width: 90%; height: 20px; margin: 10px auto 40px; padding: 2px; display: flex; align-items: center; position: relative; }
 .progress-bar { background: #000080; height: 100%; display: flex; align-items: center; font-size: 12px; font-weight: bold; color: black; overflow: hidden; position: relative; }
 .pixel { width: 4px; height: 100%; background: #000080; margin-right: 1px; }
+
 /* Subscriber tracker */
 #subscriberBox { position: fixed; top: 10px; right: 10px; width: 200px; z-index:10; }
 #subscriberBox .content { display: flex; align-items: center; gap: 5px; justify-content: center; font-size: 14px; padding: 5px; }
+
 /* Timer window */
 #timerBox { position: fixed; top: 10px; left: 10px; width: 200px; z-index: 10; }
 #timerBox .content { padding:5px; display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; }
-/* Fuck No Baby animation */
-.fuck-text { position: absolute; font-size: 24px; font-weight: bold; color: red; user-select: none; pointer-events:none; z-index:1000; }
+
+/* Playing card animation */
+.card-text {
+  position: absolute;
+  width: 120px; height: 50px;
+  background: white; border:2px solid black; border-radius:4px;
+  display: flex; justify-content: center; align-items: center;
+  font-weight: bold; color: red; user-select:none; pointer-events:none;
+  box-shadow: 2px 2px #808080;
+  z-index: 1000;
+}
 </style>
 </head>
 <body>
@@ -65,13 +77,13 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
   </div>
 </div>
 
-<!-- Timer window -->
+<!-- Timer -->
 <div id="timerBox">
   <div class="title-bar"><span>Timer</span><button onclick="timerBox.style.display='none'">X</button></div>
   <div class="content">
     <div>Time: <span id="elapsed">0.00</span> s</div>
     <div>WPM: <span id="wpm">0</span></div>
-    <div>ETA: <span id="eta">0</span> s</div>
+    <div>ETA: <span id="eta">0</span></div>
     <button id="startBtn">Start</button>
     <button id="pauseBtn">Pause</button>
     <button id="resetBtn">Reset</button>
@@ -103,7 +115,7 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Firebase setup
+// Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyC8Z5Lx8W8RHYhsIGOb-yLVsv5Ufv50ULM",
   authDomain: "anus-words.firebaseapp.com",
@@ -138,13 +150,15 @@ let timer=null;
 let elapsed=0;
 let running=false;
 
-// --- Words ---
+// Fetch words from Firestore
 async function fetchWords(){
   words.clear();
   const snapshot=await getDocs(wordsCollection);
   snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase()));
   updateDisplay();
 }
+
+// Add word
 async function addWord(){
   const newWord=input.value.trim().toLowerCase();
   message.textContent="";
@@ -168,7 +182,7 @@ clearWordsBtn.addEventListener("click",async()=>{
 });
 input.addEventListener("keypress",e=>{if(e.key==="Enter") addWord();});
 
-// --- Display & Progress ---
+// Update display & progress
 function updateDisplay(){
   counter.textContent=`${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML="";
@@ -182,7 +196,7 @@ function updateDisplay(){
   const t=document.createElement("span"); t.style.position="absolute"; t.style.left="50%"; t.style.transform="translateX(-50%)"; t.style.fontWeight="bold"; t.style.color="black"; t.textContent=(progress*100).toFixed(2)+"%"; progressBar.appendChild(t);
 }
 
-// --- Subscribers ---
+// Fetch YouTube subscribers
 async function fetchSubscribers(){
   const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw";
   const channelId="UCL6OtB3m-gQ2mgRg61-aDXw";
@@ -195,26 +209,33 @@ async function fetchSubscribers(){
 }
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
 
-// --- Timer ---
-function startTimer(){ if(running) return; running=true; startAnimation(); timer=setInterval(()=>{ elapsed+=0.1; elapsedSpan.textContent=elapsed.toFixed(2); wpmSpan.textContent=(elapsed>0?words.size/(elapsed/60):0).toFixed(2); etaSpan.textContent=(elapsed>0 && words.size>0?(subscriberCount-words.size)/ (words.size/(elapsed/60))*60:0).toFixed(2); },100);}
+// Timer
+function startTimer(){ if(running) return; running=true; startAnimation(); timer=setInterval(()=>{ elapsed+=0.1; elapsedSpan.textContent=elapsed.toFixed(2); wpmSpan.textContent=(elapsed>0?words.size/(elapsed/60):0).toFixed(2); etaSpan.textContent=(elapsed>0 && words.size>0?(subscriberCount-words.size)/(words.size/(elapsed/60))*60:0).toFixed(2); },100);}
 function pauseTimer(){ running=false; clearInterval(timer); }
 function resetTimer(){ running=false; clearInterval(timer); elapsed=0; elapsedSpan.textContent="0.00"; wpmSpan.textContent="0"; etaSpan.textContent="0"; }
 startBtn.addEventListener("click",startTimer); pauseBtn.addEventListener("click",pauseTimer); resetBtn.addEventListener("click",resetTimer);
 
-// --- Clock ---
+// Clock
 function updateClock(){ const n=new Date(); document.getElementById("clock").textContent=`${n.getHours().toString().padStart(2,"0")}:${n.getMinutes().toString().padStart(2,"0")}:${n.getSeconds().toString().padStart(2,"0")}`; }
 setInterval(updateClock,1000); updateClock();
 
-// --- Fuck No Baby Solitaire Animation ---
+// Fuck No Baby on cards
 function startAnimation(){
-  for(let i=0;i<20;i++){
-    const t=document.createElement("div"); t.className="fuck-text"; t.textContent="FUCK NO BABY";
-    document.body.appendChild(t);
-    t.style.left=Math.random()*window.innerWidth+"px"; t.style.top="-50px"; t.style.opacity=Math.random()+0.5;
+  const cards=20;
+  for(let i=0;i<cards;i++){
+    const card=document.createElement("div");
+    card.className="card-text";
+    card.textContent="FUCK NO BABY";
+    document.body.appendChild(card);
+    card.style.left=(50+i*15)+"px";
+    card.style.top="-60px";
+    card.style.transform=`rotate(${Math.random()*30-15}deg)`;
     const speed=2+Math.random()*3;
     const anim=setInterval(()=>{
-      const y=parseFloat(t.style.top); t.style.top=y+speed+"px";
-      if(y>window.innerHeight){ clearInterval(anim); t.remove(); }
+      const y=parseFloat(card.style.top);
+      card.style.top=y+speed+"px";
+      card.style.left=parseFloat(card.style.left)+Math.sin(elapsed/10)*1.5+"px";
+      if(y>window.innerHeight){ clearInterval(anim); card.remove(); }
     },20);
   }
 }
