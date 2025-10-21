@@ -5,13 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anus Words v. Subs</title>
 <style>
-body {
-  font-family: "MS Sans Serif", Tahoma, sans-serif;
-  background: #008080;
+/* Global Windows 95/97 styling */
+body, .window, #subscriberBox, #timerWindow, #startBar, input, button, ul, li, #counter, #message {
+  font-family: "MS Sans Serif", Tahoma, Geneva, sans-serif;
+  font-size: 14px;
   color: black;
   margin: 0;
-  padding-bottom: 40px; /* leave space for Start bar */
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #008080;
   text-align: center;
+  padding-bottom: 40px; /* space for start bar */
 }
 
 /* Start bar */
@@ -22,16 +29,13 @@ body {
   width: 100%;
   height: 40px;
   background: #c0c0c0;
-  border-top: 2px solid #fff inset;
-  border-bottom: 2px solid #000 outset;
+  border-top: 2px inset #fff;
+  border-bottom: 2px outset #000;
   display: flex;
   align-items: center;
   padding-left: 5px;
-  box-sizing: border-box;
 }
-
 #startBar button {
-  font-family: "MS Sans Serif";
   font-weight: bold;
   padding: 4px 10px;
   border: 2px outset #fff;
@@ -39,7 +43,7 @@ body {
   cursor: pointer;
 }
 
-/* Subscriber tracker mini-window */
+/* Subscriber tracker */
 #subscriberBox {
   position: fixed;
   top: 10px;
@@ -50,7 +54,6 @@ body {
   background: #c0c0c0;
   z-index: 10;
 }
-
 #subscriberBox .title-bar {
   background: #000080;
   color: white;
@@ -61,17 +64,14 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-
 #subscriberBox .title-bar button {
   width: 18px;
   height: 16px;
   font-weight: bold;
-  font-family: "MS Sans Serif";
   border: 2px outset #fff;
   background: #c0c0c0;
   cursor: pointer;
 }
-
 #subscriberBox .content {
   padding: 5px;
   font-size: 14px;
@@ -80,7 +80,6 @@ body {
   gap: 5px;
   justify-content: center;
 }
-
 #subscriberBox svg {
   width: 20px;
   height: 14px;
@@ -96,10 +95,8 @@ body {
   border: 2px solid #000;
   box-shadow: 4px 4px #808080;
   background: #c0c0c0;
-  z-index: 1;
   position: relative;
 }
-
 .title-bar {
   background: #000080;
   color: white;
@@ -110,42 +107,29 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-
 .title-bar button {
   width: 20px;
   height: 18px;
   font-weight: bold;
-  font-family: "MS Sans Serif";
   border: 2px outset #fff;
   background: #c0c0c0;
   cursor: pointer;
 }
-
 .content {
   padding: 10px;
   background: #c0c0c0;
 }
-
 input#wordInput {
   padding: 4px;
   font-size: 14px;
-  width: 500px;
+  width: calc(100% - 10px);
+  max-width: 100%;
+  box-sizing: border-box;
   border: 2px inset #fff;
-  margin-right: 5px;
+  margin-bottom: 5px;
 }
-
-#counter {
-  margin: 10px 0;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-#message {
-  color: red;
-  font-weight: bold;
-  margin-top: 5px;
-}
-
+#counter { margin:10px 0; font-weight:bold; font-size:16px; }
+#message { color:red; font-weight:bold; margin-top:5px; }
 #wordList {
   max-height: 250px;
   overflow-y: auto;
@@ -154,18 +138,13 @@ input#wordInput {
   margin-top: 10px;
   padding: 5px;
   list-style: none;
-  font-family: "MS Sans Serif";
 }
+li { border-bottom: 1px solid #808080; padding: 2px; }
 
-li {
-  border-bottom: 1px solid #808080;
-  padding: 2px;
-}
-
-/* Windows 95 style progress bar */
+/* Progress bar */
 .progress-container {
   background: #c0c0c0;
-  border: 2px solid #fff inset;
+  border: 2px inset #fff;
   width: 600px;
   max-width: 90%;
   height: 20px;
@@ -175,7 +154,6 @@ li {
   align-items: center;
   position: relative;
 }
-
 .progress-bar {
   background: #000080;
   height: 100%;
@@ -187,22 +165,44 @@ li {
   overflow: hidden;
   position: relative;
 }
-
 .pixel {
   width: 4px;
   height: 100%;
   background: #000080;
   margin-right: 1px;
 }
+
+/* Timer window */
+#timerWindow {
+  position: fixed;
+  top: 100px;
+  right: 10px;
+  width: 220px;
+  border: 2px solid #000;
+  box-shadow: 4px 4px #808080;
+  background: #c0c0c0;
+  z-index: 10;
+}
+#timerWindow .title-bar { background:#000080; color:white; padding:3px 5px; font-weight:bold; font-size:12px; display:flex; justify-content:space-between; align-items:center; }
+#timerWindow .title-bar button { width:20px; height:18px; font-family:"MS Sans Serif"; border:2px outset #fff; background:#c0c0c0; cursor:pointer; }
+#timerWindow .content { padding:10px; display:flex; flex-direction:column; gap:5px; align-items:center; }
+#timerDisplay { font-family:"MS Sans Serif"; font-size:18px; font-weight:bold; }
+#statsDisplay { font-size:12px; text-align:center; }
+
+@media (max-width: 500px){
+  body, .window, #subscriberBox, #timerWindow, #startBar, input, button, ul, li, #counter, #message {
+    font-size:12px;
+  }
+}
 </style>
 </head>
 <body>
 
-<!-- Subscriber tracker window -->
+<!-- Subscriber tracker -->
 <div id="subscriberBox">
   <div class="title-bar">
     <span>Subscribers</span>
-    <button onclick="window.open('https://www.youtube.com/@ANewUntoldStory', '_blank')">X</button>
+    <button onclick="window.open('https://www.youtube.com/@ANewUntoldStory','_blank')">X</button>
   </div>
   <div class="content">
     <svg viewBox="0 0 24 24"><path d="M23.498 6.186a2.964 2.964 0 0 0-2.086-2.086C19.68 3.5 12 3.5 12 3.5s-7.68 0-9.412.6A2.964 2.964 0 0 0 .502 6.186 31.523 31.523 0 0 0 0 12a31.523 31.523 0 0 0 .502 5.814 2.964 2.964 0 0 0 2.086 2.086C4.32 20.5 12 20.5 12 20.5s7.68 0 9.412-.6a2.964 2.964 0 0 0 2.086-2.086A31.523 31.523 0 0 0 24 12a31.523 31.523 0 0 0-.502-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>
@@ -228,16 +228,35 @@ li {
   <div id="progressBar" class="progress-bar"></div>
 </div>
 
+<!-- Timer window -->
+<div id="timerWindow">
+  <div class="title-bar">
+    <span>Timer</span>
+    <button onclick="stopTimer()">X</button>
+  </div>
+  <div class="content">
+    <div id="timerDisplay">00:00:00</div>
+    <div id="statsDisplay">WPM: 0 | ETA: --:--:--</div>
+    <div>
+      <button onclick="startTimer()">Start</button>
+      <button onclick="pauseTimer()">Pause</button>
+      <button onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+</div>
+
 <!-- Start bar -->
 <div id="startBar">
   <button>Start</button>
 </div>
 
 <script type="module">
+// --------------------
+// Firebase setup
+// --------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyC8Z5Lx8W8RHYhsIGOb-yLVsv5Ufv50ULM",
   authDomain: "anus-words.firebaseapp.com",
@@ -247,11 +266,13 @@ const firebaseConfig = {
   appId: "1:15328801675:web:4b52ea27902c27fcfeb58e",
   measurementId: "G-MY6LCMKMX5"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const wordsCollection = collection(db, "words");
 
+// --------------------
+// Variables
+// --------------------
 const input = document.getElementById("wordInput");
 const list = document.getElementById("wordList");
 const counter = document.getElementById("counter");
@@ -263,7 +284,9 @@ const clearWordsBtn = document.getElementById("clearWordsBtn");
 let words = new Set();
 let subscriberCount = 0;
 
-// Fetch words from Firestore
+// --------------------
+// Fetch words
+// --------------------
 async function fetchWords() {
   words.clear();
   const snapshot = await getDocs(wordsCollection);
@@ -271,7 +294,9 @@ async function fetchWords() {
   updateDisplay();
 }
 
-// Add word to Firestore
+// --------------------
+// Add word
+// --------------------
 async function addWord() {
   const newWord = input.value.trim().toLowerCase();
   message.textContent = "";
@@ -289,12 +314,13 @@ async function addWord() {
       message.textContent = "Error adding word.";
     }
   }
-
   input.value = "";
   input.focus();
 }
 
-// Clear all words (password-protected)
+// --------------------
+// Clear words (password protected)
+// --------------------
 clearWordsBtn.addEventListener("click", async () => {
   const password = prompt("Enter password to clear all words:");
   if (password !== "anuspass") { alert("Incorrect password."); return; }
@@ -316,7 +342,9 @@ input.addEventListener("keypress", function(e) {
   if (e.key === "Enter") addWord();
 });
 
+// --------------------
 // Update display & progress
+// --------------------
 function updateDisplay() {
   counter.textContent = `${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML = "";
@@ -326,7 +354,6 @@ function updateDisplay() {
     list.appendChild(li);
   });
 
-  // Windows 95 style pixel progress bar
   const totalPixels = Math.floor(progressBar.clientWidth / 5);
   let progress = subscriberCount > 0 ? words.size / subscriberCount : 0;
   if (progress > 1) progress = 1;
@@ -348,7 +375,9 @@ function updateDisplay() {
   progressBar.appendChild(textNode);
 }
 
-// Fetch YouTube subscribers
+// --------------------
+// Fetch subscribers
+// --------------------
 async function fetchSubscribers() {
   const apiKey = "AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw";
   const channelId = "UCL6OtB3m-gQ2mgRg61-aDXw";
@@ -368,10 +397,51 @@ async function fetchSubscribers() {
   }
 }
 
+// --------------------
+// Timer
+// --------------------
+let timerInterval = null;
+let elapsed = 0;
+function formatTime(sec) {
+  const h = String(Math.floor(sec/3600)).padStart(2,'0');
+  const m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
+  const s = String(sec%60).padStart(2,'0');
+  return `${h}:${m}:${s}`;
+}
+function updateTimerDisplay() {
+  document.getElementById("timerDisplay").textContent = formatTime(elapsed);
+  const wpm = elapsed > 0 ? (words.size / elapsed * 60).toFixed(2) : 0;
+  const etaSec = subscriberCount > words.size ? Math.round((subscriberCount - words.size) / (words.size / elapsed)) : 0;
+  const eta = formatTime(etaSec);
+  document.getElementById("statsDisplay").textContent = `WPM: ${wpm} | ETA: ${eta}`;
+}
+function startTimer() {
+  if(timerInterval) return;
+  timerInterval = setInterval(()=>{elapsed++; updateTimerDisplay();},1000);
+}
+function pauseTimer() {
+  clearInterval(timerInterval);
+  timerInterval=null;
+}
+function resetTimer() {
+  pauseTimer();
+  elapsed=0;
+  updateTimerDisplay();
+}
+function stopTimer(){
+  pauseTimer();
+}
+
+// --------------------
 // Initialize
-fetchWords();
-fetchSubscribers();
-setInterval(fetchSubscribers, 30000);
+// --------------------
+async function init() {
+  await fetchWords();
+  await fetchSubscribers();
+  setInterval(fetchSubscribers, 30000);
+}
+init();
 </script>
+
 </body>
 </html>
