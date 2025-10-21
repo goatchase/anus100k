@@ -48,14 +48,14 @@ input#wordInput { padding: 4px; font-size: 14px; width: 100%; max-width: 580px; 
 #wordList { max-height: 250px; overflow-y: auto; background: #fff; border: 2px inset #fff; margin-top: 10px; padding: 5px; list-style: none; font-family: "MS Sans Serif"; }
 li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif"; }
 
-/* Progress bar in subscriber box */
-.progress-container { background: #c0c0c0; border: 2px solid #fff inset; width: 100%; height: 20px; margin-top: 5px; padding: 2px; display: flex; align-items: center; position: relative; font-family: "MS Sans Serif";}
-.progress-bar { display: flex; align-items: center; position: relative; height: 100%; overflow: hidden;}
-.pixel { width: 4px; height: 100%; margin-right: 1px; }
+/* Progress bar */
+.progress-container { background: #c0c0c0; border: 2px solid #fff inset; width: 600px; max-width: 90%; height: 20px; margin: 10px auto 40px; padding: 2px; display: flex; align-items: center; position: relative; font-family: "MS Sans Serif";}
+.progress-bar { background: #000080; height: 100%; display: flex; align-items: center; font-size: 12px; font-weight: bold; color: black; overflow: hidden; position: relative; }
+.pixel { width: 4px; height: 100%; background: #000080; margin-right: 1px; }
 
 /* Subscriber tracker */
-#subscriberBox { width: 220px; z-index:10; top: 10px; right: 10px; }
-#subscriberBox .content { display: flex; flex-direction: column; align-items: center; font-size: 14px; padding: 5px; font-family: "MS Sans Serif"; }
+#subscriberBox { width: 200px; z-index:10; top: 10px; right: 10px; }
+#subscriberBox .content { display: flex; align-items: center; gap: 5px; justify-content: center; font-size: 14px; padding: 5px; font-family: "MS Sans Serif"; }
 
 /* Timer window */
 #timerBox { width: 200px; z-index: 10; top: 10px; left: 10px; }
@@ -87,9 +87,6 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
   </div>
   <div class="content">
     <span id="subscriberCount">Loading...</span>
-    <div class="progress-container">
-      <div id="progressBar" class="progress-bar"></div>
-    </div>
   </div>
 </div>
 
@@ -131,6 +128,10 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
   </div>
 </div>
 
+<div class="progress-container">
+  <div id="progressBar" class="progress-bar"></div>
+</div>
+
 <!-- Start bar -->
 <div id="startBar">
   <button id="bottomStartBtn">Start</button>
@@ -141,17 +142,25 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Firebase
-const firebaseConfig = { apiKey: "AIzaSyC8Z5Lx8W8RHYhsIGOb-yLVsv5Ufv50ULM", authDomain: "anus-words.firebaseapp.com", projectId: "anus-words", storageBucket: "anus-words.firebasestorage.app", messagingSenderId: "15328801675", appId: "1:15328801675:web:4b52ea27902c27fcfeb58e", measurementId: "G-MY6LCMKMX5" };
+// Firebase setup
+const firebaseConfig = {
+  apiKey: "AIzaSyC8Z5Lx8W8RHYhsIGOb-yLVsv5Ufv50ULM",
+  authDomain: "anus-words.firebaseapp.com",
+  projectId: "anus-words",
+  storageBucket: "anus-words.firebasestorage.app",
+  messagingSenderId: "15328801675",
+  appId: "1:15328801675:web:4b52ea27902c27fcfeb58e",
+  measurementId: "G-MY6LCMKMX5"
+};
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const wordsCollection = collection(db,"words");
 
-// Elements
+// DOM elements
 const input=document.getElementById("wordInput"), list=document.getElementById("wordList"), counter=document.getElementById("counter"), message=document.getElementById("message");
 const subscriberCountDiv=document.getElementById("subscriberCount"), progressBar=document.getElementById("progressBar");
 const clearWordsBtn=document.getElementById("clearWordsBtn"), startBtn=document.getElementById("startBtn"), pauseBtn=document.getElementById("pauseBtn"), resetBtn=document.getElementById("resetBtn");
-const elapsedSpan=document.getElementById("elapsed"), wpmSpan=document.getElementById("wpm"), etaSpan=document.getElementById("eta");
+const bottomStartBtn=document.getElementById("bottomStartBtn"), elapsedSpan=document.getElementById("elapsed"), wpmSpan=document.getElementById("wpm"), etaSpan=document.getElementById("eta");
 const timerBox=document.getElementById("timerBox"), minimizedContainer=document.getElementById("minimizedContainer");
 
 let words=new Set(), subscriberCount=0, timer=null, elapsed=0, running=false;
@@ -166,8 +175,12 @@ startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
 resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
 
+// Bottom Start button
+bottomStartBtn.onclick=function(){ alert("Fuck No Baby!"); }
+
 // Fetch words
 async function fetchWords(){ words.clear(); const snapshot=await getDocs(wordsCollection); snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); updateDisplay(); updateTimerDisplay(); }
+
 // Add word
 async function addWord(){ const newWord=input.value.trim().toLowerCase(); message.textContent=""; if(!newWord) return; if(words.has(newWord)){message.textContent="Duplicate!";} else { try{await setDoc(doc(db,"words",newWord),{createdAt:serverTimestamp()}); words.add(newWord); updateDisplay(); updateTimerDisplay();} catch(e){console.error(e); message.textContent="Error adding word.";} } input.value=""; input.focus(); }
 input.addEventListener("keypress",function(e){if(e.key==="Enter") addWord();});
@@ -175,35 +188,57 @@ input.addEventListener("keypress",function(e){if(e.key==="Enter") addWord();});
 // Clear words
 clearWordsBtn.addEventListener("click", async()=>{ const password=prompt("Password:"); if(password!=="anuspass"){alert("Incorrect password."); return;} const snapshot=await getDocs(wordsCollection); const batch=writeBatch(db); snapshot.forEach(docSnap=>batch.delete(docSnap.ref)); await batch.commit(); words.clear(); updateDisplay(); updateTimerDisplay(); alert("All words cleared!");});
 
-// Update display & progress (pixel style)
+// Update display & progress
 function updateDisplay(){
   counter.textContent=`${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML="";
   [...words].reverse().forEach(word=>{ const li=document.createElement("li"); li.textContent=word; list.appendChild(li); });
-
-  // Pixel progress bar
+  const totalPixels=Math.floor(progressBar.clientWidth/5); let progress=subscriberCount>0? words.size/subscriberCount:0; if(progress>1) progress=1;
   progressBar.innerHTML="";
-  const totalPixels=Math.floor(progressBar.clientWidth/5);
-  let progress=subscriberCount>0? words.size/subscriberCount:0; if(progress>1) progress=1;
-  const filledPixels=Math.floor(totalPixels*progress);
-  for(let i=0;i<filledPixels;i++){ const pixel=document.createElement("div"); pixel.className="pixel"; progressBar.appendChild(pixel); }
-  const percentText=document.createElement("span"); percentText.style.position="absolute"; percentText.style.left="50%"; percentText.style.transform="translateX(-50%)"; percentText.style.color="black"; percentText.style.fontWeight="bold";
-  percentText.textContent=(progress*100).toFixed(2)+"%"; progressBar.appendChild(percentText);
+  const filledPixels=Math.floor(totalPixels*progress); for(let i=0;i<filledPixels;i++){ const pixel=document.createElement("div"); pixel.className="pixel"; progressBar.appendChild(pixel);}
+  const textNode=document.createElement("span"); textNode.style.position="absolute"; textNode.style.left="50%"; textNode.style.transform="translateX(-50%)"; textNode.style.fontWeight="bold"; textNode.style.color="black"; textNode.textContent=(progress*100).toFixed(2)+"%"; progressBar.appendChild(textNode);
 }
 
-// Fetch YouTube subscribers
+// Fetch subscribers
 async function fetchSubscribers(){ const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; const channelId="UCL6OtB3m-gQ2mgRg61-aDXw"; try{ const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`); const data=await res.json(); if(data.items&&data.items.length>0){ subscriberCount=parseInt(data.items[0].statistics.subscriberCount); subscriberCountDiv.textContent=subscriberCount.toLocaleString(); updateDisplay(); } else subscriberCountDiv.textContent="Subscriber data not found."; } catch(e){ subscriberCountDiv.textContent="Error loading subscribers."; console.error(e); }}
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
 
-// Draggable
-function makeDraggable(el){ const title=el.querySelector('.title-bar'); let offsetX=0,offsetY=0,isDown=false; title.addEventListener('mousedown',e=>{isDown=true; offsetX=e.clientX-el.offsetLeft; offsetY=e.clientY-el.offsetTop;}); document.addEventListener('mousemove',e=>{if(!isDown) return; let x=e.clientX-offsetX,y=e.clientY-offsetY; x=Math.max(0,Math.min(window.innerWidth-el.offsetWidth,x)); y=Math.max(0,Math.min(window.innerHeight-el.offsetHeight,y)); el.style.left=x+'px'; el.style.top=y+'px';}); document.addEventListener('mouseup',()=>{isDown=false;}); }
+// --- Draggable & Minimize ---
+function makeDraggable(el){
+  const title=el.querySelector('.title-bar');
+  let offsetX=0, offsetY=0, isDown=false;
+  title.addEventListener('mousedown', e=>{isDown=true; offsetX=e.clientX-el.offsetLeft; offsetY=e.clientY-el.offsetTop;});
+  document.addEventListener('mousemove', e=>{if(!isDown) return; let x=e.clientX-offsetX, y=e.clientY-offsetY; x=Math.max(0,Math.min(window.innerWidth-el.offsetWidth,x)); y=Math.max(0,Math.min(window.innerHeight-el.offsetHeight,y)); el.style.left=x+'px'; el.style.top=y+'px';});
+  document.addEventListener('mouseup', ()=>{isDown=false;});
+}
 document.querySelectorAll('.window, #subscriberBox, #timerBox').forEach(makeDraggable);
 
-// Minimize
-document.querySelectorAll('.minimizeBtn').forEach(btn=>{ btn.addEventListener('click',()=>{ const win=btn.closest('.window, #subscriberBox, #timerBox'); win.style.display='none'; const minimized=document.createElement('button'); minimized.className='minimized-btn'; minimized.textContent=win.querySelector('.title-bar span').textContent; minimized.onclick=()=>{ win.style.display='block'; minimized.remove(); }; minimizedContainer.appendChild(minimized); }); });
+// Minimize buttons
+document.querySelectorAll('.minimizeBtn').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    const win=btn.closest('.window, #subscriberBox, #timerBox');
+    win.style.display='none';
+    const minimized=document.createElement('button');
+    minimized.className='minimized-btn';
+    minimized.textContent=win.querySelector('.title-bar span').textContent;
+    minimized.onclick=()=>{ win.style.display='block'; minimized.remove(); };
+    minimizedContainer.appendChild(minimized);
+  });
+});
 
-// Mobile reposition
-function repositionBoxes(){ const boxes=[...document.querySelectorAll('.window, #subscriberBox, #timerBox')].filter(b=>b.style.display!=='none'); let topOffset=10; boxes.forEach(b=>{ if(window.innerWidth<700){ b.style.top=topOffset+'px'; b.style.left='5%'; b.style.transform='none'; topOffset+=b.offsetHeight+10; } }); }
+// --- Mobile repositioning ---
+function repositionBoxes(){
+  const boxes=[...document.querySelectorAll('.window, #subscriberBox, #timerBox')].filter(b=>b.style.display!=='none');
+  let topOffset=10;
+  boxes.forEach(b=>{
+    if(window.innerWidth<700){
+      b.style.top=topOffset+'px';
+      b.style.left='5%';
+      b.style.transform='none';
+      topOffset+=b.offsetHeight+10;
+    }
+  });
+}
 window.addEventListener('resize', repositionBoxes);
 repositionBoxes();
 </script>
