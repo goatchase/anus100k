@@ -14,7 +14,7 @@
     text-align: center;
   }
 
-  /* Subscriber tracker top-right */
+  /* Subscriber tracker top-right with YouTube logo */
   #subscriberBox {
     position: fixed;
     top: 10px;
@@ -23,14 +23,25 @@
     color: white;
     border: 2px inset #fff;
     padding: 10px;
-    width: 220px;
+    width: 240px;
     font-weight: bold;
     box-shadow: inset 2px 2px #fff, inset -2px -2px #808080;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  #subscriberBox svg {
+    width: 20px;
+    height: 14px;
+    fill: white;
   }
 
   /* Window container expanded */
   .window {
-    width: 500px; /* expanded width */
+    width: 500px;
     max-width: 90%;
     margin: 60px auto 20px;
     border: 2px solid #000;
@@ -65,12 +76,6 @@
     background: #c0c0c0;
   }
 
-  h1 {
-    font-weight: normal;
-    margin: 5px;
-  }
-
-  /* Word input box */
   input#wordInput {
     padding: 4px;
     font-size: 14px;
@@ -130,7 +135,7 @@
     height: 100%;
     width: 0%;
     text-align: center;
-    color: black; /* progress text now black */
+    color: black;
     font-size: 12px;
     line-height: 20px;
     white-space: nowrap;
@@ -153,9 +158,10 @@
 </head>
 <body>
 
-<div id="subscriberBox">
-  Subscriber Tracker: <span id="subscriberCount">Loading...</span>
-</div>
+<a id="subscriberBox" href="https://www.youtube.com/@ANewUntoldStory" target="_blank">
+  <svg viewBox="0 0 24 24"><path d="M23.498 6.186a2.964 2.964 0 0 0-2.086-2.086C19.68 3.5 12 3.5 12 3.5s-7.68 0-9.412.6A2.964 2.964 0 0 0 .502 6.186 31.523 31.523 0 0 0 0 12a31.523 31.523 0 0 0 .502 5.814 2.964 2.964 0 0 0 2.086 2.086C4.32 20.5 12 20.5 12 20.5s7.68 0 9.412-.6a2.964 2.964 0 0 0 2.086-2.086A31.523 31.523 0 0 0 24 12a31.523 31.523 0 0 0-.502-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>
+  <span id="subscriberCount">Loading...</span>
+</a>
 
 <div class="window">
   <div class="title-bar">
