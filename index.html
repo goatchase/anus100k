@@ -20,8 +20,6 @@ body {
   position: fixed; bottom: 0; left: 0; width: 100%; height: 40px;
   background: #c0c0c0; border-top: 2px solid #fff inset; border-bottom: 2px solid #000 outset;
   display: flex; align-items: center; justify-content: space-between; padding: 0 5px;
-  font-family: "MS Sans Serif";
-  font-weight: bold;
 }
 #startBar button { font-family: "MS Sans Serif"; font-weight: bold; padding: 4px 10px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
 #clock { font-size: 12px; font-weight: bold; }
@@ -31,6 +29,7 @@ body {
   border: 2px solid #000; box-shadow: 4px 4px #808080; background: #c0c0c0; position: absolute;
   font-family: "MS Sans Serif";
   touch-action: none;
+  min-width: 150px;
 }
 .window { width: 600px; max-width: 90%; top: 60px; left: 50%; transform: translateX(-50%); }
 .title-bar {
@@ -66,13 +65,26 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
 /* Minesweeper dialog */
 #minesweeperDialog { width: 220px; height: 220px; z-index:20; font-family: "MS Sans Serif"; display:none; }
 #minesweeperDialog .content { display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:red; }
+
+/* Minimized boxes container */
+#minimizedContainer { position: fixed; bottom: 40px; left: 0; display: flex; gap: 5px; padding: 5px; }
+.minimized-btn { font-family: "MS Sans Serif"; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; padding: 2px 6px; font-size:12px; }
 </style>
 </head>
 <body>
 
+<!-- Minimized container -->
+<div id="minimizedContainer"></div>
+
 <!-- Subscriber tracker -->
 <div id="subscriberBox">
-  <div class="title-bar"><span>Subscribers</span><button onclick="window.open('https://www.youtube.com/@ANewUntoldStory','_blank')">X</button></div>
+  <div class="title-bar">
+    <span>Subscribers</span>
+    <div>
+      <button class="minimizeBtn">_</button>
+      <button onclick="window.open('https://www.youtube.com/@ANewUntoldStory','_blank')">X</button>
+    </div>
+  </div>
   <div class="content">
     <svg viewBox="0 0 24 24" style="width:20px;height:14px;fill:red;"><path d="M23.498 6.186a2.964 2.964 0 0 0-2.086-2.086C19.68 3.5 12 3.5 12 3.5s-7.68 0-9.412.6A2.964 2.964 0 0 0 .502 6.186 31.523 31.523 0 0 0 0 12a31.523 31.523 0 0 0 .502 5.814 2.964 2.964 0 0 0 2.086 2.086C4.32 20.5 12 20.5 12 20.5s7.68 0 9.412-.6a2.964 2.964 0 0 0 2.086-2.086A31.523 31.523 0 0 0 24 12a31.523 31.523 0 0 0-.502-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>
     <span id="subscriberCount">Loading...</span>
@@ -81,11 +93,17 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
 
 <!-- Timer -->
 <div id="timerBox">
-  <div class="title-bar"><span>Timer</span><button onclick="timerBox.style.display='none'">X</button></div>
+  <div class="title-bar">
+    <span>Timer</span>
+    <div>
+      <button class="minimizeBtn">_</button>
+      <button onclick="timerBox.style.display='none'">X</button>
+    </div>
+  </div>
   <div class="content">
     <div>Time: <span id="elapsed">0.00</span> s</div>
     <div>WPM: <span id="wpm">0</span></div>
-    <div>ETA: <span id="eta">0d 0h 0m</div>
+    <div>ETA: <span id="eta">0d 0h 0m</span></div>
     <div class="buttons-row">
       <button id="startBtn">Start</button>
       <button id="pauseBtn">Pause</button>
@@ -94,15 +112,15 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
   </div>
 </div>
 
-<!-- Minesweeper dialog -->
-<div id="minesweeperDialog">
-  <div class="title-bar"><span>Minesweeper</span><button onclick="document.getElementById('minesweeperDialog').style.display='none'">X</button></div>
-  <div class="content">FUCK NO BABY</div>
-</div>
-
 <!-- Main words window -->
 <div class="window">
-  <div class="title-bar"><span>Anus Words v. Subs</span><button id="clearWordsBtn">X</button></div>
+  <div class="title-bar">
+    <span>Anus Words v. Subs</span>
+    <div>
+      <button class="minimizeBtn">_</button>
+      <button id="clearWordsBtn">X</button>
+    </div>
+  </div>
   <div class="content">
     <input id="wordInput" type="text" placeholder="Enter a word..." />
     <div id="counter">0 / 0</div>
@@ -125,20 +143,26 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Firebase config
-const firebaseConfig = { apiKey:"AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw", authDomain:"anus-words.firebaseapp.com", projectId:"anus-words", storageBucket:"anus-words.firebasestorage.app", messagingSenderId:"15328801675", appId:"1:15328801675:web:4b52ea27902c27fcfeb58e", measurementId:"G-MY6LCMKMX5" };
+// Firebase setup
+const firebaseConfig = {
+  apiKey: "AIzaSyC8Z5Lx8W8RHYhsIGOb-yLVsv5Ufv50ULM",
+  authDomain: "anus-words.firebaseapp.com",
+  projectId: "anus-words",
+  storageBucket: "anus-words.firebasestorage.app",
+  messagingSenderId: "15328801675",
+  appId: "1:15328801675:web:4b52ea27902c27fcfeb58e",
+  measurementId: "G-MY6LCMKMX5"
+};
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const wordsCollection = collection(db,"words");
 
 // DOM elements
 const input=document.getElementById("wordInput"), list=document.getElementById("wordList"), counter=document.getElementById("counter"), message=document.getElementById("message");
-const subscriberCountDiv=document.getElementById("subscriberCount"), progressBar=document.getElementById("progressBar"), clearWordsBtn=document.getElementById("clearWordsBtn");
-const elapsedSpan=document.getElementById("elapsed"), wpmSpan=document.getElementById("wpm"), etaSpan=document.getElementById("eta");
-const startBtn=document.getElementById("startBtn"), pauseBtn=document.getElementById("pauseBtn"), resetBtn=document.getElementById("resetBtn");
-const bottomStartBtn=document.getElementById("bottomStartBtn"), minesDialog=document.getElementById("minesweeperDialog");
-const timerBox=document.getElementById("timerBox");
-
+const subscriberCountDiv=document.getElementById("subscriberCount"), progressBar=document.getElementById("progressBar");
+const clearWordsBtn=document.getElementById("clearWordsBtn"), startBtn=document.getElementById("startBtn"), pauseBtn=document.getElementById("pauseBtn"), resetBtn=document.getElementById("resetBtn");
+const bottomStartBtn=document.getElementById("bottomStartBtn"), elapsedSpan=document.getElementById("elapsed"), wpmSpan=document.getElementById("wpm"), etaSpan=document.getElementById("eta");
+const timerBox=document.getElementById("timerBox"), minimizedContainer=document.getElementById("minimizedContainer");
 let words=new Set(), subscriberCount=0, timer=null, elapsed=0, running=false;
 
 // Clock
@@ -151,8 +175,8 @@ startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
 resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
 
-// Bottom Start opens minesweeper dialog
-bottomStartBtn.onclick=function(){ minesDialog.style.display='block'; }
+// Bottom Start button
+bottomStartBtn.onclick=function(){ alert("Fuck No Baby!"); }
 
 // Fetch words
 async function fetchWords(){ words.clear(); const snapshot=await getDocs(wordsCollection); snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); updateDisplay(); updateTimerDisplay(); }
@@ -183,22 +207,28 @@ async function fetchSubscribers(){ const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQ
 // Initialize
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
 
-// --- Draggable dialogs ---
-function makeDraggable(el) {
-  const title = el.querySelector('.title-bar');
+// --- Draggable & Minimize functionality ---
+function makeDraggable(el){
+  const title=el.querySelector('.title-bar');
   let offsetX=0, offsetY=0, isDown=false;
-  title.addEventListener('mousedown', (e)=>{ isDown=true; offsetX=e.clientX-el.offsetLeft; offsetY=e.clientY-el.offsetTop; });
-  document.addEventListener('mousemove', (e)=>{ if(!isDown) return;
-    let x=e.clientX-offsetX, y=e.clientY-offsetY;
-    // Constrain to viewport
-    x=Math.max(0, Math.min(window.innerWidth-el.offsetWidth, x));
-    y=Math.max(0, Math.min(window.innerHeight-el.offsetHeight, y));
-    el.style.left=x+'px'; el.style.top=y+'px';
-  });
-  document.addEventListener('mouseup', ()=>{ isDown=false; });
+  title.addEventListener('mousedown', e=>{isDown=true; offsetX=e.clientX-el.offsetLeft; offsetY=e.clientY-el.offsetTop;});
+  document.addEventListener('mousemove', e=>{if(!isDown) return; let x=e.clientX-offsetX, y=e.clientY-offsetY; x=Math.max(0,Math.min(window.innerWidth-el.offsetWidth,x)); y=Math.max(0,Math.min(window.innerHeight-el.offsetHeight,y)); el.style.left=x+'px'; el.style.top=y+'px';});
+  document.addEventListener('mouseup', ()=>{isDown=false;});
 }
-[document.querySelector('.window'), document.getElementById('subscriberBox'), document.getElementById('timerBox'), document.getElementById('minesweeperDialog')].forEach(makeDraggable);
+document.querySelectorAll('.window, #subscriberBox, #timerBox, #minesweeperDialog').forEach(makeDraggable);
 
+// Minimize buttons
+document.querySelectorAll('.minimizeBtn').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    const win=btn.closest('.window, #subscriberBox, #timerBox, #minesweeperDialog');
+    win.style.display='none';
+    const minimized=document.createElement('button');
+    minimized.className='minimized-btn';
+    minimized.textContent=win.querySelector('.title-bar span').textContent;
+    minimized.onclick=()=>{ win.style.display='block'; minimized.remove(); };
+    minimizedContainer.appendChild(minimized);
+  });
+});
 </script>
 </body>
 </html>
