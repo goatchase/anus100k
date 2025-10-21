@@ -117,7 +117,8 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
   </div>
   <div class="content">
     <div>Time: <span id="elapsed">0.00</span> s</div>
-    <div>WPM: <span id="wpm">0</span></div>
+    <!-- WPM hidden -->
+    <!--<div>WPM: <span id="wpm">0</span></div>-->
     <div>ETA: <span id="eta">0d 0h 0m</span></div>
     <div class="buttons-row">
       <button id="startBtn">Start</button>
@@ -172,7 +173,7 @@ const wordsCollection = collection(db,"words");
 const input=document.getElementById("wordInput"), list=document.getElementById("wordList"), counter=document.getElementById("counter"), message=document.getElementById("message");
 const subscriberCountDiv=document.getElementById("subscriberCount"), progressBar=document.getElementById("progressBar"), progressText=document.getElementById("progressText");
 const clearWordsBtn=document.getElementById("clearWordsBtn"), startBtn=document.getElementById("startBtn"), pauseBtn=document.getElementById("pauseBtn"), resetBtn=document.getElementById("resetBtn");
-const bottomStartBtn=document.getElementById("bottomStartBtn"), elapsedSpan=document.getElementById("elapsed"), wpmSpan=document.getElementById("wpm"), etaSpan=document.getElementById("eta");
+const bottomStartBtn=document.getElementById("bottomStartBtn"), elapsedSpan=document.getElementById("elapsed"), etaSpan=document.getElementById("eta");
 const timerBox=document.getElementById("timerBox"), minimizedContainer=document.getElementById("minimizedContainer");
 
 let words=new Set(), subscriberCount=0, timer=null, elapsed=0, running=false;
@@ -183,12 +184,13 @@ setInterval(updateClock,1000); updateClock();
 
 // Timer
 function updateTimerDisplay(){ 
-    elapsedSpan.textContent=elapsed.toFixed(2); 
-    const wpm=elapsed>0? (words.size/(elapsed/60)):0; 
-    wpmSpan.textContent=wpm.toFixed(2); 
-    const etaSecs=wpm>0?(subscriberCount-words.size)/wpm*60:0; 
-    const d=Math.floor(etaSecs/86400), h=Math.floor((etaSecs%86400)/3600), m=Math.floor((etaSecs%3600)/60); 
-    etaSpan.textContent=`${d}d ${h}h ${m}m`; 
+    elapsedSpan.textContent = elapsed.toFixed(2); 
+    const wpm = elapsed > 0 ? (words.size / (elapsed / 60)) : 0; // still used for ETA
+    const etaSecs = wpm > 0 ? (subscriberCount - words.size) / wpm * 60 : 0; 
+    const d = Math.floor(etaSecs / 86400), 
+          h = Math.floor((etaSecs % 86400) / 3600), 
+          m = Math.floor((etaSecs % 3600) / 60); 
+    etaSpan.textContent = `${d}d ${h}h ${m}m`; 
 }
 startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{elapsed+=0.1; updateTimerDisplay();},100); }}
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
@@ -220,29 +222,31 @@ function updateDisplay(){
   let progress = subscriberCount > 0 ? words.size / subscriberCount : 0;
   if(progress > 1) progress = 1;
   const percent = (progress*100).toFixed(2);
-
   progressBar.style.width = percent + "%";
   progressText.textContent = percent + "%";
 }
 
-// YouTube logo click
-document.getElementById("ytLogo").onclick=function(){ window.open('https://www.youtube.com/@ANewUntoldStory','_blank'); }
-
 // Fetch subscribers
 async function fetchSubscribers(){ 
-  const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; 
-  const channelId="UCL6OtB3m-gQ2mgRg61-aDXw"; 
-  try{ 
-    const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`); 
-    const data=await res.json(); 
-    if(data.items&&data.items.length>0){ 
-      subscriberCount=parseInt(data.items[0].statistics.subscriberCount); 
-      subscriberCountDiv.textContent=subscriberCount.toLocaleString(); 
-      updateDisplay(); 
-    } else subscriberCountDiv.textContent="Subscriber data not found."; 
-  } catch(e){ subscriberCountDiv.textContent="Error loading subscribers."; console.error(e); }
+    const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; 
+    const channelId="UCL6OtB3m-gQ2mgRg61-aDXw"; 
+    try{ 
+        const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`); 
+        const data=await res.json(); 
+        if(data.items && data.items.length>0){ 
+            subscriberCount = parseInt(data.items[0].statistics.subscriberCount); 
+            subscriberCountDiv.textContent = subscriberCount.toLocaleString(); 
+            updateDisplay(); 
+        } else subscriberCountDiv.textContent="Subscriber data not found."; 
+    } catch(e){ 
+        subscriberCountDiv.textContent="Error loading subscribers."; 
+        console.error(e); 
+    }
 }
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
+
+// --- YouTube logo click ---
+document.getElementById("ytLogo").addEventListener("click",()=>{ window.open("https://www.youtube.com/@ANewUntoldStory","_blank"); });
 
 // --- Draggable & Minimize ---
 function makeDraggable(el){
