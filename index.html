@@ -9,8 +9,34 @@ body {
   font-family: "MS Sans Serif", Tahoma, sans-serif;
   background: #008080;
   color: black;
-  margin: 20px;
+  margin: 0;
+  padding-bottom: 40px; /* leave space for Start bar */
   text-align: center;
+}
+
+/* Start bar */
+#startBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  background: #c0c0c0;
+  border-top: 2px solid #fff inset;
+  border-bottom: 2px solid #000 outset;
+  display: flex;
+  align-items: center;
+  padding-left: 5px;
+  box-sizing: border-box;
+}
+
+#startBar button {
+  font-family: "MS Sans Serif";
+  font-weight: bold;
+  padding: 4px 10px;
+  border: 2px outset #fff;
+  background: #c0c0c0;
+  cursor: pointer;
 }
 
 /* Subscriber tracker mini-window */
@@ -22,6 +48,7 @@ body {
   border: 2px solid #000;
   box-shadow: 4px 4px #808080;
   background: #c0c0c0;
+  z-index: 10;
 }
 
 #subscriberBox .title-bar {
@@ -69,6 +96,8 @@ body {
   border: 2px solid #000;
   box-shadow: 4px 4px #808080;
   background: #c0c0c0;
+  z-index: 1;
+  position: relative;
 }
 
 .title-bar {
@@ -144,6 +173,7 @@ li {
   padding: 2px;
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 .progress-bar {
@@ -155,6 +185,7 @@ li {
   font-weight: bold;
   color: black;
   overflow: hidden;
+  position: relative;
 }
 
 .pixel {
@@ -183,7 +214,7 @@ li {
 <div class="window">
   <div class="title-bar">
     <span>Anus Words v. Subs</span>
-    <button onclick="clearWordsPrompt()">X</button>
+    <button id="clearWordsBtn">X</button>
   </div>
   <div class="content">
     <input id="wordInput" type="text" placeholder="Enter a word..." />
@@ -195,6 +226,11 @@ li {
 
 <div class="progress-container">
   <div id="progressBar" class="progress-bar"></div>
+</div>
+
+<!-- Start bar -->
+<div id="startBar">
+  <button>Start</button>
 </div>
 
 <script type="module">
@@ -222,6 +258,7 @@ const counter = document.getElementById("counter");
 const message = document.getElementById("message");
 const subscriberCountDiv = document.getElementById("subscriberCount");
 const progressBar = document.getElementById("progressBar");
+const clearWordsBtn = document.getElementById("clearWordsBtn");
 
 let words = new Set();
 let subscriberCount = 0;
@@ -258,16 +295,22 @@ async function addWord() {
 }
 
 // Clear all words (password-protected)
-async function clearWordsPrompt() {
+clearWordsBtn.addEventListener("click", async () => {
   const password = prompt("Enter password to clear all words:");
   if (password !== "anuspass") { alert("Incorrect password."); return; }
-  const snapshot = await getDocs(wordsCollection);
-  const batch = writeBatch(db);
-  snapshot.forEach(docSnap => batch.delete(docSnap.ref));
-  await batch.commit();
-  words.clear();
-  updateDisplay();
-}
+  try {
+    const snapshot = await getDocs(wordsCollection);
+    const batch = writeBatch(db);
+    snapshot.forEach(docSnap => batch.delete(docSnap.ref));
+    await batch.commit();
+    words.clear();
+    updateDisplay();
+    alert("All words cleared!");
+  } catch (err) {
+    console.error(err);
+    alert("Error clearing words.");
+  }
+});
 
 input.addEventListener("keypress", function(e) {
   if (e.key === "Enter") addWord();
