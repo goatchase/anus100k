@@ -5,8 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anus Words v. Subs</title>
 <style>
+/* --- General Text Styling --- */
+body, input, button, select, textarea, div, span, li {
+    font-family: "MS Sans Serif", Tahoma, sans-serif;
+}
+
+/* Body */
 body {
-  font-family: "MS Sans Serif", Tahoma, sans-serif;
   background: #008080;
   color: black;
   margin: 0;
@@ -21,13 +26,14 @@ body {
   background: #c0c0c0; border-top: 2px solid #fff inset; border-bottom: 2px solid #000 outset;
   display: flex; align-items: center; justify-content: space-between; padding: 0 5px;
 }
-#startBar button { font-family: "MS Sans Serif"; font-weight: bold; padding: 4px 10px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
+#startBar button {
+  font-weight: bold; padding: 4px 10px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer;
+}
 #clock { font-size: 12px; font-weight: bold; }
 
 /* Draggable dialog windows */
 .window, #subscriberBox, #timerBox {
   border: 2px solid #000; box-shadow: 4px 4px #808080; background: #c0c0c0; position: absolute;
-  font-family: "MS Sans Serif";
   touch-action: none;
   min-width: 150px;
 }
@@ -38,15 +44,17 @@ body {
   cursor: move;
 }
 .title-bar button {
-  width: 20px; height: 18px; font-weight: bold; font-family: "MS Sans Serif";
+  width: 20px; height: 18px; font-weight: bold;
   border: 2px outset #fff; background: #c0c0c0; cursor: pointer;
 }
-.content { padding: 10px; background: #c0c0c0; font-family: "MS Sans Serif"; }
+.content { padding: 10px; background: #c0c0c0; }
+
+/* Input and list styling */
 input#wordInput { padding: 4px; font-size: 14px; width: 100%; max-width: 580px; border: 2px inset #fff; box-sizing: border-box; }
 #counter { margin: 10px 0; font-weight: bold; font-size: 16px; }
 #message { color: red; font-weight: bold; margin-top: 5px; }
-#wordList { max-height: 250px; overflow-y: auto; background: #fff; border: 2px inset #fff; margin-top: 10px; padding: 5px; list-style: none; font-family: "MS Sans Serif"; }
-li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif"; }
+#wordList { max-height: 250px; overflow-y: auto; background: #fff; border: 2px inset #fff; margin-top: 10px; padding: 5px; list-style: none; }
+li { border-bottom: 1px solid #808080; padding: 2px; }
 
 /* Progress bar (brown) */
 .progress-container { 
@@ -61,17 +69,17 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
 
 /* Subscriber tracker */
 #subscriberBox { width: 200px; z-index:10; top: 10px; right: 10px; }
-#subscriberBox .content { display: flex; flex-direction:column; align-items: center; gap: 5px; justify-content: center; font-size: 14px; padding: 5px; font-family: "MS Sans Serif"; }
+#subscriberBox .content { display: flex; flex-direction:column; align-items: center; gap: 5px; justify-content: center; font-size: 14px; padding: 5px; }
 #subscriberBox svg { cursor:pointer; }
 
 /* Timer window */
 #timerBox { width: 200px; z-index: 10; top: 10px; left: 10px; }
-#timerBox .content { padding:5px; display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; font-family: "MS Sans Serif"; }
+#timerBox .content { padding:5px; display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; }
 #timerBox .buttons-row { display:flex; gap:5px; justify-content:center; }
 
 /* Minimized boxes container */
 #minimizedContainer { position: fixed; bottom: 40px; left: 0; display: flex; gap: 5px; padding: 5px; }
-.minimized-btn { font-family: "MS Sans Serif"; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; padding: 2px 6px; font-size:12px; }
+.minimized-btn { border: 2px outset #fff; background: #c0c0c0; cursor: pointer; padding: 2px 6px; font-size:12px; }
 
 @media(max-width:700px){
   .window,#subscriberBox,#timerBox{width:90%; left:5% !important; transform:none;}
@@ -116,9 +124,7 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
     </div>
   </div>
   <div class="content">
-    <div>Time: <span id="elapsed">0.00</span> s</div>
-    <!-- WPM hidden -->
-    <!--<div>WPM: <span id="wpm">0</span></div>-->
+    <div>Time: <span id="elapsed">00:00.00</span></div>
     <div>ETA: <span id="eta">0d 0h 0m</span></div>
     <div class="buttons-row">
       <button id="startBtn">Start</button>
@@ -179,19 +185,31 @@ const timerBox=document.getElementById("timerBox"), minimizedContainer=document.
 let words=new Set(), subscriberCount=0, timer=null, elapsed=0, running=false;
 
 // Clock
-function updateClock(){ const now=new Date(); let h=now.getHours(); const ampm=h>=12?"PM":"AM"; h=h%12||12; const m=String(now.getMinutes()).padStart(2,'0'); const s=String(now.getSeconds()).padStart(2,'0'); document.getElementById("clock").textContent=`${h}:${m}:${s} ${ampm}`;}
+function updateClock(){ 
+  const now=new Date(); 
+  let h=now.getHours(); 
+  const ampm=h>=12?"PM":"AM"; 
+  h=h%12||12; 
+  const m=String(now.getMinutes()).padStart(2,'0'); 
+  const s=String(now.getSeconds()).padStart(2,'0'); 
+  document.getElementById("clock").textContent=`${h}:${m}:${s} ${ampm}`;
+}
 setInterval(updateClock,1000); updateClock();
 
 // Timer
 function updateTimerDisplay(){ 
-    elapsedSpan.textContent = elapsed.toFixed(2); 
-    const wpm = elapsed > 0 ? (words.size / (elapsed / 60)) : 0; // still used for ETA
-    const etaSecs = wpm > 0 ? (subscriberCount - words.size) / wpm * 60 : 0; 
-    const d = Math.floor(etaSecs / 86400), 
-          h = Math.floor((etaSecs % 86400) / 3600), 
-          m = Math.floor((etaSecs % 3600) / 60); 
-    etaSpan.textContent = `${d}d ${h}h ${m}m`; 
+  // mm:ss.ss format
+  const minutes = Math.floor(elapsed/60);
+  const seconds = (elapsed % 60).toFixed(2);
+  elapsedSpan.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(5,'0')}`;
+
+  // ETA calculation
+  const wpm = elapsed>0 ? (words.size/(elapsed/60)) : 0;
+  const etaSecs = wpm>0 ? (subscriberCount-words.size)/wpm*60 : 0; 
+  const d=Math.floor(etaSecs/86400), h=Math.floor((etaSecs%86400)/3600), m=Math.floor((etaSecs%3600)/60); 
+  etaSpan.textContent=`${d}d ${h}h ${m}m`; 
 }
+
 startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{elapsed+=0.1; updateTimerDisplay();},100); }}
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
 resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
@@ -200,30 +218,46 @@ resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; upd
 bottomStartBtn.onclick=function(){ alert("Fuck No Baby!"); }
 
 // Fetch words
-async function fetchWords(){ words.clear(); const snapshot=await getDocs(wordsCollection); snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); updateDisplay(); updateTimerDisplay(); }
+async function fetchWords(){ 
+  words.clear(); 
+  const snapshot=await getDocs(wordsCollection); 
+  snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); 
+  updateDisplay(); updateTimerDisplay(); 
+}
 
 // Add word
-async function addWord(){ const newWord=input.value.trim().toLowerCase(); message.textContent=""; if(!newWord) return; if(words.has(newWord)){message.textContent="Duplicate!";} else { try{await setDoc(doc(db,"words",newWord),{createdAt:serverTimestamp()}); words.add(newWord); updateDisplay(); updateTimerDisplay();} catch(e){console.error(e); message.textContent="Error adding word.";} } input.value=""; input.focus(); }
+async function addWord(){ 
+  const newWord=input.value.trim().toLowerCase(); 
+  message.textContent=""; 
+  if(!newWord) return; 
+  if(words.has(newWord)){message.textContent="Duplicate!";} 
+  else { 
+    try{await setDoc(doc(db,"words",newWord),{createdAt:serverTimestamp()}); words.add(newWord); updateDisplay(); updateTimerDisplay();} 
+    catch(e){console.error(e); message.textContent="Error adding word.";} 
+  } 
+  input.value=""; input.focus(); 
+}
 input.addEventListener("keypress",function(e){if(e.key==="Enter") addWord();});
 
 // Clear words
-clearWordsBtn.addEventListener("click", async()=>{ const password=prompt("Password:"); if(password!=="anuspass"){alert("Incorrect password."); return;} const snapshot=await getDocs(wordsCollection); const batch=writeBatch(db); snapshot.forEach(docSnap=>batch.delete(docSnap.ref)); await batch.commit(); words.clear(); updateDisplay(); updateTimerDisplay(); alert("All words cleared!");});
+clearWordsBtn.addEventListener("click", async()=>{ 
+  const password=prompt("Password:"); 
+  if(password!=="anuspass"){alert("Incorrect password."); return;} 
+  const snapshot=await getDocs(wordsCollection); 
+  const batch=writeBatch(db); 
+  snapshot.forEach(docSnap=>batch.delete(docSnap.ref)); 
+  await batch.commit(); words.clear(); updateDisplay(); updateTimerDisplay(); alert("All words cleared!");
+});
 
 // Update display & progress
 function updateDisplay(){
-  counter.textContent = `${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
-  list.innerHTML = "";
-  [...words].reverse().forEach(word=>{
-    const li = document.createElement("li");
-    li.textContent = word;
-    list.appendChild(li);
-  });
+  counter.textContent=`${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
+  list.innerHTML="";
+  [...words].reverse().forEach(word=>{ const li=document.createElement("li"); li.textContent=word; list.appendChild(li); });
 
-  let progress = subscriberCount > 0 ? words.size / subscriberCount : 0;
-  if(progress > 1) progress = 1;
-  const percent = (progress*100).toFixed(2);
-  progressBar.style.width = percent + "%";
-  progressText.textContent = percent + "%";
+  const progress = subscriberCount>0? Math.min(words.size/subscriberCount,1):0;
+  progressBar.style.width = (progress*100).toFixed(2) + "%";
+  progressText.textContent = (progress*100).toFixed(2) + "%";
 }
 
 // Fetch subscribers
@@ -245,10 +279,10 @@ async function fetchSubscribers(){
 }
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
 
-// --- YouTube logo click ---
+// YouTube logo click
 document.getElementById("ytLogo").addEventListener("click",()=>{ window.open("https://www.youtube.com/@ANewUntoldStory","_blank"); });
 
-// --- Draggable & Minimize ---
+// Draggable & Minimize
 function makeDraggable(el){
   const title=el.querySelector('.title-bar');
   let offsetX=0, offsetY=0, isDown=false;
@@ -271,7 +305,7 @@ document.querySelectorAll('.minimizeBtn').forEach(btn=>{
   });
 });
 
-// --- Mobile repositioning ---
+// Mobile repositioning
 function repositionBoxes(){
   const boxes=[...document.querySelectorAll('.window, #subscriberBox, #timerBox')].filter(b=>b.style.display!=='none');
   let topOffset=10;
