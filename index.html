@@ -5,157 +5,179 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anus Words v. Subs</title>
 <style>
-  body {
-    font-family: "MS Sans Serif", Tahoma, sans-serif;
-    background: #008080;
-    color: black;
-    margin: 20px;
-    text-align: center;
-  }
+body {
+  font-family: "MS Sans Serif", Tahoma, sans-serif;
+  background: #008080;
+  color: black;
+  margin: 20px;
+  text-align: center;
+}
 
-  /* Subscriber tracker top-right with YouTube logo */
-  #subscriberBox {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background: #8B4513; /* brown */
-    color: white;
-    border: 2px inset #fff;
-    padding: 10px;
-    width: 240px;
-    font-weight: bold;
-    box-shadow: inset 2px 2px #fff, inset -2px -2px #808080;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    cursor: pointer;
-    text-decoration: none;
-  }
-  #subscriberBox svg {
-    width: 20px;
-    height: 14px;
-    fill: white;
-  }
+/* Subscriber tracker mini-window */
+#subscriberBox {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 200px;
+  border: 2px solid #000;
+  box-shadow: 4px 4px #808080;
+  background: #c0c0c0;
+}
 
-  /* Window container */
-  .window {
-    width: 600px;
-    max-width: 90%;
-    margin: 60px auto 20px;
-    border: 2px solid #000;
-    box-shadow: 4px 4px #808080;
-    background: #c0c0c0;
-  }
+#subscriberBox .title-bar {
+  background: #000080;
+  color: white;
+  padding: 2px 5px;
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  .title-bar {
-    background: #000080;
-    color: white;
-    padding: 3px 5px;
-    font-weight: bold;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+#subscriberBox .title-bar button {
+  width: 18px;
+  height: 16px;
+  font-weight: bold;
+  font-family: "MS Sans Serif";
+  border: 2px outset #fff;
+  background: #c0c0c0;
+  cursor: pointer;
+}
 
-  .title-bar button {
-    width: 20px;
-    height: 18px;
-    font-weight: bold;
-    font-family: "MS Sans Serif";
-    border: 2px outset #fff;
-    background: #c0c0c0;
-    cursor: pointer;
-  }
+#subscriberBox .content {
+  padding: 5px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+}
 
-  .content {
-    padding: 10px;
-    background: #c0c0c0;
-  }
+#subscriberBox svg {
+  width: 20px;
+  height: 14px;
+  fill: red;
+  cursor: pointer;
+}
 
-  input#wordInput {
-    padding: 4px;
-    font-size: 14px;
-    width: 500px;
-    border: 2px inset #fff;
-    margin-right: 5px;
-  }
+/* Main window */
+.window {
+  width: 600px;
+  max-width: 90%;
+  margin: 60px auto 20px;
+  border: 2px solid #000;
+  box-shadow: 4px 4px #808080;
+  background: #c0c0c0;
+}
 
-  button.add-clear {
-    padding: 4px 8px;
-    font-size: 14px;
-    border: 2px outset #fff;
-    cursor: pointer;
-    margin: 2px;
-    background: #c0c0c0;
-  }
+.title-bar {
+  background: #000080;
+  color: white;
+  padding: 3px 5px;
+  font-weight: bold;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
-  #counter {
-    margin: 10px 0;
-    font-weight: bold;
-  }
+.title-bar button {
+  width: 20px;
+  height: 18px;
+  font-weight: bold;
+  font-family: "MS Sans Serif";
+  border: 2px outset #fff;
+  background: #c0c0c0;
+  cursor: pointer;
+}
 
-  #message {
-    color: red;
-    font-weight: bold;
-    margin-top: 5px;
-  }
+.content {
+  padding: 10px;
+  background: #c0c0c0;
+}
 
-  #wordList {
-    max-height: 250px;
-    overflow-y: auto;
-    background: #fff;
-    border: 2px inset #fff;
-    margin-top: 10px;
-    padding: 5px;
-    list-style: none;
-    font-family: "MS Sans Serif";
-  }
+input#wordInput {
+  padding: 4px;
+  font-size: 14px;
+  width: 500px;
+  border: 2px inset #fff;
+  margin-right: 5px;
+}
 
-  li {
-    border-bottom: 1px solid #808080;
-    padding: 2px;
-  }
+#counter {
+  margin: 10px 0;
+  font-weight: bold;
+  font-size: 16px;
+}
 
-  .progress-container {
-    background: #fff;
-    border: 2px inset #fff;
-    width: 600px;
-    max-width: 90%;
-    height: 20px;
-    margin: 10px auto 40px;
-  }
+#message {
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
+}
 
-  .progress-bar {
-    background: #000080;
-    height: 100%;
-    width: 0%;
-    text-align: center;
-    color: black;
-    font-size: 12px;
-    line-height: 20px;
-    white-space: nowrap;
-    overflow: visible;
-  }
+#wordList {
+  max-height: 250px;
+  overflow-y: auto;
+  background: #fff;
+  border: 2px inset #fff;
+  margin-top: 10px;
+  padding: 5px;
+  list-style: none;
+  font-family: "MS Sans Serif";
+}
+
+li {
+  border-bottom: 1px solid #808080;
+  padding: 2px;
+}
+
+.progress-container {
+  background: #fff;
+  border: 2px inset #fff;
+  width: 600px;
+  max-width: 90%;
+  height: 20px;
+  margin: 10px auto 40px;
+}
+
+.progress-bar {
+  background: #000080;
+  height: 100%;
+  width: 0%;
+  text-align: center;
+  color: black;
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: visible;
+}
 </style>
 </head>
 <body>
 
-<!-- Subscriber tracker -->
-<a id="subscriberBox" href="https://www.youtube.com/@ANewUntoldStory" target="_blank">
-  <svg viewBox="0 0 24 24"><path d="M23.498 6.186a2.964 2.964 0 0 0-2.086-2.086C19.68 3.5 12 3.5 12 3.5s-7.68 0-9.412.6A2.964 2.964 0 0 0 .502 6.186 31.523 31.523 0 0 0 0 12a31.523 31.523 0 0 0 .502 5.814 2.964 2.964 0 0 0 2.086 2.086C4.32 20.5 12 20.5 12 20.5s7.68 0 9.412-.6a2.964 2.964 0 0 0 2.086-2.086A31.523 31.523 0 0 0 24 12a31.523 31.523 0 0 0-.502-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>
-  <span id="subscriberCount">Loading...</span>
-</a>
+<!-- Subscriber tracker window -->
+<div id="subscriberBox">
+  <div class="title-bar">
+    <span>Subscribers</span>
+    <button onclick="window.open('https://www.youtube.com/@ANewUntoldStory', '_blank')">X</button>
+  </div>
+  <div class="content">
+    <svg viewBox="0 0 24 24"><path d="M23.498 6.186a2.964 2.964 0 0 0-2.086-2.086C19.68 3.5 12 3.5 12 3.5s-7.68 0-9.412.6A2.964 2.964 0 0 0 .502 6.186 31.523 31.523 0 0 0 0 12a31.523 31.523 0 0 0 .502 5.814 2.964 2.964 0 0 0 2.086 2.086C4.32 20.5 12 20.5 12 20.5s7.68 0 9.412-.6a2.964 2.964 0 0 0 2.086-2.086A31.523 31.523 0 0 0 24 12a31.523 31.523 0 0 0-.502-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>
+    <span id="subscriberCount">Loading...</span>
+  </div>
+</div>
 
+<!-- Main words window -->
 <div class="window">
   <div class="title-bar">
     <span>Anus Words v. Subs</span>
-    <button onclick="alert('Close button pressed!')">X</button>
+    <button onclick="clearWordsPrompt()">X</button>
   </div>
   <div class="content">
     <input id="wordInput" type="text" placeholder="Enter a word..." />
-    <button class="add-clear" onclick="clearWordsFirestore()">Clear All Words</button>
-    <div id="counter">Words added: 0 / 0</div>
+    <div id="counter">0 / 0</div>
     <div id="message"></div>
     <ul id="wordList"></ul>
   </div>
@@ -203,7 +225,7 @@ async function fetchWords() {
   updateDisplay();
 }
 
-// Add word to Firestore and update display
+// Add word to Firestore
 async function addWord() {
   const newWord = input.value.trim().toLowerCase();
   message.textContent = "";
@@ -213,13 +235,8 @@ async function addWord() {
     message.textContent = "Duplicate! That word has already been entered.";
   } else {
     try {
-      // Add to Firestore
       await setDoc(doc(db, "words", newWord), { createdAt: serverTimestamp() });
-
-      // Add to local set
       words.add(newWord);
-
-      // Update UI
       updateDisplay();
     } catch (err) {
       console.error(err);
@@ -231,8 +248,8 @@ async function addWord() {
   input.focus();
 }
 
-// Clear all words (password protected)
-async function clearWordsFirestore() {
+// Clear all words (password-protected)
+async function clearWordsPrompt() {
   const password = prompt("Enter password to clear all words:");
   if (password !== "anuspass") { alert("Incorrect password."); return; }
   const snapshot = await getDocs(wordsCollection);
@@ -249,7 +266,7 @@ input.addEventListener("keypress", function(e) {
 
 // Update display & progress
 function updateDisplay() {
-  counter.textContent = `Words added: ${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
+  counter.textContent = `${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML = "";
   [...words].reverse().forEach(word => {
     const li = document.createElement("li");
@@ -286,6 +303,7 @@ async function fetchSubscribers() {
 fetchWords();
 fetchSubscribers();
 setInterval(fetchSubscribers, 30000);
+
 </script>
 </body>
 </html>
