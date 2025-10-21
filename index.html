@@ -32,6 +32,11 @@
     font-size: 18px;
     font-weight: bold;
   }
+  #subscriberCount {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 20px;
+  }
   #message {
     color: red;
     margin-top: 10px;
@@ -59,18 +64,24 @@
 
 <input id="wordInput" type="text" placeholder="Enter a word..." />
 <button onclick="addWord()">Add</button>
+<button onclick="clearWords()">Clear All Words</button>
 
 <div id="counter">Words added: 0 / 100,000</div>
 <div id="message"></div>
 
+<h2>Subscriber Tracker for "A New Untold Story"</h2>
+<div id="subscriberCount">Loading subscribers...</div>
+
 <ul id="wordList"></ul>
 
 <script>
+  // --- Word tracking setup ---
   let words = new Set(JSON.parse(localStorage.getItem("words") || "[]"));
   const input = document.getElementById("wordInput");
   const list = document.getElementById("wordList");
   const counter = document.getElementById("counter");
   const message = document.getElementById("message");
+  const subscriberCount = document.getElementById("subscriberCount");
 
   function updateDisplay() {
     counter.textContent = `Words added: ${words.size.toLocaleString()} / 100,000`;
@@ -97,7 +108,43 @@
     input.focus();
   }
 
+  // --- Password-protected clear ---
+  function clearWords() {
+    const password = prompt("Enter password to clear all words:");
+    if (password === "anuspass") {
+      words.clear();
+      localStorage.removeItem("words");
+      updateDisplay();
+    } else {
+      alert("Incorrect password.");
+    }
+  }
+
+  // --- YouTube subscriber tracker ---
+  async function fetchSubscribers() {
+    const apiKey = "AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; // Your API Key
+    const channelId = "UCzC4h-GAmVt9owGZWzQ8ybA"; // A New Untold Story Channel ID
+
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`
+      );
+      const data = await response.json();
+      if (data.items && data.items.length > 0) {
+        const subs = data.items[0].statistics.subscriberCount;
+        subscriberCount.textContent = `Subscribers: ${parseInt(subs).toLocaleString()}`;
+      } else {
+        subscriberCount.textContent = "Subscriber data not found.";
+      }
+    } catch (error) {
+      subscriberCount.textContent = "Error loading subscriber count.";
+      console.error(error);
+    }
+  }
+
+  // Initialize page
   updateDisplay();
+  fetchSubscribers();
 </script>
 
 </body>
