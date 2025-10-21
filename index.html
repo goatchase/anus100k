@@ -28,11 +28,11 @@
     box-shadow: inset 2px 2px #fff, inset -2px -2px #808080;
   }
 
-  /* Window container */
+  /* Window container expanded */
   .window {
-    width: 90%;
-    max-width: 800px;
-    margin: 60px auto 20px; /* leave space for subscriber box */
+    width: 500px; /* expanded width */
+    max-width: 90%;
+    margin: 60px auto 20px;
     border: 2px solid #000;
     box-shadow: 4px 4px #808080;
     background: #c0c0c0;
@@ -70,11 +70,11 @@
     margin: 5px;
   }
 
-  /* Expanded word input box */
+  /* Word input box */
   input#wordInput {
     padding: 4px;
     font-size: 14px;
-    width: 350px; /* increased length */
+    width: 400px; /* larger input */
     border: 2px inset #fff;
     margin-right: 5px;
   }
@@ -115,13 +115,14 @@
     padding: 2px;
   }
 
-  /* Progress bar aligned with input box */
+  /* Progress bar aligned with main window */
   .progress-container {
     background: #fff;
     border: 2px inset #fff;
-    width: 350px; /* match input width */
+    width: 500px; /* match main window width */
+    max-width: 90%;
     height: 20px;
-    margin: 10px auto 40px; /* bottom spacing */
+    margin: 10px auto 40px;
   }
 
   .progress-bar {
@@ -129,11 +130,11 @@
     height: 100%;
     width: 0%;
     text-align: center;
-    color: white;
+    color: black; /* progress text now black */
     font-size: 12px;
     line-height: 20px;
     white-space: nowrap;
-    overflow: visible; /* ensure percent always visible */
+    overflow: visible;
   }
 
   /* Scrollbar style for Windows 97 feel */
@@ -198,7 +199,7 @@ function updateDisplay() {
   let progress = subscriberCount > 0 ? (words.size / subscriberCount) * 100 : 0;
   if (progress > 100) progress = 100;
   progressBar.style.width = progress + "%";
-  progressBar.textContent = progress.toFixed(2) + "%"; // always visible
+  progressBar.textContent = progress.toFixed(2) + "%";
 }
 
 function addWord() {
