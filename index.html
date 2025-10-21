@@ -123,7 +123,7 @@
   // --- YouTube subscriber tracker ---
   async function fetchSubscribers() {
     const apiKey = "AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; // Your API Key
-    const channelId = "UCzC4h-GAmVt9owGZWzQ8ybA"; // A New Untold Story Channel ID
+    const channelId = "UCL6OtB3m-gQ2mgRg61-aDXw"; // Correct Channel ID
 
     try {
       const response = await fetch(
@@ -141,6 +141,9 @@
       console.error(error);
     }
   }
+
+  // Auto-refresh subscriber count every 30 seconds
+  setInterval(fetchSubscribers, 30000);
 
   // Initialize page
   updateDisplay();
