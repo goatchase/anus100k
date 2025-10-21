@@ -48,7 +48,7 @@ input#wordInput { padding: 4px; font-size: 14px; width: 100%; max-width: 580px; 
 #wordList { max-height: 250px; overflow-y: auto; background: #fff; border: 2px inset #fff; margin-top: 10px; padding: 5px; list-style: none; font-family: "MS Sans Serif"; }
 li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif"; }
 
-/* Progress bar (now brown) */
+/* Progress bar (brown) */
 .progress-container { background: #c0c0c0; border: 2px solid #fff inset; width: 100%; height: 20px; margin-top: 10px; padding: 2px; display: flex; align-items: center; position: relative; font-family: "MS Sans Serif";}
 .progress-bar { background: #8B4513; height: 100%; display: flex; align-items: center; font-size: 12px; font-weight: bold; color: black; overflow: hidden; position: relative; }
 .pixel { width: 4px; height: 100%; background: #8B4513; margin-right: 1px; }
@@ -56,7 +56,7 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
 /* Subscriber tracker */
 #subscriberBox { width: 200px; z-index:10; top: 10px; right: 10px; }
 #subscriberBox .content { display: flex; flex-direction:column; align-items: center; gap: 5px; justify-content: center; font-size: 14px; padding: 5px; font-family: "MS Sans Serif"; }
-#subscriberBox img { cursor:pointer; }
+#subscriberBox svg { cursor:pointer; }
 
 /* Timer window */
 #timerBox { width: 200px; z-index: 10; top: 10px; left: 10px; }
@@ -87,8 +87,10 @@ li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif
     </div>
   </div>
   <div class="content">
-    <img id="ytLogo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/YouTube_Logo_2013.svg/2560px-YouTube_Logo_2013.svg.png"
-        alt="YouTube" style="width:24px; height:auto;">
+    <!-- Inline SVG YouTube logo -->
+    <svg id="ytLogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="24" height="24" style="fill:red;">
+      <path d="M549.655 124.083c-6.281-23.651-24.813-42.192-48.461-48.461C459.79 64 288 64 288 64S116.21 64 74.805 75.622c-23.648 6.269-42.18 24.81-48.461 48.461C16 165.487 16 256 16 256s0 90.513 10.344 131.917c6.281 23.651 24.813 42.192 48.461 48.461C116.21 448 288 448 288 448s171.79 0 213.195-11.622c23.648-6.269 42.18-24.81 48.461-48.461C560 346.513 560 256 560 256s0-90.513-10.345-131.917zM232 336V176l142 80-142 80z"/>
+    </svg>
     <span id="subscriberCount">Loading...</span>
     <div class="progress-container">
       <div id="progressBar" class="progress-bar"></div>
@@ -172,18 +174,20 @@ function updateClock(){ const now=new Date(); let h=now.getHours(); const ampm=h
 setInterval(updateClock,1000); updateClock();
 
 // Timer
-function updateTimerDisplay(){ elapsedSpan.textContent=elapsed.toFixed(2); const wpm=elapsed>0? (words.size/(elapsed/60)):0; wpmSpan.textContent=wpm.toFixed(2); const etaSecs=wpm>0?(subscriberCount-words.size)/wpm*60:0; const d=Math.floor(etaSecs/86400), h=Math.floor((etaSecs%86400)/3600), m=Math.floor((etaSecs%3600)/60); etaSpan.textContent=`${d}d ${h}h ${m}m`; }
+function updateTimerDisplay(){ 
+    elapsedSpan.textContent=elapsed.toFixed(2); 
+    const wpm=elapsed>0? (words.size/(elapsed/60)):0; 
+    wpmSpan.textContent=wpm.toFixed(2); 
+    const etaSecs=wpm>0?(subscriberCount-words.size)/wpm*60:0; 
+    const d=Math.floor(etaSecs/86400), h=Math.floor((etaSecs%86400)/3600), m=Math.floor((etaSecs%3600)/60); 
+    etaSpan.textContent=`${d}d ${h}h ${m}m`; 
+}
 startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{elapsed+=0.1; updateTimerDisplay();},100); }}
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
 resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
 
 // Bottom Start button
 bottomStartBtn.onclick=function(){ alert("Fuck No Baby!"); }
-
-// YouTube logo click
-document.getElementById("ytLogo").onclick = function() {
-  window.open('https://www.youtube.com/@ANewUntoldStory','_blank');
-};
 
 // Fetch words
 async function fetchWords(){ words.clear(); const snapshot=await getDocs(wordsCollection); snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); updateDisplay(); updateTimerDisplay(); }
@@ -200,14 +204,32 @@ function updateDisplay(){
   counter.textContent=`${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML="";
   [...words].reverse().forEach(word=>{ const li=document.createElement("li"); li.textContent=word; list.appendChild(li); });
-  const totalPixels=Math.floor(progressBar.clientWidth/5); let progress=subscriberCount>0? words.size/subscriberCount:0; if(progress>1) progress=1;
+  const totalPixels=Math.floor(progressBar.clientWidth/5);
+  let progress=subscriberCount>0? words.size/subscriberCount : 0;
+  if(progress>1) progress=1;
   progressBar.innerHTML="";
-  const filledPixels=Math.floor(totalPixels*progress); for(let i=0;i<filledPixels;i++){ const pixel=document.createElement("div"); pixel.className="pixel"; progressBar.appendChild(pixel);}
+  const filledPixels=Math.floor(totalPixels*progress);
+  for(let i=0;i<filledPixels;i++){ const pixel=document.createElement("div"); pixel.className="pixel"; progressBar.appendChild(pixel);}
   const textNode=document.createElement("span"); textNode.style.position="absolute"; textNode.style.left="50%"; textNode.style.transform="translateX(-50%)"; textNode.style.fontWeight="bold"; textNode.style.color="black"; textNode.textContent=(progress*100).toFixed(2)+"%"; progressBar.appendChild(textNode);
 }
 
+// YouTube logo click
+document.getElementById("ytLogo").onclick=function(){ window.open('https://www.youtube.com/@ANewUntoldStory','_blank'); }
+
 // Fetch subscribers
-async function fetchSubscribers(){ const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; const channelId="UCL6OtB3m-gQ2mgRg61-aDXw"; try{ const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`); const data=await res.json(); if(data.items&&data.items.length>0){ subscriberCount=parseInt(data.items[0].statistics.subscriberCount); subscriberCountDiv.textContent=subscriberCount.toLocaleString(); updateDisplay(); } else subscriberCountDiv.textContent="Subscriber data not found."; } catch(e){ subscriberCountDiv.textContent="Error loading subscribers."; console.error(e); }}
+async function fetchSubscribers(){ 
+  const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; 
+  const channelId="UCL6OtB3m-gQ2mgRg61-aDXw"; 
+  try{ 
+    const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`); 
+    const data=await res.json(); 
+    if(data.items&&data.items.length>0){ 
+      subscriberCount=parseInt(data.items[0].statistics.subscriberCount); 
+      subscriberCountDiv.textContent=subscriberCount.toLocaleString(); 
+      updateDisplay(); 
+    } else subscriberCountDiv.textContent="Subscriber data not found."; 
+  } catch(e){ subscriberCountDiv.textContent="Error loading subscribers."; console.error(e); }
+}
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
 
 // --- Draggable & Minimize ---
