@@ -19,6 +19,8 @@ body {
   position: fixed; bottom: 0; left: 0; width: 100%; height: 40px;
   background: #c0c0c0; border-top: 2px solid #fff inset; border-bottom: 2px solid #000 outset;
   display: flex; align-items: center; justify-content: space-between; padding: 0 5px;
+  font-family: "MS Sans Serif";
+  font-weight: bold;
 }
 #startBar button { font-family: "MS Sans Serif"; font-weight: bold; padding: 4px 10px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
 #clock { font-size: 12px; font-weight: bold; }
@@ -26,6 +28,7 @@ body {
 /* Dialog windows */
 .window, #subscriberBox, #timerBox, #minesweeperDialog {
   border: 2px solid #000; box-shadow: 4px 4px #808080; background: #c0c0c0; position: relative;
+  font-family: "MS Sans Serif";
 }
 .window { width: 600px; max-width: 90%; margin: 60px auto 20px; }
 .title-bar {
@@ -36,29 +39,29 @@ body {
   width: 20px; height: 18px; font-weight: bold; font-family: "MS Sans Serif";
   border: 2px outset #fff; background: #c0c0c0; cursor: pointer;
 }
-.content { padding: 10px; background: #c0c0c0; }
+.content { padding: 10px; background: #c0c0c0; font-family: "MS Sans Serif"; }
 input#wordInput { padding: 4px; font-size: 14px; width: 100%; max-width: 580px; border: 2px inset #fff; box-sizing: border-box; }
 #counter { margin: 10px 0; font-weight: bold; font-size: 16px; }
 #message { color: red; font-weight: bold; margin-top: 5px; }
 #wordList { max-height: 250px; overflow-y: auto; background: #fff; border: 2px inset #fff; margin-top: 10px; padding: 5px; list-style: none; font-family: "MS Sans Serif"; }
-li { border-bottom: 1px solid #808080; padding: 2px; }
+li { border-bottom: 1px solid #808080; padding: 2px; font-family: "MS Sans Serif"; }
 
 /* Progress bar */
-.progress-container { background: #c0c0c0; border: 2px solid #fff inset; width: 600px; max-width: 90%; height: 20px; margin: 10px auto 40px; padding: 2px; display: flex; align-items: center; position: relative; }
+.progress-container { background: #c0c0c0; border: 2px solid #fff inset; width: 600px; max-width: 90%; height: 20px; margin: 10px auto 40px; padding: 2px; display: flex; align-items: center; position: relative; font-family: "MS Sans Serif";}
 .progress-bar { background: #000080; height: 100%; display: flex; align-items: center; font-size: 12px; font-weight: bold; color: black; overflow: hidden; position: relative; }
 .pixel { width: 4px; height: 100%; background: #000080; margin-right: 1px; }
 
 /* Subscriber tracker */
 #subscriberBox { position: fixed; top: 10px; right: 10px; width: 200px; z-index:10; }
-#subscriberBox .content { display: flex; align-items: center; gap: 5px; justify-content: center; font-size: 14px; padding: 5px; }
+#subscriberBox .content { display: flex; align-items: center; gap: 5px; justify-content: center; font-size: 14px; padding: 5px; font-family: "MS Sans Serif"; }
 
 /* Timer window */
 #timerBox { position: fixed; top: 10px; left: 10px; width: 200px; z-index: 10; }
-#timerBox .content { padding:5px; display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; }
+#timerBox .content { padding:5px; display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; font-family: "MS Sans Serif"; }
 #timerBox .buttons-row { display:flex; gap:5px; justify-content:center; }
 
 /* Minesweeper dialog */
-#minesweeperDialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; display:none; z-index:20; }
+#minesweeperDialog { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 220px; display:none; z-index:20; font-family: "MS Sans Serif";}
 #minesweeperDialog .title-bar { font-size:12px; }
 #minesweeperDialog .content { display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:18px; color:red; }
 </style>
@@ -111,7 +114,10 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
 </div>
 
 <!-- Start bar -->
-<div id="startBar"><div id="clock"></div><button id="bottomStartBtn">Start</button></div>
+<div id="startBar">
+  <button id="bottomStartBtn">Start</button>
+  <div id="clock"></div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -123,40 +129,34 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const wordsCollection = collection(db,"words");
 
-// DOM elements
+// DOM
 const input=document.getElementById("wordInput"), list=document.getElementById("wordList"), counter=document.getElementById("counter"), message=document.getElementById("message");
 const subscriberCountDiv=document.getElementById("subscriberCount"), progressBar=document.getElementById("progressBar"), clearWordsBtn=document.getElementById("clearWordsBtn");
 const elapsedSpan=document.getElementById("elapsed"), wpmSpan=document.getElementById("wpm"), etaSpan=document.getElementById("eta");
 const startBtn=document.getElementById("startBtn"), pauseBtn=document.getElementById("pauseBtn"), resetBtn=document.getElementById("resetBtn");
 const bottomStartBtn=document.getElementById("bottomStartBtn"), minesDialog=document.getElementById("minesweeperDialog");
+const timerBox=document.getElementById("timerBox");
 
 let words=new Set(), subscriberCount=0, timer=null, elapsed=0, running=false;
 
-// Clock in start bar
-function updateClock(){ const now=new Date(); let hours=now.getHours(); const ampm=hours>=12?"PM":"AM"; hours=hours%12||12; const mins=String(now.getMinutes()).padStart(2,'0'); const secs=String(now.getSeconds()).padStart(2,'0'); document.getElementById("clock").textContent=`${hours}:${mins}:${secs} ${ampm}`;}
+// Clock
+function updateClock(){ const now=new Date(); let h=now.getHours(); const ampm=h>=12?"PM":"AM"; h=h%12||12; const m=String(now.getMinutes()).padStart(2,'0'); const s=String(now.getSeconds()).padStart(2,'0'); document.getElementById("clock").textContent=`${h}:${m}:${s} ${ampm}`;}
 setInterval(updateClock,1000); updateClock();
 
-// Timer functions
-function updateTimerDisplay(){
-  elapsedSpan.textContent=elapsed.toFixed(2);
-  const wpm=elapsed>0? (words.size/(elapsed/60)):0;
-  wpmSpan.textContent=wpm.toFixed(2);
-  const etaSecs=wpm>0?(subscriberCount-words.size)/wpm*60:0;
-  const d=Math.floor(etaSecs/86400), h=Math.floor((etaSecs%86400)/3600), m=Math.floor((etaSecs%3600)/60);
-  etaSpan.textContent=`${d}d ${h}h ${m}m`;
-}
-startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{elapsed+=0.1; updateTimerDisplay();},100);}}
+// Timer
+function updateTimerDisplay(){ elapsedSpan.textContent=elapsed.toFixed(2); const wpm=elapsed>0? (words.size/(elapsed/60)):0; wpmSpan.textContent=wpm.toFixed(2); const etaSecs=wpm>0?(subscriberCount-words.size)/wpm*60:0; const d=Math.floor(etaSecs/86400), h=Math.floor((etaSecs%86400)/3600), m=Math.floor((etaSecs%3600)/60); etaSpan.textContent=`${d}d ${h}h ${m}m`; }
+startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{elapsed+=0.1; updateTimerDisplay();},100); }}
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
-resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay();}
+resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
 
-// Bottom Start button opens minesweeper dialog
+// Bottom Start opens minesweeper dialog
 bottomStartBtn.onclick=function(){ minesDialog.style.display='block'; }
 
-// Fetch words from Firestore
-async function fetchWords(){ words.clear(); const snapshot=await getDocs(wordsCollection); snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); updateDisplay();}
+// Fetch words
+async function fetchWords(){ words.clear(); const snapshot=await getDocs(wordsCollection); snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); updateDisplay(); }
 
 // Add word
-async function addWord(){ const newWord=input.value.trim().toLowerCase(); message.textContent=""; if(!newWord) return; if(words.has(newWord)){message.textContent="Duplicate!";} else { try{await setDoc(doc(db,"words",newWord),{createdAt:serverTimestamp()}); words.add(newWord); updateDisplay();} catch(e){console.error(e); message.textContent="Error adding word.";} } input.value=""; input.focus(); updateTimerDisplay();}
+async function addWord(){ const newWord=input.value.trim().toLowerCase(); message.textContent=""; if(!newWord) return; if(words.has(newWord)){message.textContent="Duplicate!";} else { try{await setDoc(doc(db,"words",newWord),{createdAt:serverTimestamp()}); words.add(newWord); updateDisplay(); updateTimerDisplay();} catch(e){console.error(e); message.textContent="Error adding word.";} } input.value=""; input.focus(); }
 
 // Clear all words (password-protected)
 clearWordsBtn.addEventListener("click", async()=>{ const password=prompt("Password:"); if(password!=="anuspass"){alert("Incorrect password."); return;} const snapshot=await getDocs(wordsCollection); const batch=writeBatch(db); snapshot.forEach(docSnap=>batch.delete(docSnap.ref)); await batch.commit(); words.clear(); updateDisplay(); updateTimerDisplay(); alert("All words cleared!");})
@@ -164,31 +164,26 @@ clearWordsBtn.addEventListener("click", async()=>{ const password=prompt("Passwo
 // Enter key
 input.addEventListener("keypress",function(e){if(e.key==="Enter") addWord();});
 
-// Update display and progress
+// Update display & progress
 function updateDisplay(){
   counter.textContent=`${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML="";
-  [...words].reverse().forEach(word=>{const li=document.createElement("li"); li.textContent=word; list.appendChild(li);});
-  const totalPixels=Math.floor(progressBar.clientWidth/5);
-  let progress=subscriberCount>0? words.size/subscriberCount:0; if(progress>1) progress=1;
+  [...words].reverse().forEach(word=>{ const li=document.createElement("li"); li.textContent=word; list.appendChild(li); });
+  const totalPixels=Math.floor(progressBar.clientWidth/5); let progress=subscriberCount>0? words.size/subscriberCount:0; if(progress>1) progress=1;
   progressBar.innerHTML="";
-  const filledPixels=Math.floor(totalPixels*progress);
-  for(let i=0;i<filledPixels;i++){ const pixel=document.createElement("div"); pixel.className="pixel"; progressBar.appendChild(pixel);}
+  const filledPixels=Math.floor(totalPixels*progress); for(let i=0;i<filledPixels;i++){ const pixel=document.createElement("div"); pixel.className="pixel"; progressBar.appendChild(pixel);}
   const textNode=document.createElement("span"); textNode.style.position="absolute"; textNode.style.left="50%"; textNode.style.transform="translateX(-50%)"; textNode.style.fontWeight="bold"; textNode.style.color="black"; textNode.textContent=(progress*100).toFixed(2)+"%"; progressBar.appendChild(textNode);
 }
 
 // Fetch YouTube subscribers
 async function fetchSubscribers(){
   const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; const channelId="UCL6OtB3m-gQ2mgRg61-aDXw";
-  try{
-    const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`);
-    const data=await res.json();
-    if(data.items&&data.items.length>0){ subscriberCount=parseInt(data.items[0].statistics.subscriberCount); subscriberCountDiv.textContent=subscriberCount.toLocaleString(); updateDisplay(); }
-    else subscriberCountDiv.textContent="Subscriber data not found.";
-  }catch(e){subscriberCountDiv.textContent="Error loading subscribers."; console.error(e);}
+  try{ const res=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`);
+    const data=await res.json(); if(data.items&&data.items.length>0){ subscriberCount=parseInt(data.items[0].statistics.subscriberCount); subscriberCountDiv.textContent=subscriberCount.toLocaleString(); updateDisplay(); } else subscriberCountDiv.textContent="Subscriber data not found.";
+  } catch(e){ subscriberCountDiv.textContent="Error loading subscribers."; console.error(e);}
 }
 
-// Initialize
+// Init
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
 </script>
 </body>
