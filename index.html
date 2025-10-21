@@ -106,7 +106,7 @@ const input = document.getElementById("wordInput");
 // --------------------
 async function fetchSubscribers(){
   try{
-    const apiKey = "YOUR_YOUTUBE_API_KEY";
+    const apiKey = "AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw";
     const channelId = "UCL6OtB3m-gQ2mgRg61-aDXw";
     const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`);
     const data = await res.json();
