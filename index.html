@@ -203,22 +203,35 @@ async function fetchWords() {
   updateDisplay();
 }
 
-// Add word to Firestore
-async function addWordFirestore(word) {
-  const lowerWord = word.toLowerCase();
-  if (words.has(lowerWord)) return false;
-  try {
-    await setDoc(doc(db, "words", lowerWord), { createdAt: serverTimestamp() });
-    words.add(lowerWord);
-    updateDisplay();
-    return true;
-  } catch (err) {
-    console.error(err);
-    return false;
+// Add word to Firestore and update display
+async function addWord() {
+  const newWord = input.value.trim().toLowerCase();
+  message.textContent = "";
+  if (!newWord) return;
+
+  if (words.has(newWord)) {
+    message.textContent = "Duplicate! That word has already been entered.";
+  } else {
+    try {
+      // Add to Firestore
+      await setDoc(doc(db, "words", newWord), { createdAt: serverTimestamp() });
+
+      // Add to local set
+      words.add(newWord);
+
+      // Update UI
+      updateDisplay();
+    } catch (err) {
+      console.error(err);
+      message.textContent = "Error adding word.";
+    }
   }
+
+  input.value = "";
+  input.focus();
 }
 
-// Clear all words
+// Clear all words (password protected)
 async function clearWordsFirestore() {
   const password = prompt("Enter password to clear all words:");
   if (password !== "anuspass") { alert("Incorrect password."); return; }
@@ -228,20 +241,6 @@ async function clearWordsFirestore() {
   await batch.commit();
   words.clear();
   updateDisplay();
-}
-
-// Add word with Enter
-async function addWord() {
-  const newWord = input.value.trim().toLowerCase();
-  message.textContent = "";
-  if (!newWord) return;
-  if (words.has(newWord)) {
-    message.textContent = "Duplicate! That word has already been entered.";
-  } else {
-    await addWordFirestore(newWord);
-  }
-  input.value = "";
-  input.focus();
 }
 
 input.addEventListener("keypress", function(e) {
@@ -287,7 +286,6 @@ async function fetchSubscribers() {
 fetchWords();
 fetchSubscribers();
 setInterval(fetchSubscribers, 30000);
-
 </script>
 </body>
 </html>
