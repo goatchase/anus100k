@@ -3,94 +3,134 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>100,000 Words Challenge</title>
+<title>Word vs Subscribers Challenge</title>
 <style>
+  /* Windows 97 style */
   body {
-    font-family: Arial, sans-serif;
-    background: #fafafa;
-    color: #333;
-    text-align: center;
+    font-family: "MS Sans Serif", Tahoma, sans-serif;
+    background: #008080;
+    color: black;
     margin: 40px;
+    text-align: center;
   }
-  h1 {
-    font-size: 2em;
-    margin-bottom: 10px;
+  .window {
+    border: 2px solid #000;
+    background: #c0c0c0;
+    padding: 10px;
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    box-shadow: 5px 5px #808080;
+  }
+  h1, h2 {
+    font-weight: normal;
   }
   input {
-    padding: 10px;
-    font-size: 16px;
-    width: 250px;
+    padding: 4px;
+    font-size: 14px;
+    width: 200px;
+    border: 2px inset #fff;
+    margin-right: 5px;
   }
   button {
-    padding: 10px 15px;
-    font-size: 16px;
-    margin-left: 5px;
+    padding: 4px 8px;
+    font-size: 14px;
+    border: 2px outset #fff;
     cursor: pointer;
+    margin: 2px;
   }
   #counter {
-    margin: 15px 0;
-    font-size: 18px;
+    margin: 10px 0;
     font-weight: bold;
   }
   #subscriberCount {
-    font-size: 20px;
     font-weight: bold;
-    margin-top: 20px;
+    margin: 10px 0;
   }
   #message {
     color: red;
-    margin-top: 10px;
     font-weight: bold;
+    margin-top: 5px;
   }
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 20px;
-    max-height: 400px;
+  #wordList {
+    max-height: 200px;
     overflow-y: scroll;
-    border: 1px solid #ccc;
-    background: #fff;
+    background: white;
+    border: 2px inset #fff;
+    margin-top: 10px;
+    padding: 5px;
+    list-style: none;
   }
   li {
-    padding: 6px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #808080;
+    padding: 2px;
+  }
+  /* Progress bar container */
+  .progress-container {
+    background: #fff;
+    border: 2px inset #fff;
+    width: 80%;
+    max-width: 500px;
+    height: 20px;
+    margin: 10px auto;
+  }
+  .progress-bar {
+    background: #000080;
+    height: 100%;
+    width: 0%;
+    text-align: center;
+    color: white;
+    font-size: 12px;
+    line-height: 20px;
   }
 </style>
 </head>
 <body>
 
-<h1>100,000 Words Challenge</h1>
-<p>Enter unique words — no duplicates allowed!</p>
+<div class="window">
+  <h1>Word vs Subscribers Challenge</h1>
+  <p>Enter unique words — try to beat the subscriber count of "A New Untold Story"!</p>
 
-<input id="wordInput" type="text" placeholder="Enter a word..." />
-<button onclick="addWord()">Add</button>
-<button onclick="clearWords()">Clear All Words</button>
+  <input id="wordInput" type="text" placeholder="Enter a word..." />
+  <button onclick="addWord()">Add</button>
+  <button onclick="clearWords()">Clear All Words</button>
 
-<div id="counter">Words added: 0 / 100,000</div>
-<div id="message"></div>
+  <div id="counter">Words added: 0 / 0</div>
+  <div class="progress-container">
+    <div id="progressBar" class="progress-bar">0%</div>
+  </div>
+  <div id="message"></div>
 
-<h2>Subscriber Tracker for "A New Untold Story"</h2>
-<div id="subscriberCount">Loading subscribers...</div>
+  <h2>Subscriber Tracker</h2>
+  <div id="subscriberCount">Loading subscribers...</div>
 
-<ul id="wordList"></ul>
+  <ul id="wordList"></ul>
+</div>
 
 <script>
-  // --- Word tracking setup ---
   let words = new Set(JSON.parse(localStorage.getItem("words") || "[]"));
   const input = document.getElementById("wordInput");
   const list = document.getElementById("wordList");
   const counter = document.getElementById("counter");
   const message = document.getElementById("message");
-  const subscriberCount = document.getElementById("subscriberCount");
+  const subscriberCountDiv = document.getElementById("subscriberCount");
+  const progressBar = document.getElementById("progressBar");
+
+  let subscriberCount = 0;
 
   function updateDisplay() {
-    counter.textContent = `Words added: ${words.size.toLocaleString()} / 100,000`;
+    counter.textContent = `Words added: ${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
     list.innerHTML = "";
     [...words].forEach(word => {
       const li = document.createElement("li");
       li.textContent = word;
       list.appendChild(li);
     });
+    // Update progress bar
+    let progress = subscriberCount > 0 ? (words.size / subscriberCount) * 100 : 0;
+    if (progress > 100) progress = 100;
+    progressBar.style.width = progress + "%";
+    progressBar.textContent = Math.floor(progress) + "%";
   }
 
   function addWord() {
@@ -108,7 +148,6 @@
     input.focus();
   }
 
-  // --- Password-protected clear ---
   function clearWords() {
     const password = prompt("Enter password to clear all words:");
     if (password === "anuspass") {
@@ -120,10 +159,9 @@
     }
   }
 
-  // --- YouTube subscriber tracker ---
   async function fetchSubscribers() {
     const apiKey = "AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; // Your API Key
-    const channelId = "UCL6OtB3m-gQ2mgRg61-aDXw"; // Correct Channel ID
+    const channelId = "UCL6OtB3m-gQ2mgRg61-aDXw"; // Correct channel ID
 
     try {
       const response = await fetch(
@@ -131,13 +169,14 @@
       );
       const data = await response.json();
       if (data.items && data.items.length > 0) {
-        const subs = data.items[0].statistics.subscriberCount;
-        subscriberCount.textContent = `Subscribers: ${parseInt(subs).toLocaleString()}`;
+        subscriberCount = parseInt(data.items[0].statistics.subscriberCount);
+        subscriberCountDiv.textContent = `Subscribers: ${subscriberCount.toLocaleString()}`;
+        updateDisplay();
       } else {
-        subscriberCount.textContent = "Subscriber data not found.";
+        subscriberCountDiv.textContent = "Subscriber data not found.";
       }
     } catch (error) {
-      subscriberCount.textContent = "Error loading subscriber count.";
+      subscriberCountDiv.textContent = "Error loading subscriber count.";
       console.error(error);
     }
   }
@@ -145,7 +184,7 @@
   // Auto-refresh subscriber count every 30 seconds
   setInterval(fetchSubscribers, 30000);
 
-  // Initialize page
+  // Initialize
   updateDisplay();
   fetchSubscribers();
 </script>
