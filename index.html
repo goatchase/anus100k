@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anus Words v. Subs</title>
 <style>
+/* Windows 95/97 styling */
 body {
   font-family: "MS Sans Serif", Tahoma, sans-serif;
   background: #008080;
   color: black;
   margin: 0;
-  padding-bottom: 40px; /* leave space for Start bar */
+  padding-bottom: 40px; /* space for Start bar */
   text-align: center;
 }
 
@@ -26,10 +27,10 @@ body {
   border-bottom: 2px solid #000 outset;
   display: flex;
   align-items: center;
-  padding-left: 5px;
+  padding: 0 5px;
   box-sizing: border-box;
+  justify-content: space-between;
 }
-
 #startBar button {
   font-family: "MS Sans Serif";
   font-weight: bold;
@@ -38,57 +39,12 @@ body {
   background: #c0c0c0;
   cursor: pointer;
 }
-
-/* Subscriber tracker mini-window */
-#subscriberBox {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  width: 200px;
-  border: 2px solid #000;
-  box-shadow: 4px 4px #808080;
-  background: #c0c0c0;
-  z-index: 10;
-}
-
-#subscriberBox .title-bar {
-  background: #000080;
-  color: white;
-  padding: 2px 5px;
-  font-weight: bold;
+#clock {
   font-size: 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-#subscriberBox .title-bar button {
-  width: 18px;
-  height: 16px;
   font-weight: bold;
-  font-family: "MS Sans Serif";
-  border: 2px outset #fff;
-  background: #c0c0c0;
-  cursor: pointer;
 }
 
-#subscriberBox .content {
-  padding: 5px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  justify-content: center;
-}
-
-#subscriberBox svg {
-  width: 20px;
-  height: 14px;
-  fill: red;
-  cursor: pointer;
-}
-
-/* Main window */
+/* Dialog windows */
 .window {
   width: 600px;
   max-width: 90%;
@@ -96,10 +52,8 @@ body {
   border: 2px solid #000;
   box-shadow: 4px 4px #808080;
   background: #c0c0c0;
-  z-index: 1;
   position: relative;
 }
-
 .title-bar {
   background: #000080;
   color: white;
@@ -110,7 +64,6 @@ body {
   justify-content: space-between;
   align-items: center;
 }
-
 .title-bar button {
   width: 20px;
   height: 18px;
@@ -120,12 +73,10 @@ body {
   background: #c0c0c0;
   cursor: pointer;
 }
-
 .content {
   padding: 10px;
   background: #c0c0c0;
 }
-
 input#wordInput {
   padding: 4px;
   font-size: 14px;
@@ -134,19 +85,8 @@ input#wordInput {
   border: 2px inset #fff;
   box-sizing: border-box;
 }
-
-#counter {
-  margin: 10px 0;
-  font-weight: bold;
-  font-size: 16px;
-}
-
-#message {
-  color: red;
-  font-weight: bold;
-  margin-top: 5px;
-}
-
+#counter { margin: 10px 0; font-weight: bold; font-size: 16px; }
+#message { color: red; font-weight: bold; margin-top: 5px; }
 #wordList {
   max-height: 250px;
   overflow-y: auto;
@@ -157,13 +97,9 @@ input#wordInput {
   list-style: none;
   font-family: "MS Sans Serif";
 }
+li { border-bottom: 1px solid #808080; padding: 2px; }
 
-li {
-  border-bottom: 1px solid #808080;
-  padding: 2px;
-}
-
-/* Windows 95 style progress bar */
+/* Progress bar */
 .progress-container {
   background: #c0c0c0;
   border: 2px solid #fff inset;
@@ -176,7 +112,6 @@ li {
   align-items: center;
   position: relative;
 }
-
 .progress-bar {
   background: #000080;
   height: 100%;
@@ -188,26 +123,52 @@ li {
   overflow: hidden;
   position: relative;
 }
+.pixel { width: 4px; height: 100%; background: #000080; margin-right: 1px; }
 
-.pixel {
-  width: 4px;
-  height: 100%;
-  background: #000080;
-  margin-right: 1px;
+/* Subscriber tracker */
+#subscriberBox {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  width: 200px;
+  border: 2px solid #000;
+  box-shadow: 4px 4px #808080;
+  background: #c0c0c0;
+  z-index: 10;
 }
+#subscriberBox .title-bar {
+  background: #000080;
+  color: white;
+  padding: 2px 5px;
+  font-weight: bold;
+  font-size: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#subscriberBox .title-bar button {
+  width: 18px;
+  height: 16px;
+  font-weight: bold;
+  font-family: "MS Sans Serif";
+  border: 2px outset #fff;
+  background: #c0c0c0;
+  cursor: pointer;
+}
+#subscriberBox .content { padding: 5px; font-size: 14px; display: flex; align-items: center; gap: 5px; justify-content: center; }
+#subscriberBox svg { width: 20px; height: 14px; fill: red; cursor: pointer; }
 
 /* Timer window */
 #timerBox {
   position: fixed;
   top: 10px;
   left: 10px;
-  width: 220px;
+  width: 200px;
   border: 2px solid #000;
   box-shadow: 4px 4px #808080;
   background: #c0c0c0;
   z-index: 10;
 }
-
 #timerBox .title-bar {
   background: #000080;
   color: white;
@@ -218,33 +179,20 @@ li {
   justify-content: space-between;
   align-items: center;
 }
+#timerBox .title-bar button { width: 18px; height: 16px; font-weight: bold; font-family: "MS Sans Serif"; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
+#timerBox .content { padding: 5px; font-size: 14px; display: flex; flex-direction: column; gap: 5px; align-items: center; }
 
-#timerBox .title-bar button {
-  width: 18px;
-  height: 16px;
+/* Fuck No Baby animation */
+#fuckNoBaby {
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
   font-weight: bold;
-  font-family: "MS Sans Serif";
-  border: 2px outset #fff;
-  background: #c0c0c0;
-  cursor: pointer;
-}
-
-#timerBox .content {
-  padding: 5px;
-  font-size: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  align-items: center;
-}
-
-#timerBox button {
-  font-family: "MS Sans Serif";
-  font-weight: bold;
-  padding: 2px 6px;
-  border: 2px outset #fff;
-  background: #c0c0c0;
-  cursor: pointer;
+  color: red;
+  display: none;
+  z-index: 1000;
 }
 </style>
 </head>
@@ -254,7 +202,7 @@ li {
 <div id="subscriberBox">
   <div class="title-bar">
     <span>Subscribers</span>
-    <button onclick="window.open('https://www.youtube.com/@ANewUntoldStory', '_blank')">X</button>
+    <button onclick="window.open('https://www.youtube.com/@ANewUntoldStory','_blank')">X</button>
   </div>
   <div class="content">
     <svg viewBox="0 0 24 24"><path d="M23.498 6.186a2.964 2.964 0 0 0-2.086-2.086C19.68 3.5 12 3.5 12 3.5s-7.68 0-9.412.6A2.964 2.964 0 0 0 .502 6.186 31.523 31.523 0 0 0 0 12a31.523 31.523 0 0 0 .502 5.814 2.964 2.964 0 0 0 2.086 2.086C4.32 20.5 12 20.5 12 20.5s7.68 0 9.412-.6a2.964 2.964 0 0 0 2.086-2.086A31.523 31.523 0 0 0 24 12a31.523 31.523 0 0 0-.502-5.814zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/></svg>
@@ -266,15 +214,15 @@ li {
 <div id="timerBox">
   <div class="title-bar">
     <span>Timer</span>
+    <button onclick="timerBox.style.display='none'">X</button>
   </div>
   <div class="content">
-    <div id="timerDisplay">00:00:00</div>
-    <div id="statsDisplay">WPM: 0 | ETA: 00:00:00</div>
-    <div>
-      <button onclick="startTimer()">Start</button>
-      <button onclick="pauseTimer()">Pause</button>
-      <button onclick="resetTimer()">Reset</button>
-    </div>
+    <div>Time: <span id="elapsed">0.00</span> s</div>
+    <div>WPM: <span id="wpm">0</span></div>
+    <div>ETA: <span id="eta">0</span> s</div>
+    <button id="startBtn">Start</button>
+    <button id="pauseBtn">Pause</button>
+    <button id="resetBtn">Reset</button>
   </div>
 </div>
 
@@ -296,9 +244,13 @@ li {
   <div id="progressBar" class="progress-bar"></div>
 </div>
 
+<!-- Fuck No Baby animation -->
+<div id="fuckNoBaby">FUCK NO BABY</div>
+
 <!-- Start bar -->
 <div id="startBar">
   <button>Start</button>
+  <div id="clock"></div>
 </div>
 
 <script type="module">
@@ -315,11 +267,11 @@ const firebaseConfig = {
   appId: "1:15328801675:web:4b52ea27902c27fcfeb58e",
   measurementId: "G-MY6LCMKMX5"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const wordsCollection = collection(db, "words");
 
+// DOM elements
 const input = document.getElementById("wordInput");
 const list = document.getElementById("wordList");
 const counter = document.getElementById("counter");
@@ -327,19 +279,29 @@ const message = document.getElementById("message");
 const subscriberCountDiv = document.getElementById("subscriberCount");
 const progressBar = document.getElementById("progressBar");
 const clearWordsBtn = document.getElementById("clearWordsBtn");
+const timerBox = document.getElementById("timerBox");
+const elapsedSpan = document.getElementById("elapsed");
+const wpmSpan = document.getElementById("wpm");
+const etaSpan = document.getElementById("eta");
+const startBtn = document.getElementById("startBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const resetBtn = document.getElementById("resetBtn");
+const fuckNoBaby = document.getElementById("fuckNoBaby");
 
+// State
 let words = new Set();
 let subscriberCount = 0;
+let timer = null;
+let elapsed = 0;
+let running = false;
 
-// Fetch words from Firestore
+// --- Firebase words ---
 async function fetchWords() {
   words.clear();
   const snapshot = await getDocs(wordsCollection);
   snapshot.forEach(docSnap => words.add(docSnap.id.toLowerCase()));
   updateDisplay();
 }
-
-// Add word to Firestore
 async function addWord() {
   const newWord = input.value.trim().toLowerCase();
   message.textContent = "";
@@ -352,18 +314,14 @@ async function addWord() {
       await setDoc(doc(db, "words", newWord), { createdAt: serverTimestamp() });
       words.add(newWord);
       updateDisplay();
-      updateTimerDisplay(); // update WPM/ETA
     } catch (err) {
       console.error(err);
       message.textContent = "Error adding word.";
     }
   }
-
   input.value = "";
   input.focus();
 }
-
-// Clear all words (password-protected)
 clearWordsBtn.addEventListener("click", async () => {
   const password = prompt("Enter password to clear all words:");
   if (password !== "anuspass") { alert("Incorrect password."); return; }
@@ -374,115 +332,94 @@ clearWordsBtn.addEventListener("click", async () => {
     await batch.commit();
     words.clear();
     updateDisplay();
-    updateTimerDisplay();
     alert("All words cleared!");
-  } catch (err) {
-    console.error(err);
-    alert("Error clearing words.");
-  }
+  } catch (err) { console.error(err); alert("Error clearing words."); }
 });
+input.addEventListener("keypress", function(e){ if(e.key==="Enter") addWord(); });
 
-input.addEventListener("keypress", function(e) {
-  if (e.key === "Enter") addWord();
-});
-
-// Update display & progress
+// --- Display & Progress ---
 function updateDisplay() {
   counter.textContent = `${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML = "";
-  [...words].reverse().forEach(word => {
-    const li = document.createElement("li");
-    li.textContent = word;
+  [...words].reverse().forEach(word=>{
+    const li=document.createElement("li");
+    li.textContent=word;
     list.appendChild(li);
   });
 
-  // Windows 95 style pixel progress bar
+  // Windows 95 style progress bar
   const totalPixels = Math.floor(progressBar.clientWidth / 5);
-  let progress = subscriberCount > 0 ? words.size / subscriberCount : 0;
-  if (progress > 1) progress = 1;
-  progressBar.innerHTML = "";
-  const filledPixels = Math.floor(totalPixels * progress);
-  for (let i = 0; i < filledPixels; i++) {
-    const pixel = document.createElement("div");
-    pixel.className = "pixel";
+  let progress = subscriberCount>0?words.size/subscriberCount:0;
+  if(progress>1) progress=1;
+  progressBar.innerHTML="";
+  const filledPixels=Math.floor(totalPixels*progress);
+  for(let i=0;i<filledPixels;i++){
+    const pixel=document.createElement("div");
+    pixel.className="pixel";
     progressBar.appendChild(pixel);
   }
-  const percentText = (progress * 100).toFixed(2) + "%";
-  const textNode = document.createElement("span");
-  textNode.style.position = "absolute";
-  textNode.style.left = "50%";
-  textNode.style.transform = "translateX(-50%)";
-  textNode.style.fontWeight = "bold";
-  textNode.style.color = "black";
-  textNode.textContent = percentText;
+  const percentText=(progress*100).toFixed(2)+"%";
+  const textNode=document.createElement("span");
+  textNode.style.position="absolute";
+  textNode.style.left="50%";
+  textNode.style.transform="translateX(-50%)";
+  textNode.style.fontWeight="bold";
+  textNode.style.color="black";
+  textNode.textContent=percentText;
   progressBar.appendChild(textNode);
 }
 
-// Fetch YouTube subscribers
+// --- YouTube Subscriber Tracker ---
 async function fetchSubscribers() {
-  const apiKey = "AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw";
-  const channelId = "UCL6OtB3m-gQ2mgRg61-aDXw";
-  try {
-    const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`
-    );
-    const data = await response.json();
-    if (data.items && data.items.length > 0) {
-      subscriberCount = parseInt(data.items[0].statistics.subscriberCount);
-      subscriberCountDiv.textContent = subscriberCount.toLocaleString();
+  const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw";
+  const channelId="UCL6OtB3m-gQ2mgRg61-aDXw";
+  try{
+    const response=await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`);
+    const data=await response.json();
+    if(data.items && data.items.length>0){
+      subscriberCount=parseInt(data.items[0].statistics.subscriberCount);
+      subscriberCountDiv.textContent=subscriberCount.toLocaleString();
       updateDisplay();
-    } else subscriberCountDiv.textContent = "Subscriber data not found.";
-  } catch (error) {
-    subscriberCountDiv.textContent = "Error loading subscriber count.";
-    console.error(error);
-  }
+    } else subscriberCountDiv.textContent="Subscriber data not found.";
+  } catch(e){ subscriberCountDiv.textContent="Error loading subscriber count."; console.error(e); }
 }
-
-// Timer variables
-let timerInterval = null;
-let elapsed = 0;
-
-function formatTime(sec) {
-  const h = String(Math.floor(sec / 3600)).padStart(2, '0');
-  const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
-  const s = String(sec % 60).padStart(2, '0');
-  return `${h}:${m}:${s}`;
-}
-
-function updateTimerDisplay() {
-  document.getElementById("timerDisplay").textContent = formatTime(elapsed);
-  const wpm = elapsed > 0 ? ((words.size / elapsed) * 60).toFixed(2) : 0;
-  let etaSec = 0;
-  if (wpm > 0 && subscriberCount > words.size) {
-    etaSec = Math.round((subscriberCount - words.size) / (words.size / elapsed));
-  }
-  document.getElementById("statsDisplay").textContent = `WPM: ${wpm} | ETA: ${formatTime(etaSec)}`;
-}
-
-// Timer controls
-window.startTimer = function() {
-  if (timerInterval) return;
-  timerInterval = setInterval(() => {
-    elapsed++;
-    updateTimerDisplay();
-  }, 1000);
-};
-
-window.pauseTimer = function() {
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = null;
-};
-
-window.resetTimer = function() {
-  pauseTimer();
-  elapsed = 0;
-  updateTimerDisplay();
-};
-
-// Initialize
 fetchWords();
 fetchSubscribers();
-setInterval(fetchSubscribers, 30000);
+setInterval(fetchSubscribers,30000);
+
+// --- Timer functionality ---
+function startTimer(){
+  if(running) return;
+  running=true;
+  fuckNoBaby.style.display="block";
+  setTimeout(()=>fuckNoBaby.style.display="none",2000);
+  timer=setInterval(()=>{
+    elapsed+=0.1;
+    elapsedSpan.textContent=elapsed.toFixed(2);
+    const wpm=(elapsed>0?words.size/(elapsed/60):0).toFixed(2);
+    wpmSpan.textContent=wpm;
+    const eta=(wpm>0?((subscriberCount-words.size)/wpm)*60:0).toFixed(2);
+    etaSpan.textContent=eta;
+  },100);
+}
+function pauseTimer(){ running=false; clearInterval(timer); }
+function resetTimer(){ running=false; clearInterval(timer); elapsed=0; elapsedSpan.textContent="0.00"; wpmSpan.textContent="0"; etaSpan.textContent="0"; }
+
+// Event listeners
+startBtn.addEventListener("click",startTimer);
+pauseBtn.addEventListener("click",pauseTimer);
+resetBtn.addEventListener("click",resetTimer);
+
+// --- Clock in Start bar ---
+function updateClock(){
+  const now=new Date();
+  const h=now.getHours().toString().padStart(2,"0");
+  const m=now.getMinutes().toString().padStart(2,"0");
+  const s=now.getSeconds().toString().padStart(2,"0");
+  document.getElementById("clock").textContent=`${h}:${m}:${s}`;
+}
+setInterval(updateClock,1000);
+updateClock();
 </script>
 </body>
 </html>
