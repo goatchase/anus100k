@@ -39,7 +39,7 @@
 
   /* Window container */
   .window {
-    width: 500px;
+    width: 600px;
     max-width: 90%;
     margin: 60px auto 20px;
     border: 2px solid #000;
@@ -76,7 +76,7 @@
   input#wordInput {
     padding: 4px;
     font-size: 14px;
-    width: 400px;
+    width: 500px;
     border: 2px inset #fff;
     margin-right: 5px;
   }
@@ -102,7 +102,7 @@
   }
 
   #wordList {
-    max-height: 200px;
+    max-height: 250px;
     overflow-y: auto;
     background: #fff;
     border: 2px inset #fff;
@@ -120,7 +120,7 @@
   .progress-container {
     background: #fff;
     border: 2px inset #fff;
-    width: 500px;
+    width: 600px;
     max-width: 90%;
     height: 20px;
     margin: 10px auto 40px;
@@ -168,9 +168,9 @@
 <!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDocs, collection, deleteDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Your Firebase config
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyC8Z5Lx8W8RHYhsIGOb-yLVsv5Ufv50ULM",
   authDomain: "anus-words.firebaseapp.com",
@@ -181,7 +181,6 @@ const firebaseConfig = {
   measurementId: "G-MY6LCMKMX5"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const wordsCollection = collection(db, "words");
@@ -196,19 +195,21 @@ const progressBar = document.getElementById("progressBar");
 let words = new Set();
 let subscriberCount = 0;
 
-// Firestore functions
+// Fetch words from Firestore
 async function fetchWords() {
   words.clear();
   const snapshot = await getDocs(wordsCollection);
-  snapshot.forEach(docSnap => words.add(docSnap.id));
+  snapshot.forEach(docSnap => words.add(docSnap.id.toLowerCase()));
   updateDisplay();
 }
 
+// Add word to Firestore
 async function addWordFirestore(word) {
-  if (words.has(word)) return false;
+  const lowerWord = word.toLowerCase();
+  if (words.has(lowerWord)) return false;
   try {
-    await setDoc(doc(db, "words", word), { createdAt: serverTimestamp() });
-    words.add(word);
+    await setDoc(doc(db, "words", lowerWord), { createdAt: serverTimestamp() });
+    words.add(lowerWord);
     updateDisplay();
     return true;
   } catch (err) {
@@ -217,6 +218,7 @@ async function addWordFirestore(word) {
   }
 }
 
+// Clear all words
 async function clearWordsFirestore() {
   const password = prompt("Enter password to clear all words:");
   if (password !== "anuspass") { alert("Incorrect password."); return; }
@@ -228,13 +230,15 @@ async function clearWordsFirestore() {
   updateDisplay();
 }
 
-// Word handling
+// Add word with Enter
 async function addWord() {
   const newWord = input.value.trim().toLowerCase();
   message.textContent = "";
   if (!newWord) return;
-  if (!(await addWordFirestore(newWord))) {
+  if (words.has(newWord)) {
     message.textContent = "Duplicate! That word has already been entered.";
+  } else {
+    await addWordFirestore(newWord);
   }
   input.value = "";
   input.focus();
@@ -244,7 +248,7 @@ input.addEventListener("keypress", function(e) {
   if (e.key === "Enter") addWord();
 });
 
-// Progress bar and display
+// Update display & progress
 function updateDisplay() {
   counter.textContent = `Words added: ${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML = "";
@@ -279,6 +283,7 @@ async function fetchSubscribers() {
   }
 }
 
+// Initialize
 fetchWords();
 fetchSubscribers();
 setInterval(fetchSubscribers, 30000);
