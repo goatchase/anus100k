@@ -133,25 +133,35 @@ li {
   padding: 2px;
 }
 
+/* Windows 95 style progress bar */
 .progress-container {
-  background: #fff;
-  border: 2px inset #fff;
+  background: #c0c0c0;
+  border: 2px solid #fff inset;
   width: 600px;
   max-width: 90%;
   height: 20px;
   margin: 10px auto 40px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
 }
 
 .progress-bar {
   background: #000080;
   height: 100%;
-  width: 0%;
-  text-align: center;
-  color: black;
+  display: flex;
+  align-items: center;
   font-size: 12px;
-  line-height: 20px;
-  white-space: nowrap;
-  overflow: visible;
+  font-weight: bold;
+  color: black;
+  overflow: hidden;
+}
+
+.pixel {
+  width: 4px;
+  height: 100%;
+  background: #000080;
+  margin-right: 1px;
 }
 </style>
 </head>
@@ -184,10 +194,9 @@ li {
 </div>
 
 <div class="progress-container">
-  <div id="progressBar" class="progress-bar">0.00%</div>
+  <div id="progressBar" class="progress-bar"></div>
 </div>
 
-<!-- Firebase SDKs -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -273,10 +282,27 @@ function updateDisplay() {
     li.textContent = word;
     list.appendChild(li);
   });
-  let progress = subscriberCount > 0 ? (words.size / subscriberCount) * 100 : 0;
-  if (progress > 100) progress = 100;
-  progressBar.style.width = progress + "%";
-  progressBar.textContent = progress.toFixed(2) + "%";
+
+  // Windows 95 style pixel progress bar
+  const totalPixels = Math.floor(progressBar.clientWidth / 5);
+  let progress = subscriberCount > 0 ? words.size / subscriberCount : 0;
+  if (progress > 1) progress = 1;
+  progressBar.innerHTML = "";
+  const filledPixels = Math.floor(totalPixels * progress);
+  for (let i = 0; i < filledPixels; i++) {
+    const pixel = document.createElement("div");
+    pixel.className = "pixel";
+    progressBar.appendChild(pixel);
+  }
+  const percentText = (progress * 100).toFixed(2) + "%";
+  const textNode = document.createElement("span");
+  textNode.style.position = "absolute";
+  textNode.style.left = "50%";
+  textNode.style.transform = "translateX(-50%)";
+  textNode.style.fontWeight = "bold";
+  textNode.style.color = "black";
+  textNode.textContent = percentText;
+  progressBar.appendChild(textNode);
 }
 
 // Fetch YouTube subscribers
@@ -303,7 +329,6 @@ async function fetchSubscribers() {
 fetchWords();
 fetchSubscribers();
 setInterval(fetchSubscribers, 30000);
-
 </script>
 </body>
 </html>
