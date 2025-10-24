@@ -64,7 +64,7 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
 
 /* Subscriber tracker */
 #subscriberBox { width: 200px; z-index:10; top: 10px; right: 10px; }
-#subscriberBox .content { display: flex; flex-direction:column; align-items: center; gap: 5px; justify-content: center; font-size: 14px; padding: 5px; }
+#subscriberBox .content { display: flex; flex-direction:column; align-items: center; gap: 5px; justify-content: center; font-size: 14px; }
 #subscriberBox svg { cursor:pointer; }
 
 /* Timer window */
@@ -79,6 +79,20 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
 /* Minimized boxes container */
 #minimizedContainer { position: fixed; bottom: 40px; left: 0; display: flex; gap: 5px; padding: 5px; }
 .minimized-btn { border: 2px outset #fff; background: #c0c0c0; cursor: pointer; padding: 2px 6px; font-size:12px; }
+
+/* Solitaire card animation */
+.solitaire-card {
+  position: fixed;
+  width: 50px;
+  height: 70px;
+  background: white;
+  border: 1px solid #000;
+  border-radius: 4px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+  background-image: linear-gradient(135deg,#fff,#e0e0e0);
+  z-index: 9999;
+  pointer-events: none;
+}
 
 @media(max-width:700px){
   .window,#subscriberBox,#timerBox,#dataBox{width:90%; left:5% !important; transform:none;}
@@ -228,9 +242,6 @@ startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
 resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
 
-// Bottom Start button
-bottomStartBtn.onclick=function(){ alert("Fuck No Baby!"); }
-
 // Fetch words
 async function fetchWords(){ 
   words.clear(); 
@@ -335,7 +346,7 @@ window.addEventListener('resize', repositionBoxes);
 repositionBoxes();
 
 // EXPORT
-exportBtn.addEventListener("click", ()=>{
+exportBtn.addEventListener("click", ()=>{ 
   if(words.size === 0){ alert("No words to export!"); return; }
   const wordArray = Array.from(words).map(w=>[w]);
   const wb = XLSX.utils.book_new();
@@ -344,7 +355,7 @@ exportBtn.addEventListener("click", ()=>{
   XLSX.writeFile(wb, "words.xlsx");
 });
 
-// IMPROVED IMPORT (batch, large files)
+// IMPORT
 importBtn.addEventListener("click", ()=>{ importFile.click(); });
 importFile.addEventListener("change", async (e) => {
   const file = e.target.files[0];
@@ -355,13 +366,13 @@ importFile.addEventListener("change", async (e) => {
   const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
   const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
 
-  const batch = writeBatch(db); // Firebase batch write
+  const batch = writeBatch(db);
   let newWords = 0;
 
   for (const row of rows) {
     const word = row[0]?.trim().toLowerCase();
     if (word && !words.has(word)) {
-      words.add(word); // add to local Set
+      words.add(word);
       const wordRef = doc(db, "words", word);
       batch.set(wordRef, { createdAt: serverTimestamp() });
       newWords++;
@@ -369,19 +380,67 @@ importFile.addEventListener("change", async (e) => {
   }
 
   if (newWords > 0) {
-    try {
-      await batch.commit(); // commit all at once
-    } catch (err) {
-      console.error("Firebase batch write failed:", err);
-      alert("Some words failed to save to Firebase. Check console.");
-    }
+    try { await batch.commit(); } 
+    catch (err) { console.error("Firebase batch write failed:", err); alert("Some words failed to save to Firebase. Check console."); }
   }
 
-  updateDisplay();      // update the UI once
-  updateTimerDisplay(); // recalc ETA
-
+  updateDisplay(); updateTimerDisplay();
   alert(`Imported ${newWords} new words!`);
 });
+
+// ---- Solitaire Animation ----
+function runSolitaireAnimation() {
+  const totalCards = 52;
+  const cards = [];
+
+  for (let i = 0; i < totalCards; i++) {
+    const card = document.createElement("div");
+    card.className = "solitaire-card";
+
+    card.style.left = Math.random() * (window.innerWidth - 50) + "px";
+    card.style.top = Math.random() * 100 + "px";
+
+    document.body.appendChild(card);
+    cards.push(card);
+
+    animateCard(card);
+  }
+
+  function animateCard(card) {
+    const startX = parseFloat(card.style.left);
+    const startY = parseFloat(card.style.top);
+
+    const endX = Math.random() * (window.innerWidth - 50);
+    const endY = window.innerHeight + 100;
+
+    const rotateSpeed = (Math.random() * 720 - 360);
+    const duration = 3000 + Math.random() * 2000;
+
+    const startTime = performance.now();
+
+    function frame(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+
+      const y = startY + (endY - startY) * ease - 50 * Math.sin(t * Math.PI * 3);
+      const x = startX + (endX - startX) * ease;
+      const rotate = rotateSpeed * ease;
+
+      card.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
+
+      if (t < 1) requestAnimationFrame(frame);
+      else card.remove();
+    }
+
+    requestAnimationFrame(frame);
+  }
+}
+
+// Bottom start button triggers solitaire animation
+bottomStartBtn.onclick = function () {
+  runSolitaireAnimation();
+}
 </script>
 </body>
 </html>
