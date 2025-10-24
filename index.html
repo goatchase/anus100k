@@ -304,19 +304,41 @@ exportBtn.addEventListener("click",()=>{
   XLSX.writeFile(wb,"words.xlsx");
 });
 
-importBtn.addEventListener("click", async()=>{
-  if(importFile.files.length===0){ alert("Select a file."); return; }
-  const f=importFile.files[0];
-  const data=await f.arrayBuffer();
-  const wb=XLSX.read(data,{type:"array"});
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  const vals=XLSX.utils.sheet_to_json(ws,{header:1}).flat().map(v=>v.toString().trim().toLowerCase()).filter(Boolean);
-  if(vals.length===0){ alert("No valid words found."); return; }
-  const batch=writeBatch(db);
-  vals.forEach(w=>{ batch.set(doc(db,"words",w),{createdAt:serverTimestamp()}); words.add(w); });
-  await batch.commit(); updateDisplay(); updateTimerDisplay();
-  alert(`${vals.length} words imported!`);
+importBtn.addEventListener("click", () => {
+  importFile.click(); // Opens the file picker automatically
 });
+
+importFile.addEventListener("change", async () => {
+  if(importFile.files.length === 0) return;
+
+  const f = importFile.files[0];
+  const data = await f.arrayBuffer();
+  const wb = XLSX.read(data, { type: "array" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const vals = XLSX.utils.sheet_to_json(ws, { header: 1 })
+               .flat()
+               .map(v => v.toString().trim().toLowerCase())
+               .filter(Boolean);
+
+  if (vals.length === 0) {
+    alert("No valid words found.");
+    return;
+  }
+
+  const batch = writeBatch(db);
+  vals.forEach(w => {
+    batch.set(doc(db, "words", w), { createdAt: serverTimestamp() });
+    words.add(w);
+  });
+
+  await batch.commit();
+  updateDisplay();
+  updateTimerDisplay();
+  alert(`${vals.length} words imported!`);
+
+  importFile.value = ""; // Reset so the same file can be selected again if needed
+});
+
 
 // --- YouTube logo click ---
 document.getElementById("ytLogo").addEventListener("click",()=>{ window.open("https://www.youtube.com/@ANewUntoldStory","_blank"); });
