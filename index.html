@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Anus Words v. Subs</title>
 <style>
 /* --- General Text Styling --- */
@@ -32,12 +32,13 @@ body {
 #clock { font-size: 12px; font-weight: bold; }
 
 /* Draggable dialog windows */
-.window, #subscriberBox, #timerBox {
+.window, #subscriberBox, #timerBox, #dataBox {
   border: 2px solid #000; box-shadow: 4px 4px #808080; background: #c0c0c0; position: absolute;
   touch-action: none;
   min-width: 150px;
 }
 .window { width: 600px; max-width: 90%; top: 60px; left: 50%; transform: translateX(-50%); }
+#dataBox, #timerBox { width: 200px; }
 .title-bar {
   background: #000080; color: white; padding: 3px 5px; font-weight: bold; font-size: 14px;
   display: flex; justify-content: space-between; align-items: center;
@@ -77,12 +78,16 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
 #timerBox .content { padding:5px; display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; }
 #timerBox .buttons-row { display:flex; gap:5px; justify-content:center; }
 
+/* Data window */
+#dataBox { width: 200px; z-index: 10; }
+#dataBox .content { display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; padding:5px; }
+
 /* Minimized boxes container */
 #minimizedContainer { position: fixed; bottom: 40px; left: 0; display: flex; gap: 5px; padding: 5px; }
 .minimized-btn { border: 2px outset #fff; background: #c0c0c0; cursor: pointer; padding: 2px 6px; font-size:12px; }
 
 @media(max-width:700px){
-  .window,#subscriberBox,#timerBox{width:90%; left:5% !important; transform:none;}
+  .window,#subscriberBox,#timerBox,#dataBox{width:90%; left:5% !important; transform:none;}
 }
 </style>
 </head>
@@ -101,7 +106,6 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
     </div>
   </div>
   <div class="content">
-    <!-- Inline SVG YouTube logo -->
     <svg id="ytLogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="24" height="24" style="fill:red;">
       <path d="M549.655 124.083c-6.281-23.651-24.813-42.192-48.461-48.461C459.79 64 288 64 288 64S116.21 64 74.805 75.622c-23.648 6.269-42.18 24.81-48.461 48.461C16 165.487 16 256 16 256s0 90.513 10.344 131.917c6.281 23.651 24.813 42.192 48.461 48.461C116.21 448 288 448 288 448s171.79 0 213.195-11.622c23.648-6.269 42.18-24.81 48.461-48.461C560 346.513 560 256 560 256s0-90.513-10.345-131.917zM232 336V176l142 80-142 80z"/>
     </svg>
@@ -134,46 +138,24 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
   </div>
 </div>
 
-<!-- Import/Export Window -->
-<div id="importExportBox" class="window" style="width:420px; top:120px; left:65%; transform:translateX(-50%); z-index:12;">
+<!-- Data dialog -->
+<div id="dataBox">
   <div class="title-bar">
-    <span>Import / Export</span>
+    <span>Data</span>
     <div>
       <button class="minimizeBtn">_</button>
-      <button onclick="importExportBox.style.display='none'">X</button>
+      <button onclick="dataBox.style.display='none'">X</button>
     </div>
   </div>
   <div class="content">
-    <div style="display:flex;flex-direction:column;gap:8px;align-items:center;">
-      <div style="width:100%;text-align:left;font-weight:bold;">Export</div>
-      <div style="width:100%;display:flex;gap:8px;justify-content:center;">
-        <button id="exportBtn">Export to Excel</button>
-      </div>
-
-      <hr style="width:100%;border:1px dashed #808080;" />
-
-      <div style="width:100%;text-align:left;font-weight:bold;">Import</div>
-      <div style="width:100%;display:flex;gap:8px;flex-direction:column;align-items:center;">
-        <input id="fileInput" type="file" accept=".xlsx,.xls" style="display:none" />
-        <button id="chooseFileBtn">Choose Excel File</button>
-        <div id="fileName" style="font-size:12px;color:#000"></div>
-
-        <!-- After file is parsed, show options -->
-        <div id="importConfirm" style="display:none;width:100%;gap:6px;align-items:center;">
-          <div id="importSummary" style="font-size:13px;margin-bottom:6px;"></div>
-          <div style="display:flex;gap:6px;justify-content:center;">
-            <button id="replaceBtn">Replace All with File</button>
-            <button id="appendBtn">Append New Words</button>
-            <button id="cancelImportBtn">Cancel</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <button id="exportBtn">📤 Export to Excel</button>
+    <input type="file" id="importFile" accept=".xlsx,.xls" />
+    <button id="importBtn">📥 Import Excel</button>
   </div>
 </div>
 
 <!-- Main words window -->
-<div class="window" style="z-index:11;">
+<div class="window">
   <div class="title-bar">
     <span>Anus Words v. Subs</span>
     <div>
@@ -195,15 +177,10 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
   <div id="clock"></div>
 </div>
 
-<!-- SheetJS (XLSX) for Excel read/write -->
-<script src="https://cdn.sheetjs.com/xlsx-0.19.1/package/dist/xlsx.full.min.js"></script>
-
 <script type="module">
-/* =======================
-   Firebase + App Logic
-   ======================= */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
 
 // Firebase setup
 const firebaseConfig = {
@@ -219,38 +196,17 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const wordsCollection = collection(db,"words");
 
-/* DOM elements */
-const input=document.getElementById("wordInput");
-const list=document.getElementById("wordList");
-const counter=document.getElementById("counter");
-const message=document.getElementById("message");
-const subscriberCountDiv=document.getElementById("subscriberCount");
-const progressBar=document.getElementById("progressBar");
-const progressText=document.getElementById("progressText");
-const clearWordsBtn=document.getElementById("clearWordsBtn");
-const startBtn=document.getElementById("startBtn");
-const pauseBtn=document.getElementById("pauseBtn");
-const resetBtn=document.getElementById("resetBtn");
-const bottomStartBtn=document.getElementById("bottomStartBtn");
-const elapsedSpan=document.getElementById("elapsed");
-const etaSpan=document.getElementById("eta");
-const timerBox=document.getElementById("timerBox");
-const minimizedContainer=document.getElementById("minimizedContainer");
-
-const importExportBox = document.getElementById('importExportBox');
-const exportBtn = document.getElementById('exportBtn');
-const chooseFileBtn = document.getElementById('chooseFileBtn');
-const fileInput = document.getElementById('fileInput');
-const fileNameDiv = document.getElementById('fileName');
-const importConfirm = document.getElementById('importConfirm');
-const importSummary = document.getElementById('importSummary');
-const replaceBtn = document.getElementById('replaceBtn');
-const appendBtn = document.getElementById('appendBtn');
-const cancelImportBtn = document.getElementById('cancelImportBtn');
+// DOM elements
+const input=document.getElementById("wordInput"), list=document.getElementById("wordList"), counter=document.getElementById("counter"), message=document.getElementById("message");
+const subscriberCountDiv=document.getElementById("subscriberCount"), progressBar=document.getElementById("progressBar"), progressText=document.getElementById("progressText");
+const clearWordsBtn=document.getElementById("clearWordsBtn"), startBtn=document.getElementById("startBtn"), pauseBtn=document.getElementById("pauseBtn"), resetBtn=document.getElementById("resetBtn");
+const bottomStartBtn=document.getElementById("bottomStartBtn"), elapsedSpan=document.getElementById("elapsed"), etaSpan=document.getElementById("eta");
+const timerBox=document.getElementById("timerBox"), minimizedContainer=document.getElementById("minimizedContainer");
+const dataBox=document.getElementById("dataBox"), exportBtn=document.getElementById("exportBtn"), importBtn=document.getElementById("importBtn"), importFile=document.getElementById("importFile");
 
 let words=new Set(), subscriberCount=0, timer=null, elapsed=0, running=false;
 
-/* ---------- Clock ---------- */
+// --- Clock ---
 function updateClock(){ 
   const now=new Date(); 
   let h=now.getHours(); 
@@ -262,14 +218,11 @@ function updateClock(){
 }
 setInterval(updateClock,1000); updateClock();
 
-/* ---------- Timer ---------- */
+// --- Timer ---
 function updateTimerDisplay(){ 
-  // mm:ss.ss format
   const minutes = Math.floor(elapsed/60);
   const seconds = (elapsed % 60).toFixed(2);
   elapsedSpan.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(5,'0')}`;
-
-  // ETA calculation
   const wpm = elapsed>0 ? (words.size/(elapsed/60)) : 0;
   const etaSecs = wpm>0 ? (subscriberCount-words.size)/wpm*60 : 0; 
   const d=Math.floor(etaSecs/86400), h=Math.floor((etaSecs%86400)/3600), m=Math.floor((etaSecs%3600)/60); 
@@ -280,67 +233,51 @@ startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
 resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
 
-/* Bottom Start button */
+// Bottom Start button
 bottomStartBtn.onclick=function(){ alert("Fuck No Baby!"); }
 
-/* ---------- Firestore: Fetch words ---------- */
+// --- Words fetch/add ---
 async function fetchWords(){ 
   words.clear(); 
-  try{
-    const snapshot=await getDocs(wordsCollection); 
-    snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); 
-  }catch(e){
-    console.error('Error fetching words', e);
-  }
+  const snapshot=await getDocs(wordsCollection); 
+  snapshot.forEach(docSnap=>words.add(docSnap.id.toLowerCase())); 
   updateDisplay(); updateTimerDisplay(); 
 }
 
-/* ---------- Add word ---------- */
 async function addWord(){ 
   const newWord=input.value.trim().toLowerCase(); 
   message.textContent=""; 
   if(!newWord) return; 
   if(words.has(newWord)){message.textContent="Duplicate!";} 
   else { 
-    try{
-      await setDoc(doc(db,"words",newWord),{createdAt:serverTimestamp()});
-      words.add(newWord); updateDisplay(); updateTimerDisplay();
-    } catch(e){
-      console.error(e); message.textContent="Error adding word.";
-    } 
+    try{await setDoc(doc(db,"words",newWord),{createdAt:serverTimestamp()}); words.add(newWord); updateDisplay(); updateTimerDisplay();} 
+    catch(e){console.error(e); message.textContent="Error adding word.";} 
   } 
   input.value=""; input.focus(); 
 }
 input.addEventListener("keypress",function(e){if(e.key==="Enter") addWord();});
 
-/* ---------- Clear words (protected by simple prompt) ---------- */
+// --- Clear words ---
 clearWordsBtn.addEventListener("click", async()=>{ 
   const password=prompt("Password:"); 
   if(password!=="anuspass"){alert("Incorrect password."); return;} 
-  try{
-    const snapshot=await getDocs(wordsCollection); 
-    const batch=writeBatch(db); 
-    snapshot.forEach(docSnap=>batch.delete(docSnap.ref)); 
-    await batch.commit(); words.clear(); updateDisplay(); updateTimerDisplay(); alert("All words cleared!");
-  }catch(e){
-    console.error('Error clearing words', e);
-    alert('Error clearing words. See console.');
-  }
+  const snapshot=await getDocs(wordsCollection); 
+  const batch=writeBatch(db); 
+  snapshot.forEach(docSnap=>batch.delete(docSnap.ref)); 
+  await batch.commit(); words.clear(); updateDisplay(); updateTimerDisplay(); alert("All words cleared!");
 });
 
-/* ---------- Update display & progress ---------- */
+// --- Display & progress ---
 function updateDisplay(){
   counter.textContent=`${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML="";
-  // reverse display
   [...words].reverse().forEach(word=>{ const li=document.createElement("li"); li.textContent=word; list.appendChild(li); });
-
   const progress = subscriberCount>0? Math.min(words.size/subscriberCount,1):0;
   progressBar.style.width = (progress*100).toFixed(2) + "%";
   progressText.textContent = (progress*100).toFixed(2) + "%";
 }
 
-/* ---------- Fetch subscribers (YouTube API) ---------- */
+// --- Subscribers ---
 async function fetchSubscribers(){ 
     const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; 
     const channelId="UCL6OtB3m-gQ2mgRg61-aDXw"; 
@@ -357,14 +294,34 @@ async function fetchSubscribers(){
         console.error(e); 
     }
 }
-
-/* Initialize */
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
 
-/* YouTube logo click */
+// --- Export/Import Excel ---
+exportBtn.addEventListener("click",()=>{
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet([...words].map(w=>[w]));
+  XLSX.utils.book_append_sheet(wb,ws,"Words");
+  XLSX.writeFile(wb,"words.xlsx");
+});
+
+importBtn.addEventListener("click", async()=>{
+  if(importFile.files.length===0){ alert("Select a file."); return; }
+  const f=importFile.files[0];
+  const data=await f.arrayBuffer();
+  const wb=XLSX.read(data,{type:"array"});
+  const ws=wb.Sheets[wb.SheetNames[0]];
+  const vals=XLSX.utils.sheet_to_json(ws,{header:1}).flat().map(v=>v.toString().trim().toLowerCase()).filter(Boolean);
+  if(vals.length===0){ alert("No valid words found."); return; }
+  const batch=writeBatch(db);
+  vals.forEach(w=>{ batch.set(doc(db,"words",w),{createdAt:serverTimestamp()}); words.add(w); });
+  await batch.commit(); updateDisplay(); updateTimerDisplay();
+  alert(`${vals.length} words imported!`);
+});
+
+// --- YouTube logo click ---
 document.getElementById("ytLogo").addEventListener("click",()=>{ window.open("https://www.youtube.com/@ANewUntoldStory","_blank"); });
 
-/* ---------- Draggable & Minimize ---------- */
+// --- Draggable & Minimize ---
 function makeDraggable(el){
   const title=el.querySelector('.title-bar');
   let offsetX=0, offsetY=0, isDown=false;
@@ -372,24 +329,33 @@ function makeDraggable(el){
   document.addEventListener('mousemove', e=>{if(!isDown) return; let x=e.clientX-offsetX, y=e.clientY-offsetY; x=Math.max(0,Math.min(window.innerWidth-el.offsetWidth,x)); y=Math.max(0,Math.min(window.innerHeight-el.offsetHeight,y)); el.style.left=x+'px'; el.style.top=y+'px';});
   document.addEventListener('mouseup', ()=>{isDown=false;});
 }
-document.querySelectorAll('.window, #subscriberBox, #timerBox').forEach(makeDraggable);
+document.querySelectorAll('.window, #subscriberBox, #timerBox, #dataBox').forEach(makeDraggable);
 
-/* Minimize buttons */
+// --- Minimize buttons ---
 document.querySelectorAll('.minimizeBtn').forEach(btn=>{
   btn.addEventListener('click', e=>{
-    const win=btn.closest('.window, #subscriberBox, #timerBox');
+    const win=btn.closest('.window, #subscriberBox, #timerBox, #dataBox');
     win.style.display='none';
     const minimized=document.createElement('button');
     minimized.className='minimized-btn';
     minimized.textContent=win.querySelector('.title-bar span').textContent;
-    minimized.onclick=()=>{ win.style.display='block'; minimized.remove(); };
+    minimized.onclick=()=>{ win.style.display='block'; minimized.remove(); positionDataBox(); };
     minimizedContainer.appendChild(minimized);
   });
 });
 
-/* Mobile repositioning */
+// --- Position Data under Timer ---
+function positionDataBox(){
+  const rect=timerBox.getBoundingClientRect();
+  dataBox.style.left=rect.left+'px';
+  dataBox.style.top=(rect.bottom + 5)+'px';
+}
+positionDataBox();
+window.addEventListener('resize', positionDataBox);
+
+// --- Mobile reposition ---
 function repositionBoxes(){
-  const boxes=[...document.querySelectorAll('.window, #subscriberBox, #timerBox')].filter(b=>b.style.display!=='none');
+  const boxes=[...document.querySelectorAll('.window, #subscriberBox, #timerBox, #dataBox')].filter(b=>b.style.display!=='none');
   let topOffset=10;
   boxes.forEach(b=>{
     if(window.innerWidth<700){
@@ -402,106 +368,7 @@ function repositionBoxes(){
 }
 window.addEventListener('resize', repositionBoxes);
 repositionBoxes();
-
-/* =========================
-   Import / Export (SheetJS)
-   ========================= */
-
-/* Export current words set to Excel */
-exportBtn.addEventListener('click', () => {
-  // Convert Set to array and build worksheet
-  const arr = [...words].map(w => ({Word: w}));
-  const ws = XLSX.utils.json_to_sheet(arr);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Words');
-  // Trigger download with a timestamped filename
-  const fname = `anus-words-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.xlsx`;
-  XLSX.writeFile(wb, fname);
-});
-
-/* Choose file */
-chooseFileBtn.addEventListener('click', ()=> fileInput.click());
-fileInput.addEventListener('change', async (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  fileNameDiv.textContent = file.name;
-  try{
-    const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data, {type:'array'});
-    const firstSheetName = workbook.SheetNames[0];
-    const ws = workbook.Sheets[firstSheetName];
-    const json = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
-    // Extract first column as words, ignoring empty rows and header-like values
-    const parsed = [];
-    for(let i=0;i<json.length;i++){
-      const row = json[i];
-      if(!row || row.length===0) continue;
-      const cell = String(row[0]||'').trim();
-      if(cell) parsed.push(cell.toLowerCase());
-    }
-    // Deduplicate parsed array
-    const parsedSet = new Set(parsed);
-    // Prepare summary and show confirm UI (user requested confirm after upload)
-    importSummary.textContent = `${parsedSet.size.toLocaleString()} unique words found in file.`;
-    importConfirm.style.display='flex';
-    // Temporarily store parsed values on the element for later actions
-    importConfirm._parsed = parsedSet;
-  }catch(err){
-    alert('Error reading file. Make sure it is a valid Excel file.');
-    console.error(err);
-  }
-});
-
-/* Cancel import */
-cancelImportBtn.addEventListener('click', ()=>{
-  fileInput.value=''; fileNameDiv.textContent=''; importConfirm.style.display='none'; importConfirm._parsed=null;
-});
-
-/* Replace all words in Firestore with the uploaded file's words */
-replaceBtn.addEventListener('click', async ()=>{
-  const parsedSet = importConfirm._parsed; if(!parsedSet) return;
-  if(!confirm(`Are you sure you want to REPLACE all existing words (${words.size.toLocaleString()}) with the ${parsedSet.size.toLocaleString()} words from the file? This cannot be undone.`)) return;
-  try{
-    // Delete all existing docs then add new ones in a batch
-    const snapshot = await getDocs(wordsCollection);
-    const batch = writeBatch(db);
-    snapshot.forEach(docSnap => batch.delete(docSnap.ref));
-    parsedSet.forEach(w => batch.set(doc(db,'words',w), {createdAt: serverTimestamp()}));
-    await batch.commit();
-    // Refresh local set
-    await fetchWords();
-    alert('Replace completed.');
-  }catch(e){ console.error(e); alert('Error during replace. See console.'); }
-  // cleanup UI
-  fileInput.value=''; fileNameDiv.textContent=''; importConfirm.style.display='none'; importConfirm._parsed=null;
-});
-
-/* Append new words only (no duplicates) */
-appendBtn.addEventListener('click', async ()=>{
-  const parsedSet = importConfirm._parsed; if(!parsedSet) return;
-  // Determine how many new words
-  const toAdd = [...parsedSet].filter(w=>!words.has(w));
-  if(toAdd.length===0){ alert('No new words to add.'); fileInput.value=''; fileNameDiv.textContent=''; importConfirm.style.display='none'; importConfirm._parsed=null; return; }
-  if(!confirm(`Append ${toAdd.length.toLocaleString()} new words to Firestore?`)) return;
-  try{
-    const batch = writeBatch(db);
-    toAdd.forEach(w => batch.set(doc(db,'words',w), {createdAt: serverTimestamp()}));
-    await batch.commit();
-    await fetchWords();
-    alert(`Added ${toAdd.length.toLocaleString()} new words.`);
-  }catch(e){ console.error(e); alert('Error during append. See console.'); }
-  fileInput.value=''; fileNameDiv.textContent=''; importConfirm.style.display='none'; importConfirm._parsed=null;
-});
-
-/* Make importExportBox draggable and minimizable */
-makeDraggable(importExportBox);
-importExportBox.querySelector('.minimizeBtn').addEventListener('click', (e)=>{
-  const win = importExportBox; win.style.display='none';
-  const minimized = document.createElement('button'); minimized.className='minimized-btn'; minimized.textContent = win.querySelector('.title-bar span').textContent;
-  minimized.onclick = ()=>{ win.style.display='block'; minimized.remove(); };
-  minimizedContainer.appendChild(minimized);
-});
-
 </script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </body>
 </html>
