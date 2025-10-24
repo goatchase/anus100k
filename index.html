@@ -38,7 +38,6 @@ body {
   min-width: 150px;
 }
 .window { width: 600px; max-width: 90%; top: 60px; left: 50%; transform: translateX(-50%); }
-#dataBox, #timerBox { width: 200px; }
 .title-bar {
   background: #000080; color: white; padding: 3px 5px; font-weight: bold; font-size: 14px;
   display: flex; justify-content: space-between; align-items: center;
@@ -79,8 +78,8 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
 #timerBox .buttons-row { display:flex; gap:5px; justify-content:center; }
 
 /* Data window */
-#dataBox { width: 200px; z-index: 10; }
-#dataBox .content { display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; padding:5px; }
+#dataBox { width: 200px; z-index: 10; top: 140px; left: 10px; display: none; }
+#dataBox .content { padding:5px; display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; }
 
 /* Minimized boxes container */
 #minimizedContainer { position: fixed; bottom: 40px; left: 0; display: flex; gap: 5px; padding: 5px; }
@@ -134,11 +133,12 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
       <button id="startBtn">Start</button>
       <button id="pauseBtn">Pause</button>
       <button id="resetBtn">Reset</button>
+      <button id="dataBtn">Data</button>
     </div>
   </div>
 </div>
 
-<!-- Data dialog -->
+<!-- Data window -->
 <div id="dataBox">
   <div class="title-bar">
     <span>Data</span>
@@ -148,9 +148,9 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
     </div>
   </div>
   <div class="content">
-    <button id="exportBtn">📤 Export to Excel</button>
-    <input type="file" id="importFile" accept=".xlsx,.xls" />
-    <button id="importBtn">📥 Import Excel</button>
+    <button id="exportBtn">Export to Excel</button>
+    <button id="importBtn">Import from Excel</button>
+    <input type="file" id="importFile" style="display:none" accept=".xlsx,.xls" />
   </div>
 </div>
 
@@ -180,7 +180,7 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+import * as XLSX from "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
 
 // Firebase setup
 const firebaseConfig = {
@@ -202,11 +202,12 @@ const subscriberCountDiv=document.getElementById("subscriberCount"), progressBar
 const clearWordsBtn=document.getElementById("clearWordsBtn"), startBtn=document.getElementById("startBtn"), pauseBtn=document.getElementById("pauseBtn"), resetBtn=document.getElementById("resetBtn");
 const bottomStartBtn=document.getElementById("bottomStartBtn"), elapsedSpan=document.getElementById("elapsed"), etaSpan=document.getElementById("eta");
 const timerBox=document.getElementById("timerBox"), minimizedContainer=document.getElementById("minimizedContainer");
-const dataBox=document.getElementById("dataBox"), exportBtn=document.getElementById("exportBtn"), importBtn=document.getElementById("importBtn"), importFile=document.getElementById("importFile");
+const dataBox=document.getElementById("dataBox"), dataBtn=document.getElementById("dataBtn");
+const exportBtn=document.getElementById("exportBtn"), importBtn=document.getElementById("importBtn"), importFile=document.getElementById("importFile");
 
 let words=new Set(), subscriberCount=0, timer=null, elapsed=0, running=false;
 
-// --- Clock ---
+// Clock
 function updateClock(){ 
   const now=new Date(); 
   let h=now.getHours(); 
@@ -218,7 +219,7 @@ function updateClock(){
 }
 setInterval(updateClock,1000); updateClock();
 
-// --- Timer ---
+// Timer
 function updateTimerDisplay(){ 
   const minutes = Math.floor(elapsed/60);
   const seconds = (elapsed % 60).toFixed(2);
@@ -232,11 +233,9 @@ function updateTimerDisplay(){
 startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{elapsed+=0.1; updateTimerDisplay();},100); }}
 pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
 resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
-
-// Bottom Start button
 bottomStartBtn.onclick=function(){ alert("Fuck No Baby!"); }
 
-// --- Words fetch/add ---
+// Fetch words
 async function fetchWords(){ 
   words.clear(); 
   const snapshot=await getDocs(wordsCollection); 
@@ -244,6 +243,7 @@ async function fetchWords(){
   updateDisplay(); updateTimerDisplay(); 
 }
 
+// Add word
 async function addWord(){ 
   const newWord=input.value.trim().toLowerCase(); 
   message.textContent=""; 
@@ -257,7 +257,7 @@ async function addWord(){
 }
 input.addEventListener("keypress",function(e){if(e.key==="Enter") addWord();});
 
-// --- Clear words ---
+// Clear words
 clearWordsBtn.addEventListener("click", async()=>{ 
   const password=prompt("Password:"); 
   if(password!=="anuspass"){alert("Incorrect password."); return;} 
@@ -267,7 +267,7 @@ clearWordsBtn.addEventListener("click", async()=>{
   await batch.commit(); words.clear(); updateDisplay(); updateTimerDisplay(); alert("All words cleared!");
 });
 
-// --- Display & progress ---
+// Update display & progress
 function updateDisplay(){
   counter.textContent=`${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
   list.innerHTML="";
@@ -277,7 +277,7 @@ function updateDisplay(){
   progressText.textContent = (progress*100).toFixed(2) + "%";
 }
 
-// --- Subscribers ---
+// Fetch subscribers
 async function fetchSubscribers(){ 
     const apiKey="AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw"; 
     const channelId="UCL6OtB3m-gQ2mgRg61-aDXw"; 
@@ -296,54 +296,10 @@ async function fetchSubscribers(){
 }
 fetchWords(); fetchSubscribers(); setInterval(fetchSubscribers,30000);
 
-// --- Export/Import Excel ---
-exportBtn.addEventListener("click",()=>{
-  const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet([...words].map(w=>[w]));
-  XLSX.utils.book_append_sheet(wb,ws,"Words");
-  XLSX.writeFile(wb,"words.xlsx");
-});
-
-importBtn.addEventListener("click", () => {
-  importFile.click(); // Opens the file picker automatically
-});
-
-importFile.addEventListener("change", async () => {
-  if(importFile.files.length === 0) return;
-
-  const f = importFile.files[0];
-  const data = await f.arrayBuffer();
-  const wb = XLSX.read(data, { type: "array" });
-  const ws = wb.Sheets[wb.SheetNames[0]];
-  const vals = XLSX.utils.sheet_to_json(ws, { header: 1 })
-               .flat()
-               .map(v => v.toString().trim().toLowerCase())
-               .filter(Boolean);
-
-  if (vals.length === 0) {
-    alert("No valid words found.");
-    return;
-  }
-
-  const batch = writeBatch(db);
-  vals.forEach(w => {
-    batch.set(doc(db, "words", w), { createdAt: serverTimestamp() });
-    words.add(w);
-  });
-
-  await batch.commit();
-  updateDisplay();
-  updateTimerDisplay();
-  alert(`${vals.length} words imported!`);
-
-  importFile.value = ""; // Reset so the same file can be selected again if needed
-});
-
-
-// --- YouTube logo click ---
+// YouTube logo click
 document.getElementById("ytLogo").addEventListener("click",()=>{ window.open("https://www.youtube.com/@ANewUntoldStory","_blank"); });
 
-// --- Draggable & Minimize ---
+// Draggable & Minimize
 function makeDraggable(el){
   const title=el.querySelector('.title-bar');
   let offsetX=0, offsetY=0, isDown=false;
@@ -353,7 +309,7 @@ function makeDraggable(el){
 }
 document.querySelectorAll('.window, #subscriberBox, #timerBox, #dataBox').forEach(makeDraggable);
 
-// --- Minimize buttons ---
+// Minimize buttons
 document.querySelectorAll('.minimizeBtn').forEach(btn=>{
   btn.addEventListener('click', e=>{
     const win=btn.closest('.window, #subscriberBox, #timerBox, #dataBox');
@@ -361,21 +317,12 @@ document.querySelectorAll('.minimizeBtn').forEach(btn=>{
     const minimized=document.createElement('button');
     minimized.className='minimized-btn';
     minimized.textContent=win.querySelector('.title-bar span').textContent;
-    minimized.onclick=()=>{ win.style.display='block'; minimized.remove(); positionDataBox(); };
+    minimized.onclick=()=>{ win.style.display='block'; minimized.remove(); };
     minimizedContainer.appendChild(minimized);
   });
 });
 
-// --- Position Data under Timer ---
-function positionDataBox(){
-  const rect=timerBox.getBoundingClientRect();
-  dataBox.style.left=rect.left+'px';
-  dataBox.style.top=(rect.bottom + 5)+'px';
-}
-positionDataBox();
-window.addEventListener('resize', positionDataBox);
-
-// --- Mobile reposition ---
+// Mobile repositioning
 function repositionBoxes(){
   const boxes=[...document.querySelectorAll('.window, #subscriberBox, #timerBox, #dataBox')].filter(b=>b.style.display!=='none');
   let topOffset=10;
@@ -390,7 +337,34 @@ function repositionBoxes(){
 }
 window.addEventListener('resize', repositionBoxes);
 repositionBoxes();
+
+// Show Data box when Data button clicked
+dataBtn.addEventListener("click", ()=>{ dataBox.style.display="block"; dataBox.style.width = timerBox.offsetWidth + "px"; dataBox.style.top = (timerBox.offsetTop + timerBox.offsetHeight + 5) + "px"; dataBox.style.left = timerBox.offsetLeft + "px"; });
+
+// Export Excel
+exportBtn.addEventListener("click", ()=>{
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([...words].map(w=>[w]));
+  XLSX.utils.book_append_sheet(wb, ws, "Words");
+  XLSX.writeFile(wb, "words.xlsx");
+});
+
+// Import Excel
+importBtn.addEventListener("click", ()=>{ importFile.click(); });
+
+importFile.addEventListener("change", async ()=>{
+  if(importFile.files.length === 0) return;
+  const f = importFile.files[0];
+  const data = await f.arrayBuffer();
+  const wb = XLSX.read(data, { type: "array" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const vals = XLSX.utils.sheet_to_json(ws, { header: 1 }).flat().map(v=>v.toString().trim().toLowerCase()).filter(Boolean);
+  if(vals.length === 0){ alert("No valid words found."); return; }
+  const batch = writeBatch(db);
+  vals.forEach(w=>{ batch.set(doc(db,"words",w), {createdAt: serverTimestamp()}); words.add(w); });
+  await batch.commit(); updateDisplay(); updateTimerDisplay(); alert(`${vals.length} words imported!`);
+  importFile.value = "";
+});
 </script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </body>
 </html>
