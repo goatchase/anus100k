@@ -8,7 +8,6 @@
 /* --- General Text Styling --- */
 body, input, button, select, textarea, div, span, li { font-family: "MS Sans Serif", Tahoma, sans-serif; }
 
-/* Body */
 body {
   background: #008080;
   color: black;
@@ -345,15 +344,43 @@ exportBtn.addEventListener("click", ()=>{
   XLSX.writeFile(wb, "words.xlsx");
 });
 
-// IMPORT
+// IMPROVED IMPORT (batch, large files)
 importBtn.addEventListener("click", ()=>{ importFile.click(); });
-importFile.addEventListener("change", async(e)=>{
-  const file = e.target.files[0]; if(!file) return;
+importFile.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
   const data = await file.arrayBuffer();
   const workbook = XLSX.read(data);
   const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(firstSheet,{header:1});
-  for(const row of rows){ if(row[0]) addWord(row[0]); }
+  const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+  const batch = writeBatch(db); // Firebase batch write
+  let newWords = 0;
+
+  for (const row of rows) {
+    const word = row[0]?.trim().toLowerCase();
+    if (word && !words.has(word)) {
+      words.add(word); // add to local Set
+      const wordRef = doc(db, "words", word);
+      batch.set(wordRef, { createdAt: serverTimestamp() });
+      newWords++;
+    }
+  }
+
+  if (newWords > 0) {
+    try {
+      await batch.commit(); // commit all at once
+    } catch (err) {
+      console.error("Firebase batch write failed:", err);
+      alert("Some words failed to save to Firebase. Check console.");
+    }
+  }
+
+  updateDisplay();      // update the UI once
+  updateTimerDisplay(); // recalc ETA
+
+  alert(`Imported ${newWords} new words!`);
 });
 </script>
 </body>
