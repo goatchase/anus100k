@@ -80,22 +80,22 @@ li { border-bottom: 1px solid #808080; padding: 2px; }
 #minimizedContainer { position: fixed; bottom: 40px; left: 0; display: flex; gap: 5px; padding: 5px; }
 .minimized-btn { border: 2px outset #fff; background: #c0c0c0; cursor: pointer; padding: 2px 6px; font-size:12px; }
 
-/* Solitaire card animation */
-.solitaire-card {
-  position: fixed;
-  width: 50px;
-  height: 70px;
-  background: white;
-  border: 1px solid #000;
-  border-radius: 4px;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-  background-image: linear-gradient(135deg,#fff,#e0e0e0);
-  z-index: 9999;
-  pointer-events: none;
-}
-
 @media(max-width:700px){
   .window,#subscriberBox,#timerBox,#dataBox{width:90%; left:5% !important; transform:none;}
+}
+
+/* Screensaver ball */
+.screensaver-ball {
+  position: absolute;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px 15px;
+  border-radius: 50%;
+  background-color: #ff0000;
+  color: #fff;
+  user-select: none;
+  pointer-events: none;
+  z-index: 9999;
 }
 </style>
 </head>
@@ -388,59 +388,48 @@ importFile.addEventListener("change", async (e) => {
   alert(`Imported ${newWords} new words!`);
 });
 
-// ---- Solitaire Animation ----
-function runSolitaireAnimation() {
-  const totalCards = 52;
-  const cards = [];
+// ---- Classic Bouncing Ball Screensaver ----
+function runScreensaver() {
+  const ball = document.createElement("div");
+  ball.className = "screensaver-ball";
+  ball.textContent = "fuck no baby";
 
-  for (let i = 0; i < totalCards; i++) {
-    const card = document.createElement("div");
-    card.className = "solitaire-card";
+  let x = Math.random() * (window.innerWidth - 100);
+  let y = Math.random() * (window.innerHeight - 100);
+  let vx = (Math.random() * 4 + 2) * (Math.random() < 0.5 ? 1 : -1);
+  let vy = (Math.random() * 4 + 2) * (Math.random() < 0.5 ? 1 : -1);
 
-    card.style.left = Math.random() * (window.innerWidth - 50) + "px";
-    card.style.top = Math.random() * 100 + "px";
+  ball.style.left = x + "px";
+  ball.style.top = y + "px";
+  document.body.appendChild(ball);
 
-    document.body.appendChild(card);
-    cards.push(card);
+  function animate() {
+    x += vx;
+    y += vy;
 
-    animateCard(card);
+    if (x <= 0 || x + ball.offsetWidth >= window.innerWidth) vx *= -1;
+    if (y <= 0 || y + ball.offsetHeight >= window.innerHeight) vy *= -1;
+
+    ball.style.left = x + "px";
+    ball.style.top = y + "px";
+
+    requestAnimationFrame(animate);
   }
 
-  function animateCard(card) {
-    const startX = parseFloat(card.style.left);
-    const startY = parseFloat(card.style.top);
+  animate();
 
-    const endX = Math.random() * (window.innerWidth - 50);
-    const endY = window.innerHeight + 100;
-
-    const rotateSpeed = (Math.random() * 720 - 360);
-    const duration = 3000 + Math.random() * 2000;
-
-    const startTime = performance.now();
-
-    function frame(now) {
-      const elapsed = now - startTime;
-      const t = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - t, 3);
-
-      const y = startY + (endY - startY) * ease - 50 * Math.sin(t * Math.PI * 3);
-      const x = startX + (endX - startX) * ease;
-      const rotate = rotateSpeed * ease;
-
-      card.style.transform = `translate(${x}px, ${y}px) rotate(${rotate}deg)`;
-
-      if (t < 1) requestAnimationFrame(frame);
-      else card.remove();
-    }
-
-    requestAnimationFrame(frame);
+  // Exit screensaver on click anywhere
+  function exit() {
+    ball.remove();
+    document.removeEventListener("click", exit);
   }
+  document.addEventListener("click", exit);
 }
 
-// Bottom start button triggers solitaire animation
+// Bottom start button triggers screensaver
 bottomStartBtn.onclick = function () {
-  runSolitaireAnimation();
-}
+  runScreensaver();
+};
 </script>
 </body>
 </html>
