@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Barstool Yug Station - Retro 95</title>
+<title>Yug Station Timer</title>
 <style>
-body { font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif; font-size:12px; background:#008080; color:black; margin:0; padding:20px;}
+body { font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif; font-size:12px; background:#008080; color:black; margin:0; padding:10px;}
 .window { background:#c0c0c0; border:2px solid #808080; position:absolute; box-shadow:2px 2px 0px #fff inset; cursor:default; max-width:95vw; }
 .window-header { background:#000080; color:white; font-weight:bold; padding:2px 5px; cursor:move; user-select:none; }
 .window-body { padding:10px; }
 
 /* Timer Window */
-#timerWindow { width:360px; max-width:90vw; }
-#timer { font-family:'MS Sans Serif', monospace; font-size:28px; font-weight:bold; margin:12px 0; padding:8px; background:#fff; border:2px solid #808080; width:100%; box-sizing:border-box; text-align:center; }
+#timerWindow { width:90vw; max-width:360px; }
+#timer { font-family:'MS Sans Serif', monospace; font-size:28px; font-weight:bold; margin:12px 0; padding:8px; background:#fff; border:2px solid #808080; width:100%; text-align:center; }
 #nameInput { width:100%; padding:6px; font-size:14px; margin-bottom:8px; box-sizing:border-box; }
 .timer-buttons { display:flex; gap:4px; flex-wrap:wrap; }
 .timer-buttons button { flex:1 1 30%; padding:6px 0; font-size:14px; }
 
-/* Leaderboard window */
-#leaderboardWindow { width:480px; max-width:95vw; }
+/* Leaderboard */
+#leaderboardWindow { width:95vw; max-width:480px; }
 #leaderboard table { width:100%; border-collapse:collapse; font-family:'MS Sans Serif', monospace; }
 #leaderboard th, #leaderboard td { border:1px solid #808080; padding:4px 2px; font-size:12px; }
 #leaderboard th { background:#000080; color:white; font-weight:bold; }
@@ -29,22 +29,19 @@ body { font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif; font-size:12px; 
 #leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; }
 .rank1 { color:red; font-weight:bold; }
 
+/* That's Baseball Window */
+#baseballWindow { width:80vw; max-width:200px; text-align:center; bottom:10px; left:10px; top:auto !important; }
+#baseballWindow .window-body { cursor:pointer; font-weight:bold; font-size:14px; color:#000080; }
+#baseballWindow .window-body:hover { text-decoration:underline; }
+
 /* Start bar */
 #startBar { position:fixed; bottom:0; left:0; width:100%; height:30px; background:#c0c0c0; border-top:2px solid #fff; display:flex; align-items:center; padding-left:4px; box-sizing:border-box; font-weight:bold; }
 #startButton { width:60px; height:24px; background:#c0c0c0; border:2px outset #fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; }
 #startButton:active { border-style:inset; }
 
-/* That's Baseball Window */
-#baseballWindow { width:200px; max-width:80vw; text-align:center; bottom:50px; left:50px; top:auto !important; }
-#baseballWindow .window-body { cursor:pointer; font-weight:bold; font-size:14px; color:#000080; }
-#baseballWindow .window-body:hover { text-decoration:underline; }
-
-input.time-input { width:60px; text-align:right; }
-input.date-input { width:80px; text-align:right; }
-
-/* Mobile friendly: scale font */
+/* Mobile text adjustments */
 @media(max-width:480px){
-  #timer { font-size:24px; }
+  #timer { font-size:22px; }
   #nameInput, .timer-buttons button { font-size:12px; }
   #leaderboard th, #leaderboard td { font-size:10px; padding:2px; }
 }
@@ -52,8 +49,7 @@ input.date-input { width:80px; text-align:right; }
 </head>
 <body>
 
-<!-- Timer -->
-<div class="window" id="timerWindow" style="top:50px; left:50px;">
+<div class="window" id="timerWindow" style="top:50px; left:10px;">
   <div class="window-header">Timer</div>
   <div class="window-body">
     <div id="timer">0.00</div>
@@ -66,37 +62,30 @@ input.date-input { width:80px; text-align:right; }
   </div>
 </div>
 
-<!-- Leaderboard -->
-<div class="window" id="leaderboardWindow" style="top:50px; left:450px;">
+<div class="window" id="leaderboardWindow" style="top:50px; left:10px;">
   <div class="window-header">Leaderboard</div>
   <div class="window-body">
     <table id="leaderboard">
-      <thead>
-        <tr><th>Rank</th><th>Name</th><th>Time</th><th>Date</th><th>X</th></tr>
-      </thead>
+      <thead><tr><th>Rank</th><th>Name</th><th>Time</th><th>Date</th><th>X</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 </div>
 
-<!-- That's Baseball -->
 <div class="window" id="baseballWindow">
   <div class="window-header">That's Baseball</div>
   <div class="window-body" onclick="openRandomPlayer()">Click me!</div>
 </div>
 
-<!-- Sounds -->
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 <audio id="fart" src="https://www.soundjay.com/human/fart-01.mp3"></audio>
 
-<!-- Start bar -->
 <div id="startBar"><div id="startButton">Start</div></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyBLX1aCaIrF4ro5cHQky2DrN1Sd-hooJyU",
   authDomain: "goatchase-e9502.firebaseapp.com",
@@ -116,28 +105,23 @@ const board = document.querySelector("#leaderboard tbody");
 const airhorn = document.getElementById("airhorn");
 const fart = document.getElementById("fart");
 
-let startTime=null;
-let interval=null;
-let leaderboard=[];
+let startTime=null, interval=null, leaderboard=[];
 
-// Timer
 window.startTimer = function(){
   if(interval) return;
   startTime = Date.now();
-  interval = setInterval(()=>{ timerDisplay.textContent = ((Date.now()-startTime)/1000).toFixed(2); }, 10);
+  interval = setInterval(()=>{ timerDisplay.textContent=((Date.now()-startTime)/1000).toFixed(2); },10);
 };
 window.resetTimer = function(){ clearInterval(interval); interval=null; timerDisplay.textContent="0.00"; };
 window.stopTimer = async function(){
   if(!interval) return;
   clearInterval(interval); interval=null;
-  const name = nameInput.value.trim(); if(!name) return alert("Enter a name.");
-  const time = parseFloat(timerDisplay.textContent);
-  const date = new Date().toLocaleDateString();
+  const name=nameInput.value.trim(); if(!name) return alert("Enter a name.");
+  const time=parseFloat(timerDisplay.textContent); const date=new Date().toLocaleDateString();
   try { await addDoc(leaderboardCol,{name,time,date}); resetTimer(); nameInput.value=""; } 
-  catch(e){ console.error("Firestore error:",e);}
+  catch(e){ console.error(e);}
 };
 
-// Render editable leaderboard
 function renderLeaderboard(){
   board.innerHTML="";
   leaderboard.forEach((entry,i)=>{
@@ -145,62 +129,52 @@ function renderLeaderboard(){
     row.innerHTML=`
       <td class="${i===0?'rank1':''}">${i+1}</td>
       <td>${entry.name}</td>
-      <td><input class="time-input" type="number" step="0.01" value="${entry.time.toFixed(2)}" onchange="updateTime('${entry.id}', this.value)"></td>
-      <td><input class="date-input" type="text" value="${entry.date}" onchange="updateDate('${entry.id}', this.value)"></td>
+      <td><input type="number" step="0.01" value="${entry.time.toFixed(2)}" onchange="updateTime('${entry.id}',this.value)"></td>
+      <td><input type="text" value="${entry.date}" onchange="updateDate('${entry.id}',this.value)"></td>
       <td><button onclick="deleteEntry('${entry.id}')">X</button></td>
     `;
     board.appendChild(row);
   });
-  // Play sounds for fastest/slowest
-  if(leaderboard.length>0){
-    if(leaderboard[0]) airhorn.play();
-    if(leaderboard[leaderboard.length-1]) fart.play();
-  }
 }
 
-// Firestore real-time update
-const q = query(leaderboardCol, orderBy("time"));
-onSnapshot(q, snapshot=>{
+const q=query(leaderboardCol, orderBy("time"));
+onSnapshot(q,snapshot=>{
   leaderboard=[];
   snapshot.forEach(docSnap=>leaderboard.push({id:docSnap.id,...docSnap.data()}));
   renderLeaderboard();
 });
 
-// Update Firestore
-window.updateTime = async function(id,value){ await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)}); };
-window.updateDate = async function(id,value){ await updateDoc(doc(db,"yugLeaderboard",id),{date:value}); };
-window.deleteEntry = async function(id){ await deleteDoc(doc(db,"yugLeaderboard",id)); };
+window.updateTime=async(id,value)=>{ await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)}); };
+window.updateDate=async(id,value)=>{ await updateDoc(doc(db,"yugLeaderboard",id),{date:value}); };
+window.deleteEntry=async(id)=>{ await deleteDoc(doc(db,"yugLeaderboard",id)); };
 
-// Drag windows (desktop + mobile touch)
+// Play sounds when user submits
+onSnapshot(q,snapshot=>{
+  leaderboard=[];
+  snapshot.forEach(docSnap=>leaderboard.push({id:docSnap.id,...docSnap.data()}));
+  renderLeaderboard();
+});
+
 function makeDraggable(el){
-  const header = el.querySelector('.window-header');
+  const header=el.querySelector('.window-header');
   let offsetX=0, offsetY=0, isDown=false;
 
-  function start(e){ isDown=true; const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; offsetX=clientX-el.offsetLeft; offsetY=clientY-el.offsetTop; el.style.zIndex=1000; }
-  function move(e){ if(!isDown) return; const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; el.style.left=(clientX-offsetX)+'px'; el.style.top=(clientY-offsetY)+'px'; }
+  function start(e){ isDown=true; const clientX=e.touches?e.touches[0].clientX:e.clientX; const clientY=e.touches?e.touches[0].clientY:e.clientY; offsetX=clientX-el.offsetLeft; offsetY=clientY-el.offsetTop; el.style.zIndex=1000; }
+  function move(e){ if(!isDown) return; const clientX=e.touches?e.touches[0].clientX:e.clientX; const clientY=e.touches?e.touches[0].clientY:e.clientY; el.style.left=(clientX-offsetX)+'px'; el.style.top=(clientY-offsetY)+'px'; }
   function end(){ isDown=false; }
 
-  header.addEventListener('mousedown',start);
-  header.addEventListener('touchstart',start);
-  document.addEventListener('mousemove',move);
-  document.addEventListener('touchmove',move);
-  document.addEventListener('mouseup',end);
-  document.addEventListener('touchend',end);
+  header.addEventListener('mousedown',start); header.addEventListener('touchstart',start);
+  document.addEventListener('mousemove',move); document.addEventListener('touchmove',move);
+  document.addEventListener('mouseup',end); document.addEventListener('touchend',end);
 }
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 
-// Random Baseball-Reference player
-window.openRandomPlayer = function() {
-  const players = [
-    "troutmi01","bettsmo01","judgear01","tatisfe01",
-    "acunar01","freemfr01","rodriju01","scherma01",
-    "muncylo01","bellingma01","deversra01","ozziema01"
-  ];
-  const player = players[Math.floor(Math.random()*players.length)];
-  const firstLetter = player[0];
-  const url = `https://www.baseball-reference.com/players/${firstLetter}/${player}.shtml`;
+window.openRandomPlayer=function(){
+  const players=["troutmi01","bettsmo01","judgear01","tatisfe01","acunar01","freemfr01","rodriju01","scherma01","muncylo01","bellingma01","deversra01","ozziema01"];
+  const player=players[Math.floor(Math.random()*players.length)];
+  const url=`https://www.baseball-reference.com/players/${player[0]}/${player}.shtml`;
   window.open(url,"_blank");
 };
 </script>
