@@ -20,6 +20,7 @@ body {
   border: 2px solid #808080;
   position: absolute;
   box-shadow: 2px 2px 0px #fff inset;
+  cursor: default;
 }
 
 .window-header {
@@ -111,6 +112,15 @@ body {
 }
 #startButton:active { border-style: inset; }
 
+/* That's Baseball window */
+#baseballWindow { width: 200px; text-align: center; }
+#baseballWindow .window-body {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  color: #000080;
+}
+#baseballWindow .window-body:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -148,10 +158,16 @@ body {
   </div>
 </div>
 
+<!-- That's Baseball Window -->
+<div class="window" id="baseballWindow" style="top:250px; left:50px;">
+  <div class="window-header">That's Baseball</div>
+  <div class="window-body" onclick="openRandomPlayer()">Click me!</div>
+</div>
+
 <!-- Airhorn -->
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 
-<!-- Windows 95 Start bar -->
+<!-- Start bar -->
 <div id="startBar">
   <div id="startButton">Start</div>
 </div>
@@ -254,6 +270,18 @@ function makeDraggable(el) {
 
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
+makeDraggable(document.getElementById('baseballWindow'));
+
+// Random Baseball Player Function
+function openRandomPlayer() {
+  const players = [
+    "aaronha01", "bondsba01", "griffeca01", "mayswi01", 
+    "ruthba01", "willite01", "mantlemi01", "jeterde01",
+    "troutmi01", "bettsmo01"
+  ];
+  const player = players[Math.floor(Math.random() * players.length)];
+  window.open(`https://www.baseball-reference.com/players/${player[0]}/${player}.shtml`, "_blank");
+}
 </script>
 
 </body>
