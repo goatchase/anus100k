@@ -3,65 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Barstool Yug Station</title>
+<title>Barstool Yug Station - Retro 95</title>
 
 <style>
   body {
-    font-family: Arial, sans-serif;
-    background: #fafafa;
-    color: #333;
+    font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+    background: #c0c0c0;
+    color: black;
     text-align: center;
-    margin: 40px;
+    margin: 20px;
   }
 
   h1 {
-    font-size: 2em;
+    font-size: 1.8em;
     margin-bottom: 10px;
+    font-weight: bold;
   }
 
   #timer {
-    font-size: 2.5em;
+    font-family: monospace;
+    font-size: 2em;
     font-weight: bold;
     margin: 15px 0;
+    padding: 10px;
+    background: #ffffff;
+    border: 2px solid #808080;
+    width: 200px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   input {
-    padding: 8px;
-    font-size: 16px;
-    width: 200px;
+    padding: 4px;
+    font-size: 14px;
+    width: 180px;
+    border: 2px inset #ffffff;
+    margin-bottom: 8px;
   }
 
   button {
-    padding: 8px 12px;
+    padding: 4px 10px;
     font-size: 14px;
-    margin: 5px;
+    margin: 4px;
+    border: 2px outset #ffffff;
+    background: #c0c0c0;
     cursor: pointer;
+    font-weight: bold;
+  }
+
+  button:active {
+    border-style: inset;
   }
 
   #leaderboardContainer {
     margin-top: 20px;
-    border: 1px solid #ccc;
-    background: #fff;
+    border: 2px solid #808080;
+    background: #ffffff;
     max-height: 400px;
     overflow-y: scroll;
+    width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 2px;
   }
 
   table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 14px;
+    font-family: monospace;
   }
 
   th, td {
-    padding: 8px;
-    border-bottom: 1px solid #eee;
-    font-size: 14px;
+    border: 1px solid #808080;
+    padding: 4px;
+    text-align: center;
   }
 
   th {
-    background: #f0f0f0;
+    background: #000080;
+    color: white;
+    font-weight: bold;
   }
 
-  .rank1 { font-weight: bold; }
+  .rank1 {
+    color: red;
+    font-weight: bold;
+  }
+
   .tv {
     font-size: 1.5em;
   }
@@ -75,7 +104,7 @@
 <body>
 
 <h1>Barstool Yug Station</h1>
-<p>Fastest chug wins.</p>
+<p>Chug your beer fast — Retro 95 Style</p>
 
 <div id="timer">0.00</div>
 
@@ -106,7 +135,6 @@
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 
 <script>
-
 let startTime = null;
 let interval = null;
 let leaderboard = JSON.parse(localStorage.getItem("yugLeaderboard") || "[]");
@@ -203,7 +231,6 @@ function toggleTVMode() {
 }
 
 renderLeaderboard();
-
 </script>
 
 </body>
