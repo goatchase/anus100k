@@ -6,19 +6,19 @@
 <title>Barstool Yug Station - Retro 95</title>
 <style>
 body { font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif; font-size:12px; background:#008080; color:black; margin:0; padding:20px;}
-.window { background:#c0c0c0; border:2px solid #808080; position:absolute; box-shadow:2px 2px 0px #fff inset; cursor:default; }
+.window { background:#c0c0c0; border:2px solid #808080; position:absolute; box-shadow:2px 2px 0px #fff inset; cursor:default; max-width:95vw; }
 .window-header { background:#000080; color:white; font-weight:bold; padding:2px 5px; cursor:move; user-select:none; }
 .window-body { padding:10px; }
 
 /* Timer Window */
-#timerWindow { width:360px; }
+#timerWindow { width:360px; max-width:90vw; }
 #timer { font-family:'MS Sans Serif', monospace; font-size:28px; font-weight:bold; margin:12px 0; padding:8px; background:#fff; border:2px solid #808080; width:100%; box-sizing:border-box; text-align:center; }
 #nameInput { width:100%; padding:6px; font-size:14px; margin-bottom:8px; box-sizing:border-box; }
-.timer-buttons { display:flex; gap:4px; }
-.timer-buttons button { flex:1; padding:6px 0; font-size:14px; }
+.timer-buttons { display:flex; gap:4px; flex-wrap:wrap; }
+.timer-buttons button { flex:1 1 30%; padding:6px 0; font-size:14px; }
 
 /* Leaderboard window */
-#leaderboardWindow { width:480px; }
+#leaderboardWindow { width:480px; max-width:95vw; }
 #leaderboard table { width:100%; border-collapse:collapse; font-family:'MS Sans Serif', monospace; }
 #leaderboard th, #leaderboard td { border:1px solid #808080; padding:4px 2px; font-size:12px; }
 #leaderboard th { background:#000080; color:white; font-weight:bold; }
@@ -35,12 +35,19 @@ body { font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif; font-size:12px; 
 #startButton:active { border-style:inset; }
 
 /* That's Baseball Window */
-#baseballWindow { width:200px; text-align:center; bottom:50px; left:50px; top:auto !important; }
+#baseballWindow { width:200px; max-width:80vw; text-align:center; bottom:50px; left:50px; top:auto !important; }
 #baseballWindow .window-body { cursor:pointer; font-weight:bold; font-size:14px; color:#000080; }
 #baseballWindow .window-body:hover { text-decoration:underline; }
 
 input.time-input { width:60px; text-align:right; }
 input.date-input { width:80px; text-align:right; }
+
+/* Mobile friendly: scale font */
+@media(max-width:480px){
+  #timer { font-size:24px; }
+  #nameInput, .timer-buttons button { font-size:12px; }
+  #leaderboard th, #leaderboard td { font-size:10px; padding:2px; }
+}
 </style>
 </head>
 <body>
@@ -78,8 +85,9 @@ input.date-input { width:80px; text-align:right; }
   <div class="window-body" onclick="openRandomPlayer()">Click me!</div>
 </div>
 
-<!-- Airhorn -->
+<!-- Sounds -->
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
+<audio id="fart" src="https://www.soundjay.com/human/fart-01.mp3"></audio>
 
 <!-- Start bar -->
 <div id="startBar"><div id="startButton">Start</div></div>
@@ -106,6 +114,7 @@ const timerDisplay = document.getElementById("timer");
 const nameInput = document.getElementById("nameInput");
 const board = document.querySelector("#leaderboard tbody");
 const airhorn = document.getElementById("airhorn");
+const fart = document.getElementById("fart");
 
 let startTime=null;
 let interval=null;
@@ -142,6 +151,11 @@ function renderLeaderboard(){
     `;
     board.appendChild(row);
   });
+  // Play sounds for fastest/slowest
+  if(leaderboard.length>0){
+    if(leaderboard[0]) airhorn.play();
+    if(leaderboard[leaderboard.length-1]) fart.play();
+  }
 }
 
 // Firestore real-time update
@@ -157,13 +171,21 @@ window.updateTime = async function(id,value){ await updateDoc(doc(db,"yugLeaderb
 window.updateDate = async function(id,value){ await updateDoc(doc(db,"yugLeaderboard",id),{date:value}); };
 window.deleteEntry = async function(id){ await deleteDoc(doc(db,"yugLeaderboard",id)); };
 
-// Drag windows
+// Drag windows (desktop + mobile touch)
 function makeDraggable(el){
   const header = el.querySelector('.window-header');
   let offsetX=0, offsetY=0, isDown=false;
-  header.addEventListener('mousedown',e=>{isDown=true; offsetX=e.clientX-el.offsetLeft; offsetY=e.clientY-el.offsetTop; el.style.zIndex=1000;});
-  document.addEventListener('mousemove',e=>{if(!isDown) return; el.style.left=(e.clientX-offsetX)+'px'; el.style.top=(e.clientY-offsetY)+'px';});
-  document.addEventListener('mouseup',e=>{isDown=false;});
+
+  function start(e){ isDown=true; const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; offsetX=clientX-el.offsetLeft; offsetY=clientY-el.offsetTop; el.style.zIndex=1000; }
+  function move(e){ if(!isDown) return; const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; el.style.left=(clientX-offsetX)+'px'; el.style.top=(clientY-offsetY)+'px'; }
+  function end(){ isDown=false; }
+
+  header.addEventListener('mousedown',start);
+  header.addEventListener('touchstart',start);
+  document.addEventListener('mousemove',move);
+  document.addEventListener('touchmove',move);
+  document.addEventListener('mouseup',end);
+  document.addEventListener('touchend',end);
 }
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
@@ -172,9 +194,9 @@ makeDraggable(document.getElementById('baseballWindow'));
 // Random Baseball-Reference player
 window.openRandomPlayer = function() {
   const players = [
-    "troutmi01", "bettsmo01", "judgear01", "tatisfe01",
-    "acunar01", "freemfr01", "rodriju01", "scherma01",
-    "muncylo01", "bellingma01", "deversra01", "ozziema01"
+    "troutmi01","bettsmo01","judgear01","tatisfe01",
+    "acunar01","freemfr01","rodriju01","scherma01",
+    "muncylo01","bellingma01","deversra01","ozziema01"
   ];
   const player = players[Math.floor(Math.random()*players.length)];
   const firstLetter = player[0];
