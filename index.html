@@ -122,9 +122,6 @@ body {
 }
 #baseballWindow .window-body:hover { text-decoration: underline; }
 
-/* Yug Logo window */
-#logoWindow { width: 250px; text-align: center; }
-#logoWindow img { width: 100%; }
 </style>
 </head>
 <body>
@@ -166,14 +163,6 @@ body {
 <div class="window" id="baseballWindow" style="top:250px; left:50px;">
   <div class="window-header">That's Baseball</div>
   <div class="window-body" onclick="openRandomPlayer()">Click me!</div>
-</div>
-
-<!-- Yug Logo Window -->
-<div class="window" id="logoWindow" style="top:400px; left:50px;">
-  <div class="window-header">Yug Station Logo</div>
-  <div class="window-body">
-    <img src="https://via.placeholder.com/250x100.png?text=Yug+Station+Logo" alt="Yug Station Logo" />
-  </div>
 </div>
 
 <!-- Airhorn -->
@@ -291,9 +280,8 @@ function makeDraggable(el) {
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
-makeDraggable(document.getElementById('logoWindow'));
 
-// Truly random Baseball-Reference player (fixed demo list)
+// Random Baseball-Reference player
 function openRandomPlayer() {
   const demoPlayers = [
     "bondsba01", // Barry Bonds
