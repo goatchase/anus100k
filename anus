@@ -3,101 +3,175 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>100,000 Words Challenge</title>
+<title>Barstool Yug Station Leaderboard</title>
+
 <style>
   body {
     font-family: Arial, sans-serif;
-    background: #fafafa;
-    color: #333;
+    background: #111;
+    color: white;
     text-align: center;
     margin: 40px;
   }
+
   h1 {
-    font-size: 2em;
+    font-size: 2.2em;
     margin-bottom: 10px;
   }
-  input {
-    padding: 10px;
-    font-size: 16px;
-    width: 250px;
+
+  #timer {
+    font-size: 3em;
+    margin: 20px 0;
+    font-weight: bold;
   }
+
   button {
     padding: 10px 15px;
     font-size: 16px;
-    margin-left: 5px;
+    margin: 5px;
     cursor: pointer;
+    border: none;
+    border-radius: 5px;
   }
-  #counter {
-    margin: 15px 0;
-    font-size: 18px;
-    font-weight: bold;
+
+  .start { background: green; color: white; }
+  .stop { background: red; color: white; }
+  .reset { background: gray; color: white; }
+
+  input {
+    padding: 8px;
+    font-size: 16px;
+    width: 200px;
+    margin-bottom: 10px;
   }
-  #message {
-    color: red;
-    margin-top: 10px;
-    font-weight: bold;
+
+  table {
+    margin: 30px auto;
+    border-collapse: collapse;
+    width: 400px;
+    background: #222;
   }
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 20px;
-    max-height: 400px;
-    overflow-y: scroll;
-    border: 1px solid #ccc;
-    background: #fff;
+
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #444;
   }
-  li {
-    padding: 6px;
-    border-bottom: 1px solid #eee;
+
+  th {
+    background: #333;
   }
+
+  .rank1 { color: gold; font-weight: bold; }
+  .rank2 { color: silver; }
+  .rank3 { color: #cd7f32; }
+
 </style>
 </head>
 <body>
 
-<h1>100,000 Words Challenge</h1>
-<p>Enter unique words — no duplicates allowed!</p>
+<h1>🍺 Barstool Yug Station</h1>
 
-<input id="wordInput" type="text" placeholder="Enter a word..." />
-<button onclick="addWord()">Add</button>
+<div id="timer">0.00</div>
 
-<div id="counter">Words added: 0 / 100,000</div>
-<div id="message"></div>
+<button class="start" onclick="startTimer()">Start</button>
+<button class="stop" onclick="stopTimer()">Stop</button>
+<button class="reset" onclick="resetTimer()">Reset</button>
 
-<ul id="wordList"></ul>
+<br><br>
+
+<input id="nameInput" type="text" placeholder="Enter name..." />
+
+<h2>Leaderboard</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Name</th>
+      <th>Time (sec)</th>
+      <th>Delete</th>
+    </tr>
+  </thead>
+  <tbody id="leaderboard"></tbody>
+</table>
 
 <script>
-  let words = new Set(JSON.parse(localStorage.getItem("words") || "[]"));
-  const input = document.getElementById("wordInput");
-  const list = document.getElementById("wordList");
-  const counter = document.getElementById("counter");
-  const message = document.getElementById("message");
 
-  function updateDisplay() {
-    counter.textContent = `Words added: ${words.size.toLocaleString()} / 100,000`;
-    list.innerHTML = "";
-    [...words].forEach(word => {
-      const li = document.createElement("li");
-      li.textContent = word;
-      list.appendChild(li);
-    });
+let startTime = null;
+let interval = null;
+let leaderboard = JSON.parse(localStorage.getItem("yugLeaderboard") || "[]");
+
+const timerDisplay = document.getElementById("timer");
+const board = document.getElementById("leaderboard");
+
+function startTimer() {
+  if (interval) return;
+  startTime = Date.now();
+  interval = setInterval(updateTimer, 10);
+}
+
+function updateTimer() {
+  const elapsed = (Date.now() - startTime) / 1000;
+  timerDisplay.textContent = elapsed.toFixed(2);
+}
+
+function stopTimer() {
+  if (!interval) return;
+
+  clearInterval(interval);
+  interval = null;
+
+  const finalTime = parseFloat(timerDisplay.textContent);
+  const name = document.getElementById("nameInput").value.trim();
+
+  if (!name) {
+    alert("Enter a name first.");
+    return;
   }
 
-  function addWord() {
-    const newWord = input.value.trim().toLowerCase();
-    message.textContent = "";
-    if (!newWord) return;
-    if (words.has(newWord)) {
-      message.textContent = "Duplicate! That word has already been entered.";
-    } else {
-      words.add(newWord);
-      localStorage.setItem("words", JSON.stringify([...words]));
-      updateDisplay();
-    }
-    input.value = "";
-    input.focus();
-  }
+  leaderboard.push({ name, time: finalTime });
+  leaderboard.sort((a, b) => a.time - b.time);
 
-  updateDisplay();
+  localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
+  renderLeaderboard();
+}
+
+function resetTimer() {
+  clearInterval(interval);
+  interval = null;
+  timerDisplay.textContent = "0.00";
+}
+
+function deleteEntry(index) {
+  leaderboard.splice(index, 1);
+  localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  board.innerHTML = "";
+
+  leaderboard.forEach((entry, index) => {
+    const row = document.createElement("tr");
+
+    let rankClass = "";
+    if (index === 0) rankClass = "rank1";
+    if (index === 1) rankClass = "rank2";
+    if (index === 2) rankClass = "rank3";
+
+    row.innerHTML = `
+      <td class="${rankClass}">${index + 1}</td>
+      <td>${entry.name}</td>
+      <td>${entry.time.toFixed(2)}</td>
+      <td><button onclick="deleteEntry(${index})">X</button></td>
+    `;
+
+    board.appendChild(row);
+  });
+}
+
+renderLeaderboard();
+
 </script>
 
 </body>
