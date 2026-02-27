@@ -145,12 +145,6 @@ const db = getFirestore(app);
 
 // Firestore collection reference
 const leaderboardCol = collection(db, "yugLeaderboard");
-window.leaderboardCol = leaderboardCol;
-window.addDoc = addDoc;
-window.query = query;
-window.orderBy = orderBy;
-window.getDocs = getDocs;
-window.onSnapshot = onSnapshot;
 </script>
 </head>
 <body>
@@ -203,6 +197,9 @@ window.onSnapshot = onSnapshot;
 </div>
 
 <script type="module">
+// Firestore imports
+import { leaderboardCol, addDoc, query, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
 // Timer logic
 let startTime = null;
 let interval = null;
@@ -213,24 +210,23 @@ const board = document.querySelector("#leaderboard tbody");
 const airhorn = document.getElementById("airhorn");
 const nameInput = document.getElementById("nameInput");
 
-// Firestore references
-import { leaderboardCol, addDoc, query, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-// Start Timer
-function startTimer() {
+// Attach timer functions to window so buttons can call them
+window.startTimer = function() {
   if(interval) return;
   startTime = Date.now();
-  interval = setInterval(updateTimer, 10);
-}
+  interval = setInterval(() => {
+    const elapsed = (Date.now() - startTime)/1000;
+    timerDisplay.textContent = elapsed.toFixed(2);
+  }, 10);
+};
 
-// Update Timer Display
-function updateTimer() {
-  const elapsed = (Date.now() - startTime)/1000;
-  timerDisplay.textContent = elapsed.toFixed(2);
-}
+window.resetTimer = function() {
+  clearInterval(interval);
+  interval = null;
+  timerDisplay.textContent = "0.00";
+};
 
-// Stop Timer and save to Firestore
-async function stopTimer() {
+window.stopTimer = async function() {
   if(!interval) return;
   clearInterval(interval);
   interval = null;
@@ -242,26 +238,15 @@ async function stopTimer() {
   const today = new Date().toLocaleDateString();
 
   try {
-    await addDoc(leaderboardCol, {
-      name: name,
-      time: finalTime,
-      date: today
-    });
+    await addDoc(leaderboardCol, { name, time: finalTime, date: today });
     resetTimer();
     nameInput.value = "";
   } catch (err) {
     console.error("Error saving to Firestore:", err);
   }
-}
+};
 
-// Reset Timer
-function resetTimer() {
-  clearInterval(interval);
-  interval = null;
-  timerDisplay.textContent = "0.00";
-}
-
-// Render Leaderboard
+// Render leaderboard
 function renderLeaderboard() {
   board.innerHTML = "";
   leaderboard.forEach((entry,index)=>{
@@ -277,25 +262,13 @@ function renderLeaderboard() {
   });
 }
 
-// Load leaderboard from Firestore
-async function loadLeaderboard() {
-  const q = query(leaderboardCol, orderBy("time"));
-  const snapshot = await getDocs(q);
-  leaderboard = [];
-  snapshot.forEach(doc => leaderboard.push(doc.data()));
-  renderLeaderboard();
-}
-
-// Real-time updates
+// Load leaderboard from Firestore (real-time)
 const q = query(leaderboardCol, orderBy("time"));
 onSnapshot(q, snapshot => {
   leaderboard = [];
   snapshot.forEach(doc => leaderboard.push(doc.data()));
   renderLeaderboard();
 });
-
-// Initial load
-loadLeaderboard();
 
 // Dragging logic
 function makeDraggable(el) {
@@ -321,18 +294,17 @@ makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 
-// Truly random Baseball-Reference player
-function openRandomPlayer() {
+// Random Baseball-Reference player
+window.openRandomPlayer = function() {
   const demoPlayers = [
     "bondsba01","ripkera01","griffke01","ruthba01","aaronha01",
     "mayswi01","cobbha01","mantleo01","musiala01","troutmi01",
-    "judgeaa01","scherje01","harperbr01","vottetr01","bettsmo01"
+    "judgeaa01","scherje01","harperbr01","vottetr","bettsmo01"
   ];
   const playerID = demoPlayers[Math.floor(Math.random()*demoPlayers.length)];
   const firstLetter = playerID[0];
   window.open(`https://www.baseball-reference.com/players/${firstLetter}/${playerID}.shtml`, "_blank");
-}
+};
 </script>
-
 </body>
 </html>
