@@ -121,6 +121,10 @@ body {
   color: #000080;
 }
 #baseballWindow .window-body:hover { text-decoration: underline; }
+
+/* Yug Logo window */
+#logoWindow { width: 250px; text-align: center; }
+#logoWindow img { width: 100%; }
 </style>
 </head>
 <body>
@@ -162,6 +166,14 @@ body {
 <div class="window" id="baseballWindow" style="top:250px; left:50px;">
   <div class="window-header">That's Baseball</div>
   <div class="window-body" onclick="openRandomPlayer()">Click me!</div>
+</div>
+
+<!-- Yug Logo Window -->
+<div class="window" id="logoWindow" style="top:400px; left:50px;">
+  <div class="window-header">Yug Station Logo</div>
+  <div class="window-body">
+    <img src="/mnt/data/9ccdba58-816c-4475-95b1-f83ecb5f83ecb5c8592.png" alt="Yug Station Logo" />
+  </div>
 </div>
 
 <!-- Airhorn -->
@@ -279,19 +291,15 @@ function makeDraggable(el) {
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
+makeDraggable(document.getElementById('logoWindow'));
 
-// Random Baseball Player Function (more random)
+// Truly random Baseball-Reference player
 function openRandomPlayer() {
   const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-  const playerIDs = [
-    "aaronha01","bondsba01","griffeca01","mayswi01",
-    "ruthba01","willite01","mantlemi01","jeterde01",
-    "troutmi01","bettsmo01","arodmi01","harperbr01",
-    "frazijo01","suzukik01","muncyja01"
-  ];
-  const player = playerIDs[Math.floor(Math.random() * playerIDs.length)];
-  const folder = player[0]; // first letter folder
-  window.open(`https://www.baseball-reference.com/players/${folder}/${player}.shtml`, "_blank");
+  const firstLetter = letters[Math.floor(Math.random() * letters.length)];
+  // Generate random 5-letter player ID ending with 01
+  const randomID = Array.from({length:5},()=>String.fromCharCode(97 + Math.floor(Math.random()*26))).join('') + '01';
+  window.open(`https://www.baseball-reference.com/players/${firstLetter}/${randomID}.shtml`, "_blank");
 }
 </script>
 
