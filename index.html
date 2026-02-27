@@ -8,37 +8,22 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    background: #111;
-    color: white;
+    background: #fafafa;
+    color: #333;
     text-align: center;
     margin: 40px;
-    transition: all 0.3s ease;
   }
 
   h1 {
-    font-size: 2.5em;
+    font-size: 2em;
     margin-bottom: 10px;
   }
 
   #timer {
-    font-size: 4em;
-    margin: 20px 0;
+    font-size: 2.5em;
     font-weight: bold;
+    margin: 15px 0;
   }
-
-  button {
-    padding: 10px 15px;
-    font-size: 16px;
-    margin: 5px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-  }
-
-  .start { background: green; color: white; }
-  .stop { background: red; color: white; }
-  .reset { background: gray; color: white; }
-  .tvmode { background: #0077ff; color: white; }
 
   input {
     padding: 8px;
@@ -46,63 +31,77 @@
     width: 200px;
   }
 
+  button {
+    padding: 8px 12px;
+    font-size: 14px;
+    margin: 5px;
+    cursor: pointer;
+  }
+
+  #leaderboardContainer {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    background: #fff;
+    max-height: 400px;
+    overflow-y: scroll;
+  }
+
   table {
-    margin: 30px auto;
+    width: 100%;
     border-collapse: collapse;
-    width: 700px;
-    background: #222;
   }
 
   th, td {
-    padding: 12px;
-    border-bottom: 1px solid #444;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
   }
 
-  th { background: #333; }
+  th {
+    background: #f0f0f0;
+  }
 
-  .rank1 { color: gold; font-weight: bold; font-size: 1.2em; }
-  .rank2 { color: silver; }
-  .rank3 { color: #cd7f32; }
-
+  .rank1 { font-weight: bold; }
   .tv {
-    background: black;
+    font-size: 1.5em;
   }
 
-  .tv h1 { font-size: 4em; }
-  .tv #timer { font-size: 7em; }
-  .tv table { width: 90%; font-size: 1.5em; }
+  .tv #timer {
+    font-size: 4em;
+  }
 
 </style>
 </head>
 <body>
 
-<h1>🍺 Barstool Yug Station</h1>
+<h1>Barstool Yug Station</h1>
+<p>Fastest chug wins.</p>
 
 <div id="timer">0.00</div>
 
-<button class="start" onclick="startTimer()">Start</button>
-<button class="stop" onclick="stopTimer()">Stop</button>
-<button class="reset" onclick="resetTimer()">Reset</button>
-<button class="tvmode" onclick="toggleTVMode()">TV Mode</button>
+<button onclick="startTimer()">Start</button>
+<button onclick="stopTimer()">Stop</button>
+<button onclick="resetTimer()">Reset</button>
+<button onclick="toggleTVMode()">TV Mode</button>
 
 <br><br>
 
 <input id="nameInput" type="text" placeholder="Enter name..." />
 
-<h2>Leaderboard</h2>
-
+<div id="leaderboardContainer">
 <table>
   <thead>
     <tr>
       <th>Rank</th>
       <th>Name</th>
-      <th>Time (sec)</th>
+      <th>Time</th>
       <th>Date</th>
-      <th>Delete</th>
+      <th>X</th>
     </tr>
   </thead>
   <tbody id="leaderboard"></tbody>
 </table>
+</div>
 
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 
@@ -135,18 +134,13 @@ function stopTimer() {
 
   const finalTime = parseFloat(timerDisplay.textContent);
   const name = document.getElementById("nameInput").value.trim();
-
-  if (!name) {
-    alert("Enter a name first.");
-    return;
-  }
+  if (!name) return alert("Enter a name.");
 
   const today = new Date().toLocaleDateString();
-
   const previousBest = leaderboard.length ? leaderboard[0].time : Infinity;
 
   leaderboard.push({ name, time: finalTime, date: today });
-  leaderboard.sort((a, b) => a.time - b.time);
+  leaderboard.sort((a,b) => a.time - b.time);
 
   localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
   renderLeaderboard();
@@ -154,6 +148,8 @@ function stopTimer() {
   if (leaderboard[0].time < previousBest) {
     airhorn.play();
   }
+
+  resetTimer();
 }
 
 function resetTimer() {
@@ -163,17 +159,17 @@ function resetTimer() {
 }
 
 function deleteEntry(index) {
-  leaderboard.splice(index, 1);
+  leaderboard.splice(index,1);
   localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
   renderLeaderboard();
 }
 
-function updateTime(index, newValue) {
-  const parsed = parseFloat(newValue);
+function updateTime(index, value) {
+  const parsed = parseFloat(value);
   if (isNaN(parsed)) return;
 
   leaderboard[index].time = parsed;
-  leaderboard.sort((a, b) => a.time - b.time);
+  leaderboard.sort((a,b) => a.time - b.time);
 
   localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
   renderLeaderboard();
@@ -182,22 +178,17 @@ function updateTime(index, newValue) {
 function renderLeaderboard() {
   board.innerHTML = "";
 
-  leaderboard.forEach((entry, index) => {
-
-    let rankClass = "";
-    if (index === 0) rankClass = "rank1";
-    if (index === 1) rankClass = "rank2";
-    if (index === 2) rankClass = "rank3";
-
+  leaderboard.forEach((entry,index) => {
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td class="${rankClass}">${index + 1}</td>
+      <td class="${index === 0 ? 'rank1' : ''}">${index+1}</td>
       <td>${entry.name}</td>
       <td>
-        <input type="number" step="0.01" value="${entry.time.toFixed(2)}"
-        onchange="updateTime(${index}, this.value)"
-        style="width:80px;">
+        <input type="number" step="0.01"
+          value="${entry.time.toFixed(2)}"
+          onchange="updateTime(${index}, this.value)"
+          style="width:70px;">
       </td>
       <td>${entry.date}</td>
       <td><button onclick="deleteEntry(${index})">X</button></td>
