@@ -1,612 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Anus Words v. Subs</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barstool Yug Station Leaderboard</title>
+
 <style>
-/* --- General Text Styling --- */
-body, input, button, select, textarea, div, span, li { font-family: "MS Sans Serif", Tahoma, sans-serif; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: white;
+    text-align: center;
+    margin: 40px;
+  }
 
-body {
-  background: #008080;
-  color: black;
-  margin: 0;
-  padding-bottom: 40px;
-  text-align: center;
-  overflow-x: hidden;
-}
+  h1 {
+    font-size: 2.2em;
+    margin-bottom: 10px;
+  }
 
-/* Start bar */
-#startBar {
-  position: fixed; bottom: 0; left: 0; width: 100%; height: 40px;
-  background: #c0c0c0; border-top: 2px solid #fff inset; border-bottom: 2px solid #000 outset;
-  display: flex; align-items: center; justify-content: space-between; padding: 0 5px;
-}
-#startBar button { font-weight: bold; padding: 4px 10px; border: 2px outset #fff; background: #c0c0c0; cursor: pointer; }
-#clock { font-size: 12px; font-weight: bold; }
+  #timer {
+    font-size: 3em;
+    margin: 20px 0;
+    font-weight: bold;
+  }
 
-/* Draggable dialog windows */
-.window, #subscriberBox, #timerBox, #dataBox {
-  border: 2px solid #000; box-shadow: 4px 4px #808080; background: #c0c0c0; position: absolute;
-  touch-action: none;
-  min-width: 150px;
-}
-.window { width: 600px; max-width: 90%; top: 60px; left: 50%; transform: translateX(-50%); }
-.title-bar {
-  background: #000080; color: white; padding: 3px 5px; font-weight: bold; font-size: 14px;
-  display: flex; justify-content: space-between; align-items: center;
-  cursor: move;
-}
-.title-bar button {
-  width: 20px; height: 18px; font-weight: bold;
-  border: 2px outset #fff; background: #c0c0c0; cursor: pointer;
-}
-.content { padding: 10px; background: #c0c0c0; }
+  button {
+    padding: 10px 15px;
+    font-size: 16px;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+  }
 
-/* Input and list styling */
-input#wordInput { padding: 4px; font-size: 14px; width: 100%; max-width: 580px; border: 2px inset #fff; box-sizing: border-box; }
-#counter { margin: 10px 0; font-weight: bold; font-size: 16px; }
-#message { color: red; font-weight: bold; margin-top: 5px; }
-#wordList { max-height: 250px; overflow-y: auto; background: #fff; border: 2px inset #fff; margin-top: 10px; padding: 5px; list-style: none; }
-li { border-bottom: 1px solid #808080; padding: 2px; }
+  .start { background: green; color: white; }
+  .stop { background: red; color: white; }
+  .reset { background: gray; color: white; }
 
-/* Progress bar (brown) */
-.progress-container { 
-  background: #c0c0c0; border: 2px inset #fff; width: 100%; height: 20px; margin-top: 10px; position: relative; 
-}
-.progress-bar { 
-  background: #8B4513; height: 100%; width: 0%; position: relative; 
-}
-.progress-bar span { 
-  position: absolute; width: 100%; text-align: center; font-weight: bold; color: black; 
-}
+  input {
+    padding: 8px;
+    font-size: 16px;
+    width: 200px;
+    margin-bottom: 10px;
+  }
 
-/* Subscriber tracker */
-#subscriberBox { width: 200px; z-index:10; top: 10px; right: 10px; }
-#subscriberBox .content { display: flex; flex-direction:column; align-items: center; gap: 5px; justify-content: center; font-size: 14px; }
-#subscriberBox svg { cursor:pointer; }
+  table {
+    margin: 30px auto;
+    border-collapse: collapse;
+    width: 400px;
+    background: #222;
+  }
 
-/* Timer window */
-#timerBox { width: 200px; z-index: 10; top: 10px; left: 10px; }
-#timerBox .content { padding:5px; display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; }
-#timerBox .buttons-row { display:flex; gap:5px; justify-content:center; }
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #444;
+  }
 
-/* Data window */
-#dataBox { width: 200px; z-index: 10; top: 140px; left: 10px; }
-#dataBox .content { display:flex; flex-direction:column; gap:5px; align-items:center; font-size:14px; }
+  th {
+    background: #333;
+  }
 
-/* Minimized boxes container */
-#minimizedContainer { position: fixed; bottom: 40px; left: 0; display: flex; gap: 5px; padding: 5px; }
-.minimized-btn { border: 2px outset #fff; background: #c0c0c0; cursor: pointer; padding: 2px 6px; font-size:12px; }
+  .rank1 { color: gold; font-weight: bold; }
+  .rank2 { color: silver; }
+  .rank3 { color: #cd7f32; }
 
-/* Solitaire card (kept in case further) */
-.solitaire-card {
-  position: fixed;
-  width: 50px;
-  height: 70px;
-  background: white;
-  border: 1px solid #000;
-  border-radius: 4px;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-  background-image: linear-gradient(135deg,#fff,#e0e0e0);
-  z-index: 9999;
-  pointer-events: none;
-}
-
-/* Screensaver ball (single ball, color cycling via JS) */
-.screensaver-ball {
-  position: fixed;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  font-size:16px;
-  color:white;
-  z-index:99999;
-  pointer-events:none; /* we capture clicks on document to exit */
-  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
-  user-select: none;
-}
-
-/* Mobile responsive */
-@media(max-width:700px){
-  .window,#subscriberBox,#timerBox,#dataBox{width:90%; left:5% !important; transform:none;}
-  .screensaver-ball { width: 110px; height: 110px; font-size:14px; }
-}
 </style>
 </head>
 <body>
 
-<!-- Minimized container -->
-<div id="minimizedContainer"></div>
+<h1>🍺 Barstool Yug Station</h1>
 
-<!-- Subscriber tracker -->
-<div id="subscriberBox">
-  <div class="title-bar">
-    <span>Subscribers</span>
-    <div>
-      <button class="minimizeBtn">_</button>
-      <button onclick="window.open('https://www.youtube.com/@ANewUntoldStory','_blank')">X</button>
-    </div>
-  </div>
-  <div class="content">
-    <svg id="ytLogo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="24" height="24" style="fill:red;">
-      <path d="M549.655 124.083c-6.281-23.651-24.813-42.192-48.461-48.461C459.79 64 288 64 288 64S116.21 64 74.805 75.622c-23.648 6.269-42.18 24.81-48.461 48.461C16 165.487 16 256 16 256s0 90.513 10.344 131.917c6.281 23.651 24.813 42.192 48.461 48.461C116.21 448 288 448 288 448s171.79 0 213.195-11.622c23.648-6.269 42.18-24.81 48.461-48.461C560 346.513 560 256 560 256s0-90.513-10.345-131.917zM232 336V176l142 80-142 80z"/>
-    </svg>
-    <span id="subscriberCount">Loading...</span>
-    <div class="progress-container">
-      <div id="progressBar" class="progress-bar">
-        <span id="progressText"></span>
-      </div>
-    </div>
-  </div>
-</div>
+<div id="timer">0.00</div>
 
-<!-- Timer -->
-<div id="timerBox">
-  <div class="title-bar">
-    <span>Timer</span>
-    <div>
-      <button class="minimizeBtn">_</button>
-      <button onclick="timerBox.style.display='none'">X</button>
-    </div>
-  </div>
-  <div class="content">
-    <div>Time: <span id="elapsed">00:00.00</span></div>
-    <div>ETA: <span id="eta">0d 0h 0m</span></div>
-    <div class="buttons-row">
-      <button id="startBtn">Start</button>
-      <button id="pauseBtn">Pause</button>
-      <button id="resetBtn">Reset</button>
-    </div>
-  </div>
-</div>
+<button class="start" onclick="startTimer()">Start</button>
+<button class="stop" onclick="stopTimer()">Stop</button>
+<button class="reset" onclick="resetTimer()">Reset</button>
 
-<!-- Main words window -->
-<div class="window">
-  <div class="title-bar">
-    <span>Anus Words v. Subs</span>
-    <div>
-      <button class="minimizeBtn">_</button>
-      <button id="clearWordsBtn">X</button>
-    </div>
-  </div>
-  <div class="content">
-    <input id="wordInput" type="text" placeholder="Enter a word..." />
-    <div id="counter">0 / 0</div>
-    <div id="message"></div>
-    <ul id="wordList"></ul>
-  </div>
-</div>
+<br><br>
 
-<!-- Data window -->
-<div id="dataBox">
-  <div class="title-bar">
-    <span>Data</span>
-    <div>
-      <button class="minimizeBtn">_</button>
-      <button onclick="dataBox.style.display='none'">X</button>
-    </div>
-  </div>
-  <div class="content">
-    <button id="exportBtn">Export to Excel</button>
-    <button id="importBtn">Import from Excel</button>
-    <input type="file" id="importFile" style="display:none" accept=".xlsx,.xls" />
-  </div>
-</div>
+<input id="nameInput" type="text" placeholder="Enter name..." />
 
-<!-- Start bar -->
-<div id="startBar">
-  <button id="bottomStartBtn">Start</button>
-  <div id="clock"></div>
-</div>
+<h2>Leaderboard</h2>
 
-<!-- XLSX library -->
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+<table>
+  <thead>
+    <tr>
+      <th>Rank</th>
+      <th>Name</th>
+      <th>Time (sec)</th>
+      <th>Delete</th>
+    </tr>
+  </thead>
+  <tbody id="leaderboard"></tbody>
+</table>
 
-<script type="module">
-/* ===========================
-   Firebase imports + setup
-   =========================== */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, doc, setDoc, getDocs, collection, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<script>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC8Z5Lx8W8RHYhsIGOb-yLVsv5Ufv50ULM",
-  authDomain: "anus-words.firebaseapp.com",
-  projectId: "anus-words",
-  storageBucket: "anus-words.firebasestorage.app",
-  messagingSenderId: "15328801675",
-  appId: "1:15328801675:web:4b52ea27902c27fcfeb58e",
-  measurementId: "G-MY6LCMKMX5"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const wordsCollection = collection(db,"words");
+let startTime = null;
+let interval = null;
+let leaderboard = JSON.parse(localStorage.getItem("yugLeaderboard") || "[]");
 
-/* ===========================
-   DOM shortcuts
-   =========================== */
-const input = document.getElementById("wordInput");
-const list = document.getElementById("wordList");
-const counter = document.getElementById("counter");
-const message = document.getElementById("message");
+const timerDisplay = document.getElementById("timer");
+const board = document.getElementById("leaderboard");
 
-const subscriberCountDiv = document.getElementById("subscriberCount");
-const progressBar = document.getElementById("progressBar");
-const progressText = document.getElementById("progressText");
-
-const clearWordsBtn = document.getElementById("clearWordsBtn");
-const startBtn = document.getElementById("startBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const resetBtn = document.getElementById("resetBtn");
-
-const bottomStartBtn = document.getElementById("bottomStartBtn");
-const elapsedSpan = document.getElementById("elapsed");
-const etaSpan = document.getElementById("eta");
-const timerBox = document.getElementById("timerBox");
-const minimizedContainer = document.getElementById("minimizedContainer");
-
-const dataBox = document.getElementById("dataBox");
-const exportBtn = document.getElementById("exportBtn");
-const importBtn = document.getElementById("importBtn");
-const importFile = document.getElementById("importFile");
-
-let words = new Set();
-let subscriberCount = 0;
-let timer = null;
-let elapsed = 0;
-let running = false;
-
-/* ===========================
-   Clock
-   =========================== */
-function updateClock(){ 
-  const now=new Date(); 
-  let h=now.getHours(); 
-  const ampm=h>=12?"PM":"AM"; 
-  h=h%12||12; 
-  const m=String(now.getMinutes()).padStart(2,'0'); 
-  const s=String(now.getSeconds()).padStart(2,'0'); 
-  document.getElementById("clock").textContent=`${h}:${m}:${s} ${ampm}`;
+function startTimer() {
+  if (interval) return;
+  startTime = Date.now();
+  interval = setInterval(updateTimer, 10);
 }
-setInterval(updateClock,1000);
-updateClock();
 
-/* ===========================
-   Timer controls
-   =========================== */
-function updateTimerDisplay(){ 
-  const minutes = Math.floor(elapsed/60);
-  const seconds = (elapsed % 60).toFixed(2);
-  elapsedSpan.textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(5,'0')}`;
-  const wpm = elapsed>0 ? (words.size/(elapsed/60)) : 0;
-  const etaSecs = wpm>0 ? (subscriberCount-words.size)/wpm*60 : 0; 
-  const d=Math.floor(etaSecs/86400), h=Math.floor((etaSecs%86400)/3600), m=Math.floor((etaSecs%3600)/60); 
-  etaSpan.textContent=`${d}d ${h}h ${m}m`; 
+function updateTimer() {
+  const elapsed = (Date.now() - startTime) / 1000;
+  timerDisplay.textContent = elapsed.toFixed(2);
 }
-startBtn.onclick=function(){ if(!running){ running=true; timer=setInterval(()=>{elapsed+=0.1; updateTimerDisplay();},100); }}
-pauseBtn.onclick=function(){ if(running){ clearInterval(timer); running=false; }}
-resetBtn.onclick=function(){ clearInterval(timer); elapsed=0; running=false; updateTimerDisplay(); }
 
-/* ===========================
-   Firestore: fetch & add words
-   =========================== */
-async function fetchWords(){ 
-  words.clear(); 
-  try {
-    const snapshot = await getDocs(wordsCollection);
-    snapshot.forEach(docSnap => words.add(docSnap.id.toLowerCase()));
-  } catch(e) {
-    console.error("Error fetching words:", e);
+function stopTimer() {
+  if (!interval) return;
+
+  clearInterval(interval);
+  interval = null;
+
+  const finalTime = parseFloat(timerDisplay.textContent);
+  const name = document.getElementById("nameInput").value.trim();
+
+  if (!name) {
+    alert("Enter a name first.");
+    return;
   }
-  updateDisplay(); updateTimerDisplay();
+
+  leaderboard.push({ name, time: finalTime });
+  leaderboard.sort((a, b) => a.time - b.time);
+
+  localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
+  renderLeaderboard();
 }
 
-async function addWord(){ 
-  const newWord = input.value.trim().toLowerCase(); 
-  message.textContent = ""; 
-  if(!newWord) return; 
-  if(words.has(newWord)){ message.textContent = "Duplicate!"; } 
-  else { 
-    try {
-      await setDoc(doc(db,"words",newWord), { createdAt: serverTimestamp() });
-      words.add(newWord);
-      updateDisplay();
-      updateTimerDisplay();
-    } catch(e) {
-      console.error(e);
-      message.textContent = "Error adding word.";
-    }
-  } 
-  input.value = ""; 
-  input.focus(); 
-}
-input.addEventListener("keypress", function(e){ if(e.key === "Enter") addWord(); });
-
-/* Clear words - requires password */
-clearWordsBtn.addEventListener("click", async()=>{ 
-  const password = prompt("Password:");
-  if (password !== "anuspass") { alert("Incorrect password."); return; }
-  try {
-    const snapshot = await getDocs(wordsCollection);
-    const batch = writeBatch(db);
-    snapshot.forEach(docSnap => batch.delete(docSnap.ref));
-    await batch.commit();
-    words.clear();
-    updateDisplay();
-    updateTimerDisplay();
-    alert("All words cleared!");
-  } catch (err) {
-    console.error("Error clearing words:", err);
-    alert("Failed to clear words. Check console.");
-  }
-});
-
-/* Update display & progress */
-function updateDisplay(){
-  counter.textContent = `${words.size.toLocaleString()} / ${subscriberCount.toLocaleString()}`;
-  list.innerHTML = "";
-  [...words].reverse().forEach(word => {
-    const li = document.createElement("li");
-    li.textContent = word;
-    list.appendChild(li);
-  });
-  const progress = subscriberCount > 0 ? Math.min(words.size / subscriberCount, 1) : 0;
-  progressBar.style.width = (progress*100).toFixed(2) + "%";
-  progressText.textContent = (progress*100).toFixed(2) + "%";
+function resetTimer() {
+  clearInterval(interval);
+  interval = null;
+  timerDisplay.textContent = "0.00";
 }
 
-/* ===========================
-   YouTube subscribers fetch
-   =========================== */
-async function fetchSubscribers(){ 
-  const apiKey = "AIzaSyBtcKxmge24wcaEQwJv0uBHKmQBLgIg0gw";
-  const channelId = "UCL6OtB3m-gQ2mgRg61-aDXw";
-  try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`);
-    const data = await res.json();
-    if (data.items && data.items.length > 0) {
-      subscriberCount = parseInt(data.items[0].statistics.subscriberCount);
-      subscriberCountDiv.textContent = subscriberCount.toLocaleString();
-      updateDisplay();
-    } else {
-      subscriberCountDiv.textContent = "Subscriber data not found.";
-    }
-  } catch (e) {
-    subscriberCountDiv.textContent = "Error loading subscribers.";
-    console.error(e);
-  }
+function deleteEntry(index) {
+  leaderboard.splice(index, 1);
+  localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
+  renderLeaderboard();
 }
 
-/* initialize fetches */
-fetchWords();
-fetchSubscribers();
-setInterval(fetchSubscribers, 30000);
+function renderLeaderboard() {
+  board.innerHTML = "";
 
-/* YouTube logo click */
-document.getElementById("ytLogo").addEventListener("click", ()=>{ window.open("https://www.youtube.com/@ANewUntoldStory","_blank"); });
+  leaderboard.forEach((entry, index) => {
+    const row = document.createElement("tr");
 
-/* ===========================
-   Draggable & Minimize behavior
-   =========================== */
-function makeDraggable(el){
-  const title = el.querySelector('.title-bar');
-  if (!title) return;
-  let offsetX=0, offsetY=0, isDown=false;
-  title.addEventListener('mousedown', e=>{
-    isDown=true;
-    offsetX = e.clientX - el.offsetLeft;
-    offsetY = e.clientY - el.offsetTop;
-    el.style.transition = "none";
-  });
-  document.addEventListener('mousemove', e=>{
-    if(!isDown) return;
-    let x = e.clientX - offsetX;
-    let y = e.clientY - offsetY;
-    x = Math.max(0, Math.min(window.innerWidth - el.offsetWidth, x));
-    y = Math.max(0, Math.min(window.innerHeight - el.offsetHeight, y));
-    el.style.left = x + 'px';
-    el.style.top = y + 'px';
-    el.style.transform = 'none';
-  });
-  document.addEventListener('mouseup', ()=>{ isDown=false; el.style.transition = ""; });
-}
-document.querySelectorAll('.window, #subscriberBox, #timerBox, #dataBox').forEach(makeDraggable);
+    let rankClass = "";
+    if (index === 0) rankClass = "rank1";
+    if (index === 1) rankClass = "rank2";
+    if (index === 2) rankClass = "rank3";
 
-/* Minimize buttons */
-document.querySelectorAll('.minimizeBtn').forEach(btn=>{
-  btn.addEventListener('click', e=>{
-    const win = btn.closest('.window, #subscriberBox, #timerBox, #dataBox');
-    if (!win) return;
-    win.style.display='none';
-    const minimized = document.createElement('button');
-    minimized.className='minimized-btn';
-    minimized.textContent = win.querySelector('.title-bar span').textContent;
-    minimized.onclick = ()=>{ win.style.display='block'; minimized.remove(); };
-    minimizedContainer.appendChild(minimized);
-  });
-});
+    row.innerHTML = `
+      <td class="${rankClass}">${index + 1}</td>
+      <td>${entry.name}</td>
+      <td>${entry.time.toFixed(2)}</td>
+      <td><button onclick="deleteEntry(${index})">X</button></td>
+    `;
 
-/* Mobile repositioning */
-function repositionBoxes(){
-  const boxes = [...document.querySelectorAll('.window, #subscriberBox, #timerBox, #dataBox')].filter(b=>b.style.display !== 'none');
-  let topOffset = 10;
-  boxes.forEach(b=>{
-    if(window.innerWidth < 700){
-      b.style.top = topOffset + 'px';
-      b.style.left = '5%';
-      b.style.transform = 'none';
-      topOffset += b.offsetHeight + 10;
-    }
+    board.appendChild(row);
   });
 }
-window.addEventListener('resize', repositionBoxes);
-repositionBoxes();
 
-/* ===========================
-   Export / Import (XLSX)
-   =========================== */
-exportBtn.addEventListener("click", ()=>{ 
-  if(words.size === 0){ alert("No words to export!"); return; }
-  const wordArray = Array.from(words).map(w=>[w]);
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(wordArray);
-  XLSX.utils.book_append_sheet(wb, ws, "Words");
-  XLSX.writeFile(wb, "words.xlsx");
-});
+renderLeaderboard();
 
-importBtn.addEventListener("click", ()=>{ importFile.click(); });
-importFile.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const data = await file.arrayBuffer();
-  const workbook = XLSX.read(data);
-  const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-
-  const batch = writeBatch(db);
-  let newWords = 0;
-
-  for (const row of rows) {
-    const word = row[0]?.trim().toLowerCase();
-    if (word && !words.has(word)) {
-      words.add(word);
-      const wordRef = doc(db, "words", word);
-      batch.set(wordRef, { createdAt: serverTimestamp() });
-      newWords++;
-    }
-  }
-
-  if (newWords > 0) {
-    try { await batch.commit(); } 
-    catch (err) { console.error("Firebase batch write failed:", err); alert("Some words failed to save to Firebase. Check console."); }
-  }
-
-  updateDisplay(); updateTimerDisplay();
-  alert(`Imported ${newWords} new words!`);
-});
-
-/* ===========================
-   Classic Bouncing Ball Screensaver (single ball)
-   - color-cycling
-   - started by bottomStartBtn
-   - click anywhere to exit
-   =========================== */
-
-let screensaverActive = false;
-let screensaverState = null; // holds state so we can cancel
-
-function runScreensaver_singleBall() {
-  if (screensaverActive) return; // prevent multiple
-  screensaverActive = true;
-
-  const ball = document.createElement("div");
-  ball.className = "screensaver-ball";
-  ball.textContent = "fuck no baby";
-  // ensure pointer-events none so clicks are caught by document (we exit on document click)
-  ball.style.pointerEvents = "none";
-
-  // initial size & placement
-  const size = Math.min(140, Math.max(90, Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.15)));
-  ball.style.width = size + "px";
-  ball.style.height = size + "px";
-  ball.style.lineHeight = size + "px";
-
-  // random start position inside viewport
-  let x = Math.random() * (window.innerWidth - size);
-  let y = Math.random() * (window.innerHeight - size);
-
-  // random initial velocity
-  let vx = (Math.random() * 3 + 2) * (Math.random() < 0.5 ? -1 : 1);
-  let vy = (Math.random() * 3 + 2) * (Math.random() < 0.5 ? -1 : 1);
-
-  // hue for color cycling
-  let hue = Math.floor(Math.random() * 360);
-
-  document.body.appendChild(ball);
-
-  // resize handler to keep ball inside on window resize
-  function onResize() {
-    const newSize = Math.min(140, Math.max(90, Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.15)));
-    ball.style.width = newSize + "px";
-    ball.style.height = newSize + "px";
-    // clamp position so it remains visible
-    x = Math.max(0, Math.min(x, window.innerWidth - newSize));
-    y = Math.max(0, Math.min(y, window.innerHeight - newSize));
-  }
-  window.addEventListener("resize", onResize);
-
-  let rafId = null;
-  function loop() {
-    // move
-    x += vx;
-    y += vy;
-
-    const w = ball.offsetWidth;
-    const h = ball.offsetHeight;
-
-    // bounce off walls
-    if (x <= 0) { x = 0; vx = Math.abs(vx); }
-    if (x + w >= window.innerWidth) { x = window.innerWidth - w; vx = -Math.abs(vx); }
-    if (y <= 0) { y = 0; vy = Math.abs(vy); }
-    if (y + h >= window.innerHeight) { y = window.innerHeight - h; vy = -Math.abs(vy); }
-
-    ball.style.left = Math.round(x) + "px";
-    ball.style.top = Math.round(y) + "px";
-
-    // color cycle - subtle and slow
-    hue = (hue + 0.5) % 360;
-    ball.style.background = `linear-gradient(135deg, hsl(${hue} 70% 45%), hsl(${(hue+30)%360} 70% 40%))`;
-
-    // keep text horizontal - done by normal DOM text (no rotation)
-    rafId = requestAnimationFrame(loop);
-  }
-
-  // exit handler - click anywhere removes ball and stops animation
-  function exitHandler() {
-    stopScreensaver();
-  }
-
-  function stopScreensaver() {
-    if (!screensaverActive) return;
-    screensaverActive = false;
-    cancelAnimationFrame(rafId);
-    window.removeEventListener("resize", onResize);
-    document.removeEventListener("click", exitHandler);
-    if (ball && ball.parentNode) ball.parentNode.removeChild(ball);
-    screensaverState = null;
-  }
-
-  // attach document click listener to exit
-  // NOTE: we attach with capture so it fires right away before other handlers
-  document.addEventListener("click", exitHandler, { capture: true });
-
-  // keep a reference so external code could stop it if needed
-  screensaverState = { stop: stopScreensaver };
-  loop();
-}
-
-// bind the bottom Start button AFTER everything is defined
-document.getElementById("bottomStartBtn").addEventListener("click", (e) => {
-  // prevent the click from propagating and immediately exiting the screensaver
-  e.stopPropagation();
-  // start screensaver
-  runScreensaver_singleBall();
-});
-
-/* Make sure clicking Start doesn't immediately close due to document click propagation:
-   we used e.stopPropagation() here; the screensaver itself listens on document click capture,
-   but stopping propagation on the button prevents the immediate close. */
-
-/* ===========================
-   End of script
-   =========================== */
 </script>
+
 </body>
 </html>
