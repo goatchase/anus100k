@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Barstool Yug Station - Retro 95 Draggable</title>
+<title>Barstool Yug Station - Retro 95</title>
 <style>
+/* Windows 95 font + sizing */
 body {
   font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+  font-size: 12px;
   background: #008080;
+  color: black;
   margin: 0;
   padding: 20px;
 }
@@ -36,9 +39,10 @@ body {
 
 /* Buttons */
 button {
-  padding: 4px 10px;
-  font-size: 14px;
-  margin: 4px;
+  padding: 2px 6px;
+  font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+  font-size: 12px;
+  margin: 2px;
   border: 2px outset #ffffff;
   background: #c0c0c0;
   cursor: pointer;
@@ -51,19 +55,19 @@ button:active {
 
 /* Inputs */
 input {
-  padding: 4px;
-  font-size: 14px;
-  width: 80%;
+  padding: 2px;
+  font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+  font-size: 12px;
   border: 2px inset #fff;
 }
 
 /* Timer display */
 #timer {
-  font-family: monospace;
-  font-size: 2em;
+  font-family: 'MS Sans Serif', Tahoma, Geneva, monospace;
+  font-size: 16px;
   font-weight: bold;
   margin: 10px 0;
-  padding: 5px;
+  padding: 4px;
   background: #ffffff;
   border: 2px solid #808080;
   width: 150px;
@@ -74,12 +78,12 @@ input {
 #leaderboard table {
   width: 100%;
   border-collapse: collapse;
-  font-family: monospace;
+  font-family: 'MS Sans Serif', Tahoma, Geneva, monospace;
 }
 
 #leaderboard th, #leaderboard td {
   border: 1px solid #808080;
-  padding: 2px;
+  padding: 4px 2px;
   text-align: center;
   font-size: 12px;
 }
@@ -87,14 +91,43 @@ input {
 #leaderboard th {
   background: #000080;
   color: white;
+  font-weight: bold;
 }
 
 /* Rank highlight */
 .rank1 { color: red; font-weight: bold; }
 
-/* TV Mode */
-.tv #timer { font-size: 3em; width: 250px; }
-.tv table { font-size: 1.2em; }
+/* Start bar button */
+#startBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 30px;
+  background: #c0c0c0;
+  border-top: 2px solid #fff;
+  display: flex;
+  align-items: center;
+  padding-left: 4px;
+  box-sizing: border-box;
+  font-weight: bold;
+}
+
+#startButton {
+  width: 60px;
+  height: 24px;
+  background: #c0c0c0;
+  border: 2px outset #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+}
+#startButton:active {
+  border-style: inset;
+}
+
 </style>
 </head>
 <body>
@@ -108,7 +141,6 @@ input {
     <button onclick="startTimer()">Start</button>
     <button onclick="stopTimer()">Stop</button>
     <button onclick="resetTimer()">Reset</button>
-    <button onclick="toggleTVMode()">TV Mode</button>
   </div>
 </div>
 
@@ -131,7 +163,13 @@ input {
   </div>
 </div>
 
+<!-- Airhorn -->
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
+
+<!-- Windows 95 Start bar -->
+<div id="startBar">
+  <div id="startButton">Start</div>
+</div>
 
 <script>
 // Timer logic
@@ -207,30 +245,23 @@ function renderLeaderboard(){
   });
 }
 
-function toggleTVMode() {
-  document.body.classList.toggle("tv");
-}
-
 renderLeaderboard();
 
 // Dragging logic
 function makeDraggable(el) {
   const header = el.querySelector('.window-header');
   let offsetX=0, offsetY=0, isDown=false;
-
   header.addEventListener('mousedown', e=>{
     isDown=true;
     offsetX = e.clientX - el.offsetLeft;
     offsetY = e.clientY - el.offsetTop;
-    el.style.zIndex = 1000; // bring to front
+    el.style.zIndex = 1000;
   });
-
   document.addEventListener('mousemove', e=>{
     if(!isDown) return;
     el.style.left = (e.clientX - offsetX) + 'px';
     el.style.top = (e.clientY - offsetY) + 'px';
   });
-
   document.addEventListener('mouseup', e=>{
     isDown=false;
   });
@@ -239,5 +270,6 @@ function makeDraggable(el) {
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 </script>
+
 </body>
 </html>
