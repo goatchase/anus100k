@@ -9,10 +9,15 @@ body { font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif; font-size:12px; 
 .window { background:#c0c0c0; border:2px solid #808080; position:absolute; box-shadow:2px 2px 0px #fff inset; cursor:default; }
 .window-header { background:#000080; color:white; font-weight:bold; padding:2px 5px; cursor:move; user-select:none; }
 .window-body { padding:10px; }
+
+/* Timer Window */
 #timerWindow { width:360px; }
-#timer { font-family:'MS Sans Serif', monospace; font-size:28px; font-weight:bold; margin:12px 0; padding:8px; background:#fff; border:2px solid #808080; width:220px; text-align:center; }
-#nameInput { width:220px; padding:6px; font-size:14px; margin-bottom:8px; }
-.timer-buttons button { padding:6px 12px; font-size:14px; margin:4px 4px 0 0; }
+#timer { font-family:'MS Sans Serif', monospace; font-size:28px; font-weight:bold; margin:12px 0; padding:8px; background:#fff; border:2px solid #808080; width:100%; box-sizing:border-box; text-align:center; }
+#nameInput { width:100%; padding:6px; font-size:14px; margin-bottom:8px; box-sizing:border-box; }
+.timer-buttons { display:flex; gap:4px; }
+.timer-buttons button { flex:1; padding:6px 0; font-size:14px; }
+
+/* Leaderboard window */
 #leaderboardWindow { width:480px; }
 #leaderboard table { width:100%; border-collapse:collapse; font-family:'MS Sans Serif', monospace; }
 #leaderboard th, #leaderboard td { border:1px solid #808080; padding:4px 2px; font-size:12px; }
@@ -23,12 +28,17 @@ body { font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif; font-size:12px; 
 #leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:6px; }
 #leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; }
 .rank1 { color:red; font-weight:bold; }
+
+/* Start bar */
 #startBar { position:fixed; bottom:0; left:0; width:100%; height:30px; background:#c0c0c0; border-top:2px solid #fff; display:flex; align-items:center; padding-left:4px; box-sizing:border-box; font-weight:bold; }
 #startButton { width:60px; height:24px; background:#c0c0c0; border:2px outset #fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; }
 #startButton:active { border-style:inset; }
-#baseballWindow { width:200px; text-align:center; }
+
+/* That's Baseball Window */
+#baseballWindow { width:200px; text-align:center; bottom:50px; left:50px; top:auto !important; }
 #baseballWindow .window-body { cursor:pointer; font-weight:bold; font-size:14px; color:#000080; }
 #baseballWindow .window-body:hover { text-decoration:underline; }
+
 input.time-input { width:60px; text-align:right; }
 input.date-input { width:80px; text-align:right; }
 </style>
@@ -55,9 +65,7 @@ input.date-input { width:80px; text-align:right; }
   <div class="window-body">
     <table id="leaderboard">
       <thead>
-        <tr>
-          <th>Rank</th><th>Name</th><th>Time</th><th>Date</th><th>X</th>
-        </tr>
+        <tr><th>Rank</th><th>Name</th><th>Time</th><th>Date</th><th>X</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -65,9 +73,9 @@ input.date-input { width:80px; text-align:right; }
 </div>
 
 <!-- That's Baseball -->
-<div class="window" id="baseballWindow" style="top:250px; left:50px;">
+<div class="window" id="baseballWindow">
   <div class="window-header">That's Baseball</div>
-  <div class="window-body" onclick="openRandomBaseball()">Click me!</div>
+  <div class="window-body" onclick="openRandomFangraphs()">Click me!</div>
 </div>
 
 <!-- Airhorn -->
@@ -103,7 +111,7 @@ let startTime=null;
 let interval=null;
 let leaderboard=[];
 
-// Timer functions
+// Timer
 window.startTimer = function(){
   if(interval) return;
   startTime = Date.now();
@@ -120,7 +128,7 @@ window.stopTimer = async function(){
   catch(e){ console.error("Firestore error:",e);}
 };
 
-// Render leaderboard editable
+// Render editable leaderboard
 function renderLeaderboard(){
   board.innerHTML="";
   leaderboard.forEach((entry,i)=>{
@@ -144,21 +152,12 @@ onSnapshot(q, snapshot=>{
   renderLeaderboard();
 });
 
-// Update time/date in Firestore
-window.updateTime = async function(id,value){
-  const docRef = doc(db,"yugLeaderboard",id);
-  await updateDoc(docRef,{time:parseFloat(value)});
-};
-window.updateDate = async function(id,value){
-  const docRef = doc(db,"yugLeaderboard",id);
-  await updateDoc(docRef,{date:value});
-};
-window.deleteEntry = async function(id){
-  const docRef = doc(db,"yugLeaderboard",id);
-  await deleteDoc(docRef);
-};
+// Update Firestore
+window.updateTime = async function(id,value){ await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)}); };
+window.updateDate = async function(id,value){ await updateDoc(doc(db,"yugLeaderboard",id),{date:value}); };
+window.deleteEntry = async function(id){ await deleteDoc(doc(db,"yugLeaderboard",id)); };
 
-// Dragging windows
+// Drag windows
 function makeDraggable(el){
   const header = el.querySelector('.window-header');
   let offsetX=0, offsetY=0, isDown=false;
@@ -170,16 +169,11 @@ makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 
-// Random baseball site
-window.openRandomBaseball = function(){
-  const sites = [
-    "https://www.mlb.com/stats",
-    "https://www.fangraphs.com",
-    "https://www.baseball-reference.com",
-    "https://www.mlb.com/news"
-  ];
-  const url = sites[Math.floor(Math.random()*sites.length)];
-  window.open(url,"_blank");
+// Random Fangraphs player
+window.openRandomFangraphs = function(){
+  const players = ["mookie-betts","mike-trout","aaron-judge","ronald-acuna-jr","tatis-felix","freddie-freeman","julio-rodriguez","scherzer-max"];
+  const player = players[Math.floor(Math.random()*players.length)];
+  window.open(`https://www.fangraphs.com/players/${player}`,"_blank");
 };
 </script>
 </body>
