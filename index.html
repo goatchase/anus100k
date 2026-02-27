@@ -172,7 +172,7 @@ body {
 <div class="window" id="logoWindow" style="top:400px; left:50px;">
   <div class="window-header">Yug Station Logo</div>
   <div class="window-body">
-    <img src="/mnt/data/9ccdba58-816c-4475-95b1-f83ecb5f83ecb5c8592.png" alt="Yug Station Logo" />
+    <img src="https://via.placeholder.com/250x100.png?text=Yug+Station+Logo" alt="Yug Station Logo" />
   </div>
 </div>
 
@@ -221,7 +221,7 @@ function stopTimer() {
   renderLeaderboard();
   if(leaderboard[0].time < previousBest) airhorn.play();
   resetTimer();
-  nameInput.value = ""; // clear name after stop
+  nameInput.value = "";
 }
 
 function resetTimer() {
@@ -293,13 +293,18 @@ makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 makeDraggable(document.getElementById('logoWindow'));
 
-// Truly random Baseball-Reference player
+// Truly random Baseball-Reference player (fixed demo list)
 function openRandomPlayer() {
-  const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
-  const firstLetter = letters[Math.floor(Math.random() * letters.length)];
-  // Generate random 5-letter player ID ending with 01
-  const randomID = Array.from({length:5},()=>String.fromCharCode(97 + Math.floor(Math.random()*26))).join('') + '01';
-  window.open(`https://www.baseball-reference.com/players/${firstLetter}/${randomID}.shtml`, "_blank");
+  const demoPlayers = [
+    "bondsba01", // Barry Bonds
+    "ripkera01", // Cal Ripken
+    "griffke01", // Ken Griffey Jr
+    "ruthba01",  // Babe Ruth
+    "aaronha01"  // Hank Aaron
+  ];
+  const playerID = demoPlayers[Math.floor(Math.random()*demoPlayers.length)];
+  const firstLetter = playerID[0];
+  window.open(`https://www.baseball-reference.com/players/${firstLetter}/${playerID}.shtml`, "_blank");
 }
 </script>
 
