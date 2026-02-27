@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Barstool Yug Station - Retro 95</title>
 <style>
-/* Windows 95 font + sizing */
 body {
   font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
   font-size: 12px;
@@ -15,9 +14,8 @@ body {
   padding: 20px;
 }
 
-/* Draggable window style */
+/* Draggable windows */
 .window {
-  width: 300px;
   background: #c0c0c0;
   border: 2px solid #808080;
   position: absolute;
@@ -37,67 +35,55 @@ body {
   padding: 10px;
 }
 
-/* Buttons */
-button {
-  padding: 2px 6px;
-  font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
-  font-size: 12px;
-  margin: 2px;
-  border: 2px outset #ffffff;
-  background: #c0c0c0;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-button:active {
-  border-style: inset;
-}
-
-/* Inputs */
-input {
-  padding: 2px;
-  font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
-  font-size: 12px;
-  border: 2px inset #fff;
-}
-
-/* Timer display */
-#timer {
-  font-family: 'MS Sans Serif', Tahoma, Geneva, monospace;
-  font-size: 16px;
-  font-weight: bold;
-  margin: 10px 0;
-  padding: 4px;
-  background: #ffffff;
-  border: 2px solid #808080;
-  width: 150px;
+/* Timer Window */
+#timerWindow { width: 360px; }
+#timer { 
+  font-family: 'MS Sans Serif', monospace;
+  font-size: 28px; 
+  font-weight: bold; 
+  margin: 12px 0; 
+  padding: 8px; 
+  background: #ffffff; 
+  border: 2px solid #808080; 
+  width: 220px; 
   text-align: center;
+}
+#nameInput {
+  width: 220px;
+  padding: 6px;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.timer-buttons button {
+  padding: 6px 12px;
+  font-size: 14px;
+  margin: 4px 4px 0 0;
 }
 
 /* Leaderboard window */
+#leaderboardWindow { width: 440px; }
 #leaderboard table {
   width: 100%;
   border-collapse: collapse;
-  font-family: 'MS Sans Serif', Tahoma, Geneva, monospace;
+  font-family: 'MS Sans Serif', monospace;
 }
-
 #leaderboard th, #leaderboard td {
   border: 1px solid #808080;
   padding: 4px 2px;
-  text-align: center;
   font-size: 12px;
 }
+#leaderboard th { background: #000080; color: white; font-weight: bold; }
 
-#leaderboard th {
-  background: #000080;
-  color: white;
-  font-weight: bold;
-}
+/* Leaderboard alignment */
+#leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align: center; }
+#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align: left; padding-left: 6px; }
+#leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
+#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align: right; padding-right: 6px; }
+#leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align: center; }
 
-/* Rank highlight */
 .rank1 { color: red; font-weight: bold; }
 
-/* Start bar button */
+/* Start bar */
 #startBar {
   position: fixed;
   bottom: 0;
@@ -112,7 +98,6 @@ input {
   box-sizing: border-box;
   font-weight: bold;
 }
-
 #startButton {
   width: 60px;
   height: 24px;
@@ -124,9 +109,7 @@ input {
   cursor: pointer;
   font-size: 12px;
 }
-#startButton:active {
-  border-style: inset;
-}
+#startButton:active { border-style: inset; }
 
 </style>
 </head>
@@ -138,14 +121,16 @@ input {
   <div class="window-body">
     <div id="timer">0.00</div>
     <input id="nameInput" type="text" placeholder="Enter name..." /><br>
-    <button onclick="startTimer()">Start</button>
-    <button onclick="stopTimer()">Stop</button>
-    <button onclick="resetTimer()">Reset</button>
+    <div class="timer-buttons">
+      <button onclick="startTimer()">Start</button>
+      <button onclick="stopTimer()">Stop</button>
+      <button onclick="resetTimer()">Reset</button>
+    </div>
   </div>
 </div>
 
 <!-- Leaderboard Window -->
-<div class="window" id="leaderboardWindow" style="top:50px; left:400px; width:400px;">
+<div class="window" id="leaderboardWindow" style="top:50px; left:450px;">
   <div class="window-header">Leaderboard</div>
   <div class="window-body" id="leaderboardContainer">
     <table id="leaderboard">
