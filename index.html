@@ -181,6 +181,7 @@ let leaderboard = JSON.parse(localStorage.getItem("yugLeaderboard") || "[]");
 const timerDisplay = document.getElementById("timer");
 const board = document.querySelector("#leaderboard tbody");
 const airhorn = document.getElementById("airhorn");
+const nameInput = document.getElementById("nameInput");
 
 function startTimer() {
   if(interval) return;
@@ -198,7 +199,7 @@ function stopTimer() {
   clearInterval(interval);
   interval = null;
   const finalTime = parseFloat(timerDisplay.textContent);
-  const name = document.getElementById("nameInput").value.trim();
+  const name = nameInput.value.trim();
   if(!name) return alert("Enter a name.");
   const today = new Date().toLocaleDateString();
   const previousBest = leaderboard.length ? leaderboard[0].time : Infinity;
@@ -208,6 +209,7 @@ function stopTimer() {
   renderLeaderboard();
   if(leaderboard[0].time < previousBest) airhorn.play();
   resetTimer();
+  nameInput.value = ""; // clear name after stop
 }
 
 function resetTimer() {
@@ -231,6 +233,12 @@ function updateTime(index,value){
   renderLeaderboard();
 }
 
+function updateDate(index,value){
+  leaderboard[index].date = value;
+  localStorage.setItem("yugLeaderboard",JSON.stringify(leaderboard));
+  renderLeaderboard();
+}
+
 function renderLeaderboard(){
   board.innerHTML = "";
   leaderboard.forEach((entry,index)=>{
@@ -239,7 +247,7 @@ function renderLeaderboard(){
       <td class="${index===0?'rank1':''}">${index+1}</td>
       <td>${entry.name}</td>
       <td><input type="number" step="0.01" value="${entry.time.toFixed(2)}" onchange="updateTime(${index}, this.value)" style="width:60px;"></td>
-      <td>${entry.date}</td>
+      <td><input type="text" value="${entry.date}" onchange="updateDate(${index}, this.value)" style="width:80px;text-align:right;"></td>
       <td><button onclick="deleteEntry(${index})">X</button></td>
     `;
     board.appendChild(row);
@@ -272,15 +280,18 @@ makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 
-// Random Baseball Player Function
+// Random Baseball Player Function (more random)
 function openRandomPlayer() {
-  const players = [
-    "aaronha01", "bondsba01", "griffeca01", "mayswi01", 
-    "ruthba01", "willite01", "mantlemi01", "jeterde01",
-    "troutmi01", "bettsmo01"
+  const letters = 'abcdefghijklmnopqrstuvwxyz'.split('');
+  const playerIDs = [
+    "aaronha01","bondsba01","griffeca01","mayswi01",
+    "ruthba01","willite01","mantlemi01","jeterde01",
+    "troutmi01","bettsmo01","arodmi01","harperbr01",
+    "frazijo01","suzukik01","muncyja01"
   ];
-  const player = players[Math.floor(Math.random() * players.length)];
-  window.open(`https://www.baseball-reference.com/players/${player[0]}/${player}.shtml`, "_blank");
+  const player = playerIDs[Math.floor(Math.random() * playerIDs.length)];
+  const folder = player[0]; // first letter folder
+  window.open(`https://www.baseball-reference.com/players/${folder}/${player}.shtml`, "_blank");
 }
 </script>
 
