@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Barstool Yug Station Leaderboard</title>
+<title>Barstool Yug Station</title>
 
 <style>
   body {
@@ -12,15 +12,16 @@
     color: white;
     text-align: center;
     margin: 40px;
+    transition: all 0.3s ease;
   }
 
   h1 {
-    font-size: 2.2em;
+    font-size: 2.5em;
     margin-bottom: 10px;
   }
 
   #timer {
-    font-size: 3em;
+    font-size: 4em;
     margin: 20px 0;
     font-weight: bold;
   }
@@ -37,33 +38,39 @@
   .start { background: green; color: white; }
   .stop { background: red; color: white; }
   .reset { background: gray; color: white; }
+  .tvmode { background: #0077ff; color: white; }
 
   input {
     padding: 8px;
     font-size: 16px;
     width: 200px;
-    margin-bottom: 10px;
   }
 
   table {
     margin: 30px auto;
     border-collapse: collapse;
-    width: 400px;
+    width: 700px;
     background: #222;
   }
 
   th, td {
-    padding: 10px;
+    padding: 12px;
     border-bottom: 1px solid #444;
   }
 
-  th {
-    background: #333;
-  }
+  th { background: #333; }
 
-  .rank1 { color: gold; font-weight: bold; }
+  .rank1 { color: gold; font-weight: bold; font-size: 1.2em; }
   .rank2 { color: silver; }
   .rank3 { color: #cd7f32; }
+
+  .tv {
+    background: black;
+  }
+
+  .tv h1 { font-size: 4em; }
+  .tv #timer { font-size: 7em; }
+  .tv table { width: 90%; font-size: 1.5em; }
 
 </style>
 </head>
@@ -76,6 +83,7 @@
 <button class="start" onclick="startTimer()">Start</button>
 <button class="stop" onclick="stopTimer()">Stop</button>
 <button class="reset" onclick="resetTimer()">Reset</button>
+<button class="tvmode" onclick="toggleTVMode()">TV Mode</button>
 
 <br><br>
 
@@ -89,11 +97,14 @@
       <th>Rank</th>
       <th>Name</th>
       <th>Time (sec)</th>
+      <th>Date</th>
       <th>Delete</th>
     </tr>
   </thead>
   <tbody id="leaderboard"></tbody>
 </table>
+
+<audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 
 <script>
 
@@ -103,6 +114,7 @@ let leaderboard = JSON.parse(localStorage.getItem("yugLeaderboard") || "[]");
 
 const timerDisplay = document.getElementById("timer");
 const board = document.getElementById("leaderboard");
+const airhorn = document.getElementById("airhorn");
 
 function startTimer() {
   if (interval) return;
@@ -129,11 +141,19 @@ function stopTimer() {
     return;
   }
 
-  leaderboard.push({ name, time: finalTime });
+  const today = new Date().toLocaleDateString();
+
+  const previousBest = leaderboard.length ? leaderboard[0].time : Infinity;
+
+  leaderboard.push({ name, time: finalTime, date: today });
   leaderboard.sort((a, b) => a.time - b.time);
 
   localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
   renderLeaderboard();
+
+  if (leaderboard[0].time < previousBest) {
+    airhorn.play();
+  }
 }
 
 function resetTimer() {
@@ -148,26 +168,47 @@ function deleteEntry(index) {
   renderLeaderboard();
 }
 
+function updateTime(index, newValue) {
+  const parsed = parseFloat(newValue);
+  if (isNaN(parsed)) return;
+
+  leaderboard[index].time = parsed;
+  leaderboard.sort((a, b) => a.time - b.time);
+
+  localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
+  renderLeaderboard();
+}
+
 function renderLeaderboard() {
   board.innerHTML = "";
 
   leaderboard.forEach((entry, index) => {
-    const row = document.createElement("tr");
 
     let rankClass = "";
     if (index === 0) rankClass = "rank1";
     if (index === 1) rankClass = "rank2";
     if (index === 2) rankClass = "rank3";
 
+    const row = document.createElement("tr");
+
     row.innerHTML = `
       <td class="${rankClass}">${index + 1}</td>
       <td>${entry.name}</td>
-      <td>${entry.time.toFixed(2)}</td>
+      <td>
+        <input type="number" step="0.01" value="${entry.time.toFixed(2)}"
+        onchange="updateTime(${index}, this.value)"
+        style="width:80px;">
+      </td>
+      <td>${entry.date}</td>
       <td><button onclick="deleteEntry(${index})">X</button></td>
     `;
 
     board.appendChild(row);
   });
+}
+
+function toggleTVMode() {
+  document.body.classList.toggle("tv");
 }
 
 renderLeaderboard();
