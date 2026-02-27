@@ -121,8 +121,37 @@ body {
   color: #000080;
 }
 #baseballWindow .window-body:hover { text-decoration: underline; }
-
 </style>
+
+<!-- Firebase v9 modular SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBLX1aCaIrF4ro5cHQky2DrN1Sd-hooJyU",
+  authDomain: "goatchase-e9502.firebaseapp.com",
+  projectId: "goatchase-e9502",
+  storageBucket: "goatchase-e9502.firebasestorage.app",
+  messagingSenderId: "16998517478",
+  appId: "1:16998517478:web:8985a2bf70d7df9bccc927",
+  measurementId: "G-1432J8NJ77"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Firestore collection reference
+const leaderboardCol = collection(db, "yugLeaderboard");
+window.leaderboardCol = leaderboardCol;
+window.addDoc = addDoc;
+window.query = query;
+window.orderBy = orderBy;
+window.getDocs = getDocs;
+window.onSnapshot = onSnapshot;
+</script>
 </head>
 <body>
 
@@ -173,89 +202,100 @@ body {
   <div id="startButton">Start</div>
 </div>
 
-<script>
+<script type="module">
 // Timer logic
 let startTime = null;
 let interval = null;
-let leaderboard = JSON.parse(localStorage.getItem("yugLeaderboard") || "[]");
+let leaderboard = [];
 
 const timerDisplay = document.getElementById("timer");
 const board = document.querySelector("#leaderboard tbody");
 const airhorn = document.getElementById("airhorn");
 const nameInput = document.getElementById("nameInput");
 
+// Firestore references
+import { leaderboardCol, addDoc, query, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// Start Timer
 function startTimer() {
   if(interval) return;
   startTime = Date.now();
   interval = setInterval(updateTimer, 10);
 }
 
+// Update Timer Display
 function updateTimer() {
   const elapsed = (Date.now() - startTime)/1000;
   timerDisplay.textContent = elapsed.toFixed(2);
 }
 
-function stopTimer() {
+// Stop Timer and save to Firestore
+async function stopTimer() {
   if(!interval) return;
   clearInterval(interval);
   interval = null;
-  const finalTime = parseFloat(timerDisplay.textContent);
+
   const name = nameInput.value.trim();
   if(!name) return alert("Enter a name.");
+
+  const finalTime = parseFloat(timerDisplay.textContent);
   const today = new Date().toLocaleDateString();
-  const previousBest = leaderboard.length ? leaderboard[0].time : Infinity;
-  leaderboard.push({name,time:finalTime,date:today});
-  leaderboard.sort((a,b)=>a.time-b.time);
-  localStorage.setItem("yugLeaderboard",JSON.stringify(leaderboard));
-  renderLeaderboard();
-  if(leaderboard[0].time < previousBest) airhorn.play();
-  resetTimer();
-  nameInput.value = "";
+
+  try {
+    await addDoc(leaderboardCol, {
+      name: name,
+      time: finalTime,
+      date: today
+    });
+    resetTimer();
+    nameInput.value = "";
+  } catch (err) {
+    console.error("Error saving to Firestore:", err);
+  }
 }
 
+// Reset Timer
 function resetTimer() {
   clearInterval(interval);
   interval = null;
   timerDisplay.textContent = "0.00";
 }
 
-function deleteEntry(index){
-  leaderboard.splice(index,1);
-  localStorage.setItem("yugLeaderboard",JSON.stringify(leaderboard));
-  renderLeaderboard();
-}
-
-function updateTime(index,value){
-  const parsed = parseFloat(value);
-  if(isNaN(parsed)) return;
-  leaderboard[index].time = parsed;
-  leaderboard.sort((a,b)=>a.time-b.time);
-  localStorage.setItem("yugLeaderboard",JSON.stringify(leaderboard));
-  renderLeaderboard();
-}
-
-function updateDate(index,value){
-  leaderboard[index].date = value;
-  localStorage.setItem("yugLeaderboard",JSON.stringify(leaderboard));
-  renderLeaderboard();
-}
-
-function renderLeaderboard(){
+// Render Leaderboard
+function renderLeaderboard() {
   board.innerHTML = "";
   leaderboard.forEach((entry,index)=>{
     const row = document.createElement("tr");
     row.innerHTML = `
       <td class="${index===0?'rank1':''}">${index+1}</td>
       <td>${entry.name}</td>
-      <td><input type="number" step="0.01" value="${entry.time.toFixed(2)}" onchange="updateTime(${index}, this.value)" style="width:60px;"></td>
-      <td><input type="text" value="${entry.date}" onchange="updateDate(${index}, this.value)" style="width:80px;text-align:right;"></td>
-      <td><button onclick="deleteEntry(${index})">X</button></td>
+      <td>${entry.time.toFixed(2)}</td>
+      <td>${entry.date}</td>
+      <td></td>
     `;
     board.appendChild(row);
   });
 }
 
-renderLeaderboard();
+// Load leaderboard from Firestore
+async function loadLeaderboard() {
+  const q = query(leaderboardCol, orderBy("time"));
+  const snapshot = await getDocs(q);
+  leaderboard = [];
+  snapshot.forEach(doc => leaderboard.push(doc.data()));
+  renderLeaderboard();
+}
+
+// Real-time updates
+const q = query(leaderboardCol, orderBy("time"));
+onSnapshot(q, snapshot => {
+  leaderboard = [];
+  snapshot.forEach(doc => leaderboard.push(doc.data()));
+  renderLeaderboard();
+});
+
+// Initial load
+loadLeaderboard();
 
 // Dragging logic
 function makeDraggable(el) {
@@ -281,14 +321,12 @@ makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 
-// Random Baseball-Reference player
+// Truly random Baseball-Reference player
 function openRandomPlayer() {
   const demoPlayers = [
-    "bondsba01", // Barry Bonds
-    "ripkera01", // Cal Ripken
-    "griffke01", // Ken Griffey Jr
-    "ruthba01",  // Babe Ruth
-    "aaronha01"  // Hank Aaron
+    "bondsba01","ripkera01","griffke01","ruthba01","aaronha01",
+    "mayswi01","cobbha01","mantleo01","musiala01","troutmi01",
+    "judgeaa01","scherje01","harperbr01","vottetr01","bettsmo01"
   ];
   const playerID = demoPlayers[Math.floor(Math.random()*demoPlayers.length)];
   const firstLetter = playerID[0];
