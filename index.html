@@ -3,180 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Barstool Yug Station - Retro 95</title>
-
+<title>Barstool Yug Station - Retro 95 Draggable</title>
 <style>
-  body {
-    font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
-    background: #c0c0c0;
-    color: black;
-    text-align: center;
-    margin: 20px;
-  }
+body {
+  font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
+  background: #008080;
+  margin: 0;
+  padding: 20px;
+}
 
-  h1 {
-    font-size: 1.8em;
-    margin-bottom: 10px;
-    font-weight: bold;
-  }
+/* Draggable window style */
+.window {
+  width: 300px;
+  background: #c0c0c0;
+  border: 2px solid #808080;
+  position: absolute;
+  box-shadow: 2px 2px 0px #fff inset;
+}
 
-  #timer {
-    font-family: monospace;
-    font-size: 2em;
-    font-weight: bold;
-    margin: 15px 0;
-    padding: 10px;
-    background: #ffffff;
-    border: 2px solid #808080;
-    width: 200px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+.window-header {
+  background: #000080;
+  color: white;
+  font-weight: bold;
+  padding: 2px 5px;
+  cursor: move;
+  user-select: none;
+}
 
-  input {
-    padding: 4px;
-    font-size: 14px;
-    width: 180px;
-    border: 2px inset #ffffff;
-    margin-bottom: 8px;
-  }
+.window-body {
+  padding: 10px;
+}
 
-  button {
-    padding: 4px 10px;
-    font-size: 14px;
-    margin: 4px;
-    border: 2px outset #ffffff;
-    background: #c0c0c0;
-    cursor: pointer;
-    font-weight: bold;
-  }
+/* Buttons */
+button {
+  padding: 4px 10px;
+  font-size: 14px;
+  margin: 4px;
+  border: 2px outset #ffffff;
+  background: #c0c0c0;
+  cursor: pointer;
+  font-weight: bold;
+}
 
-  button:active {
-    border-style: inset;
-  }
+button:active {
+  border-style: inset;
+}
 
-  #leaderboardContainer {
-    margin-top: 20px;
-    border: 2px solid #808080;
-    background: #ffffff;
-    max-height: 400px;
-    overflow-y: scroll;
-    width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 2px;
-  }
+/* Inputs */
+input {
+  padding: 4px;
+  font-size: 14px;
+  width: 80%;
+  border: 2px inset #fff;
+}
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    font-family: monospace;
-  }
+/* Timer display */
+#timer {
+  font-family: monospace;
+  font-size: 2em;
+  font-weight: bold;
+  margin: 10px 0;
+  padding: 5px;
+  background: #ffffff;
+  border: 2px solid #808080;
+  width: 150px;
+  text-align: center;
+}
 
-  th, td {
-    border: 1px solid #808080;
-    padding: 4px;
-    text-align: center;
-  }
+/* Leaderboard window */
+#leaderboard table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: monospace;
+}
 
-  th {
-    background: #000080;
-    color: white;
-    font-weight: bold;
-  }
+#leaderboard th, #leaderboard td {
+  border: 1px solid #808080;
+  padding: 2px;
+  text-align: center;
+  font-size: 12px;
+}
 
-  .rank1 {
-    color: red;
-    font-weight: bold;
-  }
+#leaderboard th {
+  background: #000080;
+  color: white;
+}
 
-  .tv {
-    font-size: 1.5em;
-  }
+/* Rank highlight */
+.rank1 { color: red; font-weight: bold; }
 
-  .tv #timer {
-    font-size: 4em;
-  }
-
+/* TV Mode */
+.tv #timer { font-size: 3em; width: 250px; }
+.tv table { font-size: 1.2em; }
 </style>
 </head>
 <body>
 
-<h1>Barstool Yug Station</h1>
-<p>Chug your beer fast — Retro 95 Style</p>
+<!-- Timer Window -->
+<div class="window" id="timerWindow" style="top:50px; left:50px;">
+  <div class="window-header">Timer</div>
+  <div class="window-body">
+    <div id="timer">0.00</div>
+    <input id="nameInput" type="text" placeholder="Enter name..." /><br>
+    <button onclick="startTimer()">Start</button>
+    <button onclick="stopTimer()">Stop</button>
+    <button onclick="resetTimer()">Reset</button>
+    <button onclick="toggleTVMode()">TV Mode</button>
+  </div>
+</div>
 
-<div id="timer">0.00</div>
-
-<button onclick="startTimer()">Start</button>
-<button onclick="stopTimer()">Stop</button>
-<button onclick="resetTimer()">Reset</button>
-<button onclick="toggleTVMode()">TV Mode</button>
-
-<br><br>
-
-<input id="nameInput" type="text" placeholder="Enter name..." />
-
-<div id="leaderboardContainer">
-<table>
-  <thead>
-    <tr>
-      <th>Rank</th>
-      <th>Name</th>
-      <th>Time</th>
-      <th>Date</th>
-      <th>X</th>
-    </tr>
-  </thead>
-  <tbody id="leaderboard"></tbody>
-</table>
+<!-- Leaderboard Window -->
+<div class="window" id="leaderboardWindow" style="top:50px; left:400px; width:400px;">
+  <div class="window-header">Leaderboard</div>
+  <div class="window-body" id="leaderboardContainer">
+    <table id="leaderboard">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Time</th>
+          <th>Date</th>
+          <th>X</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 
 <script>
+// Timer logic
 let startTime = null;
 let interval = null;
 let leaderboard = JSON.parse(localStorage.getItem("yugLeaderboard") || "[]");
 
 const timerDisplay = document.getElementById("timer");
-const board = document.getElementById("leaderboard");
+const board = document.querySelector("#leaderboard tbody");
 const airhorn = document.getElementById("airhorn");
 
 function startTimer() {
-  if (interval) return;
+  if(interval) return;
   startTime = Date.now();
   interval = setInterval(updateTimer, 10);
 }
 
 function updateTimer() {
-  const elapsed = (Date.now() - startTime) / 1000;
+  const elapsed = (Date.now() - startTime)/1000;
   timerDisplay.textContent = elapsed.toFixed(2);
 }
 
 function stopTimer() {
-  if (!interval) return;
-
+  if(!interval) return;
   clearInterval(interval);
   interval = null;
-
   const finalTime = parseFloat(timerDisplay.textContent);
   const name = document.getElementById("nameInput").value.trim();
-  if (!name) return alert("Enter a name.");
-
+  if(!name) return alert("Enter a name.");
   const today = new Date().toLocaleDateString();
   const previousBest = leaderboard.length ? leaderboard[0].time : Infinity;
-
-  leaderboard.push({ name, time: finalTime, date: today });
-  leaderboard.sort((a,b) => a.time - b.time);
-
-  localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
+  leaderboard.push({name,time:finalTime,date:today});
+  leaderboard.sort((a,b)=>a.time-b.time);
+  localStorage.setItem("yugLeaderboard",JSON.stringify(leaderboard));
   renderLeaderboard();
-
-  if (leaderboard[0].time < previousBest) {
-    airhorn.play();
-  }
-
+  if(leaderboard[0].time < previousBest) airhorn.play();
   resetTimer();
 }
 
@@ -186,42 +177,32 @@ function resetTimer() {
   timerDisplay.textContent = "0.00";
 }
 
-function deleteEntry(index) {
+function deleteEntry(index){
   leaderboard.splice(index,1);
-  localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
+  localStorage.setItem("yugLeaderboard",JSON.stringify(leaderboard));
   renderLeaderboard();
 }
 
-function updateTime(index, value) {
+function updateTime(index,value){
   const parsed = parseFloat(value);
-  if (isNaN(parsed)) return;
-
+  if(isNaN(parsed)) return;
   leaderboard[index].time = parsed;
-  leaderboard.sort((a,b) => a.time - b.time);
-
-  localStorage.setItem("yugLeaderboard", JSON.stringify(leaderboard));
+  leaderboard.sort((a,b)=>a.time-b.time);
+  localStorage.setItem("yugLeaderboard",JSON.stringify(leaderboard));
   renderLeaderboard();
 }
 
-function renderLeaderboard() {
+function renderLeaderboard(){
   board.innerHTML = "";
-
-  leaderboard.forEach((entry,index) => {
+  leaderboard.forEach((entry,index)=>{
     const row = document.createElement("tr");
-
     row.innerHTML = `
-      <td class="${index === 0 ? 'rank1' : ''}">${index+1}</td>
+      <td class="${index===0?'rank1':''}">${index+1}</td>
       <td>${entry.name}</td>
-      <td>
-        <input type="number" step="0.01"
-          value="${entry.time.toFixed(2)}"
-          onchange="updateTime(${index}, this.value)"
-          style="width:70px;">
-      </td>
+      <td><input type="number" step="0.01" value="${entry.time.toFixed(2)}" onchange="updateTime(${index}, this.value)" style="width:60px;"></td>
       <td>${entry.date}</td>
       <td><button onclick="deleteEntry(${index})">X</button></td>
     `;
-
     board.appendChild(row);
   });
 }
@@ -231,7 +212,32 @@ function toggleTVMode() {
 }
 
 renderLeaderboard();
-</script>
 
+// Dragging logic
+function makeDraggable(el) {
+  const header = el.querySelector('.window-header');
+  let offsetX=0, offsetY=0, isDown=false;
+
+  header.addEventListener('mousedown', e=>{
+    isDown=true;
+    offsetX = e.clientX - el.offsetLeft;
+    offsetY = e.clientY - el.offsetTop;
+    el.style.zIndex = 1000; // bring to front
+  });
+
+  document.addEventListener('mousemove', e=>{
+    if(!isDown) return;
+    el.style.left = (e.clientX - offsetX) + 'px';
+    el.style.top = (e.clientY - offsetY) + 'px';
+  });
+
+  document.addEventListener('mouseup', e=>{
+    isDown=false;
+  });
+}
+
+makeDraggable(document.getElementById('timerWindow'));
+makeDraggable(document.getElementById('leaderboardWindow'));
+</script>
 </body>
 </html>
