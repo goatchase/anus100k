@@ -5,151 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Barstool Yug Station - Retro 95</title>
 <style>
-body {
-  font-family: 'MS Sans Serif', Tahoma, Geneva, sans-serif;
-  font-size: 12px;
-  background: #008080;
-  color: black;
-  margin: 0;
-  padding: 20px;
-}
-
-/* Draggable windows */
-.window {
-  background: #c0c0c0;
-  border: 2px solid #808080;
-  position: absolute;
-  box-shadow: 2px 2px 0px #fff inset;
-  cursor: default;
-}
-
-.window-header {
-  background: #000080;
-  color: white;
-  font-weight: bold;
-  padding: 2px 5px;
-  cursor: move;
-  user-select: none;
-}
-
-.window-body {
-  padding: 10px;
-}
-
-/* Timer Window */
-#timerWindow { width: 360px; }
-#timer { 
-  font-family: 'MS Sans Serif', monospace;
-  font-size: 28px; 
-  font-weight: bold; 
-  margin: 12px 0; 
-  padding: 8px; 
-  background: #ffffff; 
-  border: 2px solid #808080; 
-  width: 220px; 
-  text-align: center;
-}
-#nameInput {
-  width: 220px;
-  padding: 6px;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-.timer-buttons button {
-  padding: 6px 12px;
-  font-size: 14px;
-  margin: 4px 4px 0 0;
-}
-
-/* Leaderboard window */
-#leaderboardWindow { width: 440px; }
-#leaderboard table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: 'MS Sans Serif', monospace;
-}
-#leaderboard th, #leaderboard td {
-  border: 1px solid #808080;
-  padding: 4px 2px;
-  font-size: 12px;
-}
-#leaderboard th { background: #000080; color: white; font-weight: bold; }
-
-/* Leaderboard alignment */
-#leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align: center; }
-#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align: left; padding-left: 6px; }
+body { font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif; font-size:12px; background:#008080; color:black; margin:0; padding:20px;}
+.window { background:#c0c0c0; border:2px solid #808080; position:absolute; box-shadow:2px 2px 0px #fff inset; cursor:default; }
+.window-header { background:#000080; color:white; font-weight:bold; padding:2px 5px; cursor:move; user-select:none; }
+.window-body { padding:10px; }
+#timerWindow { width:360px; }
+#timer { font-family:'MS Sans Serif', monospace; font-size:28px; font-weight:bold; margin:12px 0; padding:8px; background:#fff; border:2px solid #808080; width:220px; text-align:center; }
+#nameInput { width:220px; padding:6px; font-size:14px; margin-bottom:8px; }
+.timer-buttons button { padding:6px 12px; font-size:14px; margin:4px 4px 0 0; }
+#leaderboardWindow { width:440px; }
+#leaderboard table { width:100%; border-collapse:collapse; font-family:'MS Sans Serif', monospace; }
+#leaderboard th, #leaderboard td { border:1px solid #808080; padding:4px 2px; font-size:12px; }
+#leaderboard th { background:#000080; color:white; font-weight:bold; }
+#leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; }
+#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; }
 #leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
-#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align: right; padding-right: 6px; }
-#leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align: center; }
-
-.rank1 { color: red; font-weight: bold; }
-
-/* Start bar */
-#startBar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 30px;
-  background: #c0c0c0;
-  border-top: 2px solid #fff;
-  display: flex;
-  align-items: center;
-  padding-left: 4px;
-  box-sizing: border-box;
-  font-weight: bold;
-}
-#startButton {
-  width: 60px;
-  height: 24px;
-  background: #c0c0c0;
-  border: 2px outset #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 12px;
-}
-#startButton:active { border-style: inset; }
-
-/* That's Baseball window */
-#baseballWindow { width: 200px; text-align: center; }
-#baseballWindow .window-body {
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 14px;
-  color: #000080;
-}
-#baseballWindow .window-body:hover { text-decoration: underline; }
+#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:6px; }
+#leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; }
+.rank1 { color:red; font-weight:bold; }
+#startBar { position:fixed; bottom:0; left:0; width:100%; height:30px; background:#c0c0c0; border-top:2px solid #fff; display:flex; align-items:center; padding-left:4px; box-sizing:border-box; font-weight:bold; }
+#startButton { width:60px; height:24px; background:#c0c0c0; border:2px outset #fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; }
+#startButton:active { border-style:inset; }
+#baseballWindow { width:200px; text-align:center; }
+#baseballWindow .window-body { cursor:pointer; font-weight:bold; font-size:14px; color:#000080; }
+#baseballWindow .window-body:hover { text-decoration:underline; }
 </style>
-
-<!-- Firebase v9 modular SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyBLX1aCaIrF4ro5cHQky2DrN1Sd-hooJyU",
-  authDomain: "goatchase-e9502.firebaseapp.com",
-  projectId: "goatchase-e9502",
-  storageBucket: "goatchase-e9502.firebasestorage.app",
-  messagingSenderId: "16998517478",
-  appId: "1:16998517478:web:8985a2bf70d7df9bccc927",
-  measurementId: "G-1432J8NJ77"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// Firestore collection reference
-const leaderboardCol = collection(db, "yugLeaderboard");
-</script>
 </head>
 <body>
 
-<!-- Timer Window -->
+<!-- Timer -->
 <div class="window" id="timerWindow" style="top:50px; left:50px;">
   <div class="window-header">Timer</div>
   <div class="window-body">
@@ -163,18 +47,14 @@ const leaderboardCol = collection(db, "yugLeaderboard");
   </div>
 </div>
 
-<!-- Leaderboard Window -->
+<!-- Leaderboard -->
 <div class="window" id="leaderboardWindow" style="top:50px; left:450px;">
   <div class="window-header">Leaderboard</div>
-  <div class="window-body" id="leaderboardContainer">
+  <div class="window-body">
     <table id="leaderboard">
       <thead>
         <tr>
-          <th>Rank</th>
-          <th>Name</th>
-          <th>Time</th>
-          <th>Date</th>
-          <th>X</th>
+          <th>Rank</th><th>Name</th><th>Time</th><th>Date</th><th>X</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -182,7 +62,7 @@ const leaderboardCol = collection(db, "yugLeaderboard");
   </div>
 </div>
 
-<!-- That's Baseball Window -->
+<!-- That's Baseball -->
 <div class="window" id="baseballWindow" style="top:250px; left:50px;">
   <div class="window-header">That's Baseball</div>
   <div class="window-body" onclick="openRandomPlayer()">Click me!</div>
@@ -192,118 +72,88 @@ const leaderboardCol = collection(db, "yugLeaderboard");
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 
 <!-- Start bar -->
-<div id="startBar">
-  <div id="startButton">Start</div>
-</div>
+<div id="startBar"><div id="startButton">Start</div></div>
 
 <script type="module">
-// Firestore imports
-import { leaderboardCol, addDoc, query, orderBy, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Timer logic
-let startTime = null;
-let interval = null;
-let leaderboard = [];
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyBLX1aCaIrF4ro5cHQky2DrN1Sd-hooJyU",
+  authDomain: "goatchase-e9502.firebaseapp.com",
+  projectId: "goatchase-e9502",
+  storageBucket: "goatchase-e9502.firebasestorage.app",
+  messagingSenderId: "16998517478",
+  appId: "1:16998517478:web:8985a2bf70d7df9bccc927",
+  measurementId: "G-1432J8NJ77"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const leaderboardCol = collection(db,"yugLeaderboard");
 
 const timerDisplay = document.getElementById("timer");
+const nameInput = document.getElementById("nameInput");
 const board = document.querySelector("#leaderboard tbody");
 const airhorn = document.getElementById("airhorn");
-const nameInput = document.getElementById("nameInput");
 
-// Attach timer functions to window so buttons can call them
-window.startTimer = function() {
+let startTime=null;
+let interval=null;
+let leaderboard=[];
+
+// Timer functions
+window.startTimer = function(){
   if(interval) return;
   startTime = Date.now();
-  interval = setInterval(() => {
-    const elapsed = (Date.now() - startTime)/1000;
-    timerDisplay.textContent = elapsed.toFixed(2);
-  }, 10);
+  interval = setInterval(()=>{ timerDisplay.textContent = ((Date.now()-startTime)/1000).toFixed(2); }, 10);
 };
-
-window.resetTimer = function() {
-  clearInterval(interval);
-  interval = null;
-  timerDisplay.textContent = "0.00";
-};
-
-window.stopTimer = async function() {
+window.resetTimer = function(){ clearInterval(interval); interval=null; timerDisplay.textContent="0.00"; };
+window.stopTimer = async function(){
   if(!interval) return;
-  clearInterval(interval);
-  interval = null;
-
-  const name = nameInput.value.trim();
-  if(!name) return alert("Enter a name.");
-
-  const finalTime = parseFloat(timerDisplay.textContent);
-  const today = new Date().toLocaleDateString();
-
-  try {
-    await addDoc(leaderboardCol, { name, time: finalTime, date: today });
-    resetTimer();
-    nameInput.value = "";
-  } catch (err) {
-    console.error("Error saving to Firestore:", err);
-  }
+  clearInterval(interval); interval=null;
+  const name = nameInput.value.trim(); if(!name) return alert("Enter a name.");
+  const time = parseFloat(timerDisplay.textContent);
+  const date = new Date().toLocaleDateString();
+  try { await addDoc(leaderboardCol,{name,time,date}); resetTimer(); nameInput.value=""; } 
+  catch(e){ console.error("Firestore error:",e);}
 };
 
 // Render leaderboard
-function renderLeaderboard() {
-  board.innerHTML = "";
-  leaderboard.forEach((entry,index)=>{
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="${index===0?'rank1':''}">${index+1}</td>
-      <td>${entry.name}</td>
-      <td>${entry.time.toFixed(2)}</td>
-      <td>${entry.date}</td>
-      <td></td>
-    `;
+function renderLeaderboard(){
+  board.innerHTML="";
+  leaderboard.forEach((entry,i)=>{
+    const row=document.createElement("tr");
+    row.innerHTML=`<td class="${i===0?'rank1':''}">${i+1}</td><td>${entry.name}</td><td>${entry.time.toFixed(2)}</td><td>${entry.date}</td><td></td>`;
     board.appendChild(row);
   });
 }
 
-// Load leaderboard from Firestore (real-time)
+// Real-time Firestore updates
 const q = query(leaderboardCol, orderBy("time"));
-onSnapshot(q, snapshot => {
-  leaderboard = [];
-  snapshot.forEach(doc => leaderboard.push(doc.data()));
+onSnapshot(q, snapshot=>{
+  leaderboard=[];
+  snapshot.forEach(doc=>leaderboard.push(doc.data()));
   renderLeaderboard();
 });
 
-// Dragging logic
-function makeDraggable(el) {
+// Dragging
+function makeDraggable(el){
   const header = el.querySelector('.window-header');
   let offsetX=0, offsetY=0, isDown=false;
-  header.addEventListener('mousedown', e=>{
-    isDown=true;
-    offsetX = e.clientX - el.offsetLeft;
-    offsetY = e.clientY - el.offsetTop;
-    el.style.zIndex = 1000;
-  });
-  document.addEventListener('mousemove', e=>{
-    if(!isDown) return;
-    el.style.left = (e.clientX - offsetX) + 'px';
-    el.style.top = (e.clientY - offsetY) + 'px';
-  });
-  document.addEventListener('mouseup', e=>{
-    isDown=false;
-  });
+  header.addEventListener('mousedown',e=>{isDown=true; offsetX=e.clientX-el.offsetLeft; offsetY=e.clientY-el.offsetTop; el.style.zIndex=1000;});
+  document.addEventListener('mousemove',e=>{if(!isDown) return; el.style.left=(e.clientX-offsetX)+'px'; el.style.top=(e.clientY-offsetY)+'px';});
+  document.addEventListener('mouseup',e=>{isDown=false;});
 }
-
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 
 // Random Baseball-Reference player
-window.openRandomPlayer = function() {
-  const demoPlayers = [
-    "bondsba01","ripkera01","griffke01","ruthba01","aaronha01",
-    "mayswi01","cobbha01","mantleo01","musiala01","troutmi01",
-    "judgeaa01","scherje01","harperbr01","vottetr","bettsmo01"
-  ];
+window.openRandomPlayer = function(){
+  const demoPlayers=["bondsba01","ripkera01","griffke01","ruthba01","aaronha01","mayswi01","cobbha01","mantleo01","musiala01","troutmi01","judgeaa01","scherje01","harperbr01","vottetr","bettsmo01"];
   const playerID = demoPlayers[Math.floor(Math.random()*demoPlayers.length)];
   const firstLetter = playerID[0];
-  window.open(`https://www.baseball-reference.com/players/${firstLetter}/${playerID}.shtml`, "_blank");
+  window.open(`https://www.baseball-reference.com/players/${firstLetter}/${playerID}.shtml`,"_blank");
 };
 </script>
 </body>
