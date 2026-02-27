@@ -75,7 +75,7 @@ input.date-input { width:80px; text-align:right; }
 <!-- That's Baseball -->
 <div class="window" id="baseballWindow">
   <div class="window-header">That's Baseball</div>
-  <div class="window-body" onclick="openRandomFangraphs()">Click me!</div>
+  <div class="window-body" onclick="openRandomPlayer()">Click me!</div>
 </div>
 
 <!-- Airhorn -->
@@ -169,11 +169,17 @@ makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 
-// Random Fangraphs player
-window.openRandomFangraphs = function(){
-  const players = ["mookie-betts","mike-trout","aaron-judge","ronald-acuna-jr","tatis-felix","freddie-freeman","julio-rodriguez","scherzer-max"];
+// Random Baseball-Reference player
+window.openRandomPlayer = function() {
+  const players = [
+    "troutmi01", "bettsmo01", "judgear01", "tatisfe01",
+    "acunar01", "freemfr01", "rodriju01", "scherma01",
+    "muncylo01", "bellingma01", "deversra01", "ozziema01"
+  ];
   const player = players[Math.floor(Math.random()*players.length)];
-  window.open(`https://www.fangraphs.com/players/${player}`,"_blank");
+  const firstLetter = player[0];
+  const url = `https://www.baseball-reference.com/players/${firstLetter}/${player}.shtml`;
+  window.open(url,"_blank");
 };
 </script>
 </body>
