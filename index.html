@@ -370,24 +370,36 @@ function updateFastestTime(){
 
 function renderLeaderboard(){
   board.innerHTML="";
+
+  if (leaderboard.length === 0) return;
+
+  const fastest = leaderboard[0].time; // #1 time
+
   leaderboard.forEach((entry,i)=>{
     const row=document.createElement("tr");
-    const percentFill = fastestTime<Infinity ? Math.min(entry.time/fastestTime*100,100) : 0;
+
+    const percentFill = Math.min((fastest / entry.time) * 100, 100);
+
     row.innerHTML=`
       <td class="${i===0?'rank1':''}">${i+1}</td>
       <td>${entry.name}</td>
-      <td><input class="time-input" type="number" step="0.01"
-        value="${entry.time.toFixed(2)}"
-        style="background: linear-gradient(to right, #f4d35e ${percentFill}%, transparent ${percentFill}%);"
-        onchange="updateTime('${entry.id}', this.value)"></td>
-      <td><input class="date-input" type="text"
-        value="${entry.date}"
-        onchange="updateDate('${entry.id}', this.value)"></td>
+      <td>
+        <input class="time-input" type="number" step="0.01"
+          value="${entry.time.toFixed(2)}"
+          style="background: linear-gradient(to right, #f4d35e ${percentFill}%, transparent ${percentFill}%);"
+          onchange="updateTime('${entry.id}', this.value)">
+      </td>
+      <td>
+        <input class="date-input" type="text"
+          value="${entry.date}"
+          onchange="updateDate('${entry.id}', this.value)">
+      </td>
       <td><button onclick="deleteEntry('${entry.id}')">X</button></td>
     `;
+
     board.appendChild(row);
   });
-  updateFastestTime();
+
   updateYugStats();
 }
 
