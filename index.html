@@ -368,24 +368,10 @@ window.toggleWindow = function(id){
 
 /* Random Baseball Wikipedia */
 window.openRandomWiki = function(){
-  const pages=[
-    "Major_League_Baseball",
-    "World_Series",
-    "Babe_Ruth",
-    "Jackie_Robinson",
-    "Hank_Aaron",
-    "Barry_Bonds",
-    "Shohei_Ohtani",
-    "Negro_league_baseball",
-    "Perfect_game_(baseball)",
-    "No-hitter",
-    "Baseball_statistics",
-    "Fenway_Park",
-    "Wrigley_Field"
-  ];
-
-  const page=pages[Math.floor(Math.random()*pages.length)];
-  window.open(`https://en.wikipedia.org/wiki/${page}`,"_blank");
+  window.open(
+    "https://en.wikipedia.org/wiki/Special:RandomInCategory/Baseball",
+    "_blank"
+  );
 };
 </script>
 
