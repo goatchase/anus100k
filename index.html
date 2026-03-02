@@ -50,20 +50,74 @@ body {
 
 /* Timer */
 #timerWindow { width:360px; }
-#nameInput { width:100%; padding:6px; font-size:14px; margin-bottom:8px; }
-.timer-buttons { display:flex; gap:4px; }
+#nameInput { width:100%; padding:6px; font-size:14px; margin-top:12px; } /* added spacing from timer */
+.timer-buttons { display:flex; gap:4px; margin-top:6px; }
 .timer-buttons button { flex:1; padding:6px 0; font-size:14px; }
+
+/* Beer timer styles */
+#timerContainer {
+  position:relative;
+  width:100%;
+  height:40px;
+  background:#fff;
+  border:2px solid #808080;
+  overflow:hidden;
+  border-radius:4px;
+  margin-bottom:6px;
+}
+#timerFill {
+  position:absolute;
+  left:0; top:0;
+  height:100%;
+  width:0%;
+  background: linear-gradient(to top, #f4d35e 0%, #ffd966 80%);
+  z-index:0;
+}
+#foam {
+  position:absolute;
+  top:0;
+  left:0;
+  height:8px;
+  width:100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.8) 20%, rgba(255,255,255,0) 80%);
+  background-size:10px 10px;
+  pointer-events:none;
+  opacity:0.8;
+  z-index:1;
+}
+#timerText {
+  position:relative;
+  z-index:2;
+  font-family:monospace;
+  font-size:28px;
+  font-weight:bold;
+  text-align:center;
+  line-height:40px;
+}
 
 /* Leaderboard */
 #leaderboardWindow { width:480px; }
-#leaderboard table { width:100%; border-collapse:collapse; font-family:monospace; }
-#leaderboard th, #leaderboard td { border:1px solid #808080; padding:4px 2px; font-size:12px; }
+#leaderboard table {
+  width:100%;
+  height:100%;
+  border-collapse:collapse;
+  font-family:monospace;
+  table-layout: fixed;
+}
+#leaderboard th, #leaderboard td {
+  border:1px solid #808080;
+  padding:4px 6px;
+  font-size:12px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 #leaderboard th { background:#000080; color:white; font-weight:bold; }
-#leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; }
-#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; }
+#leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; width:50px; }
+#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:180px; }
 #leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
-#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:6px; }
-#leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; }
+#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:6px; width:80px; }
+#leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; width:50px; }
 .rank1 { color:red; font-weight:bold; }
 input.time-input { width:60px; text-align:right; }
 input.date-input { width:80px; text-align:right; }
@@ -111,24 +165,10 @@ input.date-input { width:80px; text-align:right; }
     <button class="min-btn" onclick="toggleWindow('timerWindow')">_</button>
   </div>
   <div class="window-body">
-    <!-- Beer-style fill container -->
-    <div id="timerContainer" style="position:relative; width:100%; height:40px; background:#fff; border:2px solid #808080;">
-      <div id="timerFill" style="
-          position:absolute;
-          left:0; top:0; height:100%; width:0;
-          background: linear-gradient(to top, #f4d35e 0%, #ffd966 80%);
-          border-top: 2px solid #fff;
-          z-index:0;
-      "></div>
-      <div id="timerText" style="
-          position:relative;
-          z-index:1;
-          font-family:monospace;
-          font-size:28px;
-          font-weight:bold;
-          text-align:center;
-          line-height:40px;
-      ">0.00</div>
+    <div id="timerContainer">
+      <div id="timerFill"></div>
+      <div id="foam"></div>
+      <div id="timerText">0.00</div>
     </div>
 
     <input id="nameInput" type="text" placeholder="Enter name..." />
@@ -146,7 +186,7 @@ input.date-input { width:80px; text-align:right; }
     <span>Leaderboard</span>
     <button class="min-btn" onclick="toggleWindow('leaderboardWindow')">_</button>
   </div>
-  <div class="window-body">
+  <div class="window-body" style="height:400px;">
     <table id="leaderboard">
       <thead>
         <tr>
@@ -212,7 +252,6 @@ window.startTimer = function(){
   startTime = Date.now();
   interval = setInterval(updateTimerDisplay, 10);
 };
-
 window.resetTimer = function(){
   clearInterval(interval);
   interval=null;
@@ -220,28 +259,22 @@ window.resetTimer = function(){
   timerText.textContent="0.00";
   timerFill.style.width="0%";
 };
-
 window.stopTimer = async function(){
   if(!interval) return;
   clearInterval(interval);
   interval=null;
-
   const name = nameInput.value.trim();
   if(!name) return alert("Enter a name.");
-
   const time = parseFloat(timerText.textContent);
   const date = new Date().toLocaleDateString();
-
   await addDoc(leaderboardCol,{name,time,date});
   resetTimer();
   nameInput.value="";
 };
-
 function updateTimerDisplay(){
   if(!startTime) return;
   const elapsed = (Date.now()-startTime)/1000;
   timerText.textContent = elapsed.toFixed(2);
-
   if(fastestTime<Infinity){
     let percent = Math.min((elapsed/fastestTime)*100,100);
     timerFill.style.width = percent+"%";
@@ -290,11 +323,9 @@ window.updateTime = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)});
   updateFastestTime();
 };
-
 window.updateDate = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{date:value});
 };
-
 window.deleteEntry = async function(id){
   await deleteDoc(doc(db,"yugLeaderboard",id));
   updateFastestTime();
@@ -312,13 +343,11 @@ function makeDraggable(el){
     topZ++;
     el.style.zIndex=topZ;
   });
-
   document.addEventListener('mousemove',e=>{
     if(!isDown) return;
     el.style.left=(e.clientX-offsetX)+'px';
     el.style.top=(e.clientY-offsetY)+'px';
   });
-
   document.addEventListener('mouseup',()=>{ isDown=false; });
 }
 
