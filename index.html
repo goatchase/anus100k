@@ -508,6 +508,7 @@ window.toggleWindow = function(id){
 
 // Add bubbles to leaderboard time cells
 function addCellBubbles(input){
+  // remove old bubbles
   let existing = input.parentElement.querySelector('.cell-bubbles');
   if(existing) existing.remove();
 
@@ -522,12 +523,20 @@ function addCellBubbles(input){
   input.parentElement.style.position = 'relative';
   input.parentElement.appendChild(container);
 
-  const count = 5 + Math.floor(Math.random()*5);
+  // get fill percent from background gradient
+  const style = window.getComputedStyle(input);
+  const bg = style.backgroundImage;
+  let percent = 0;
+  const match = bg.match(/(\d+)%/);
+  if(match) percent = parseFloat(match[1]);
+
+  const count = 3 + Math.floor(Math.random()*4);
   for(let i=0;i<count;i++){
     const b = document.createElement('div');
     b.className='bubble';
-    b.style.width = b.style.height = (2 + Math.random()*3)+'px';
-    b.style.left = Math.random()*container.offsetWidth+'px';
+    const size = 2 + Math.random()*3;
+    b.style.width = b.style.height = size + 'px';
+    b.style.left = Math.random() * (input.offsetWidth * (percent/100)) + 'px'; // only inside yellow fill
     b.style.bottom = '0px';
     b.style.animationDuration = (1 + Math.random()*1.5)+'s';
     container.appendChild(b);
