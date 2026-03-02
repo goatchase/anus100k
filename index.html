@@ -108,7 +108,7 @@ body {
 }
 
 /* Leaderboard */
-#leaderboardWindow { width:480px; }
+#leaderboardWindow { width:700px; top:50px; left:370px; }
 #leaderboardWindow .window-body {
   padding:10px;
   max-height:600px;
@@ -130,14 +130,25 @@ body {
   font-weight:bold;
 }
 #leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; width:50px; }
-#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:180px; }
+#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:200px; }
 #leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
 #leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:4px; width:auto; }
 #leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; width:50px; }
 .rank1 { color:red; font-weight:bold; }
 
+/* Inputs fill cells with beer progress */
+input.time-input {
+  width:100%;
+  box-sizing:border-box;
+  text-align:right;
+  border:1px solid #808080;
+  padding:2px 4px;
+  font-size:12px;
+  background-size: 100% 100%;
+}
+
 /* Inputs fill cells */
-input.time-input, input.date-input {
+input.date-input {
   width:100%;
   box-sizing:border-box;
   text-align:right;
@@ -152,7 +163,7 @@ input.time-input, input.date-input {
 #baseballWindow .window-body:hover { text-decoration:underline; }
 
 /* Yug Stats Window */
-#yugStatsWindow { width:200px; }
+#yugStatsWindow { width:200px; bottom:50px; right:20px; top:auto !important; }
 #yugStatsWindow .window-body { font-weight:bold; position:relative; overflow:hidden; }
 #yugStatsWindow #yugImage { position:relative; z-index:2; max-width:120px; height:auto; }
 
@@ -208,7 +219,7 @@ input.time-input, input.date-input {
 </div>
 
 <!-- Leaderboard Window -->
-<div class="window" id="leaderboardWindow" style="top:50px; left:450px;">
+<div class="window" id="leaderboardWindow">
   <div class="window-header">
     <span>Leaderboard</span>
     <button class="min-btn" onclick="toggleWindow('leaderboardWindow')">_</button>
@@ -241,7 +252,7 @@ input.time-input, input.date-input {
 </div>
 
 <!-- Yug Stats Window -->
-<div class="window" id="yugStatsWindow" style="top:50px; left:950px;">
+<div class="window" id="yugStatsWindow">
   <div class="window-header">
     <span>Yug Stats</span>
     <button class="min-btn" onclick="toggleWindow('yugStatsWindow')">_</button>
@@ -361,11 +372,13 @@ function renderLeaderboard(){
   board.innerHTML="";
   leaderboard.forEach((entry,i)=>{
     const row=document.createElement("tr");
+    const percentFill = fastestTime<Infinity ? Math.min(entry.time/fastestTime*100,100) : 0;
     row.innerHTML=`
       <td class="${i===0?'rank1':''}">${i+1}</td>
       <td>${entry.name}</td>
       <td><input class="time-input" type="number" step="0.01"
         value="${entry.time.toFixed(2)}"
+        style="background: linear-gradient(to right, #f4d35e ${percentFill}%, transparent ${percentFill}%);"
         onchange="updateTime('${entry.id}', this.value)"></td>
       <td><input class="date-input" type="text"
         value="${entry.date}"
@@ -468,10 +481,8 @@ window.toggleWindow = function(id){
 };
 
 // That's Baseball internal window
-// That's Baseball internal window
 window.openRandomBaseballWiki = async function() {
   try {
-    // Fetch random baseball pages
     const res = await fetch(
       "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=baseball&format=json&srlimit=50"
     );
@@ -482,39 +493,32 @@ window.openRandomBaseballWiki = async function() {
     const page = data.query.search[Math.floor(Math.random() * data.query.search.length)];
     const url = `https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`;
 
-    // Create new internal window
     const win = document.createElement('div');
     win.className = 'window';
     win.style.width = '600px';
     win.style.height = '400px';
     win.style.overflow = 'hidden';
-
-    // Position bottom right (above start bar)
     const pageWidth = window.innerWidth;
     const pageHeight = window.innerHeight;
     const winWidth = 600;
     const winHeight = 400;
-    const startBarHeight = 30; // your start bar
-    win.style.left = (pageWidth - winWidth - 20) + 'px'; // 20px from right edge
-    win.style.top = (pageHeight - winHeight - startBarHeight - 20) + 'px'; // 20px above start bar
+    const startBarHeight = 30;
+    win.style.left = (pageWidth - winWidth - 20) + 'px';
+    win.style.top = (pageHeight - winHeight - startBarHeight - 20) + 'px';
 
-    // Window header
     const header = document.createElement('div');
     header.className = 'window-header';
     header.style.display = 'flex';
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
 
-    // Title
     const titleSpan = document.createElement('span');
     titleSpan.textContent = page.title;
 
-    // Buttons container
     const btnContainer = document.createElement('div');
     btnContainer.style.display = 'flex';
     btnContainer.style.gap = '2px';
 
-    // Maximize button
     const maxBtn = document.createElement('button');
     maxBtn.className = 'min-btn';
     maxBtn.textContent = '⬜';
@@ -522,7 +526,6 @@ window.openRandomBaseballWiki = async function() {
     let prevStyle = {};
     maxBtn.addEventListener('click', () => {
       if (!isMaximized) {
-        // Save previous position & size
         prevStyle = {
           left: win.style.left,
           top: win.style.top,
@@ -535,7 +538,6 @@ window.openRandomBaseballWiki = async function() {
         win.style.height = '100%';
         isMaximized = true;
       } else {
-        // Restore previous position & size
         win.style.left = prevStyle.left;
         win.style.top = prevStyle.top;
         win.style.width = prevStyle.width;
@@ -544,22 +546,17 @@ window.openRandomBaseballWiki = async function() {
       }
     });
 
-    // Close button
     const closeBtn = document.createElement('button');
     closeBtn.className = 'min-btn';
     closeBtn.textContent = 'X';
     closeBtn.addEventListener('click', () => win.remove());
 
-    // Add buttons to container
     btnContainer.appendChild(maxBtn);
     btnContainer.appendChild(closeBtn);
-
-    // Add title and buttons to header
     header.appendChild(titleSpan);
     header.appendChild(btnContainer);
     win.appendChild(header);
 
-    // Window body with iframe
     const body = document.createElement('div');
     body.className = 'window-body';
     body.style.padding = '0';
@@ -573,10 +570,7 @@ window.openRandomBaseballWiki = async function() {
     body.appendChild(iframe);
     win.appendChild(body);
 
-    // Add to document
     document.body.appendChild(win);
-
-    // Make draggable
     makeDraggable(win);
 
   } catch (err) {
