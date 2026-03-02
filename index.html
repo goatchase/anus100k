@@ -468,8 +468,10 @@ window.toggleWindow = function(id){
 };
 
 // That's Baseball internal window
+// That's Baseball internal window
 window.openRandomBaseballWiki = async function() {
   try {
+    // Fetch random baseball pages
     const res = await fetch(
       "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=baseball&format=json&srlimit=50"
     );
@@ -492,14 +494,20 @@ window.openRandomBaseballWiki = async function() {
     // Window header
     const header = document.createElement('div');
     header.className = 'window-header';
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
 
-    // Close button
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'min-btn';
-    closeBtn.textContent = 'X';
-    closeBtn.addEventListener('click', () => win.remove());
+    // Title
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = page.title;
 
-    // Optional minimize button
+    // Buttons container
+    const btnContainer = document.createElement('div');
+    btnContainer.style.display = 'flex';
+    btnContainer.style.gap = '2px';
+
+    // Minimize button
     const minBtn = document.createElement('button');
     minBtn.className = 'min-btn';
     minBtn.textContent = '_';
@@ -508,9 +516,19 @@ window.openRandomBaseballWiki = async function() {
       body.style.display = body.style.display === "none" ? "block" : "none";
     });
 
-    header.innerHTML = `<span>${page.title}</span>`;
-    header.appendChild(minBtn);
-    header.appendChild(closeBtn);
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'min-btn';
+    closeBtn.textContent = 'X';
+    closeBtn.addEventListener('click', () => win.remove());
+
+    // Append buttons to container
+    btnContainer.appendChild(minBtn);
+    btnContainer.appendChild(closeBtn);
+
+    // Append title and buttons to header
+    header.appendChild(titleSpan);
+    header.appendChild(btnContainer);
     win.appendChild(header);
 
     // Window body with iframe
@@ -526,7 +544,10 @@ window.openRandomBaseballWiki = async function() {
     body.appendChild(iframe);
     win.appendChild(body);
 
+    // Add to document
     document.body.appendChild(win);
+
+    // Make draggable
     makeDraggable(win);
 
   } catch(err) {
