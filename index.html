@@ -6,25 +6,23 @@
 <title>Barstool Yug Station - Retro 95</title>
 
 <style>
-body {
+body{
   font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif;
   font-size:12px;
   background:#008080;
-  color:black;
   margin:0;
   padding:20px;
 }
 
 /* Windows */
-.window {
+.window{
   background:#c0c0c0;
   border:2px solid #808080;
   position:absolute;
   box-shadow:2px 2px 0px #fff inset;
-  cursor:default;
 }
 
-.window-header {
+.window-header{
   background:#000080;
   color:white;
   font-weight:bold;
@@ -36,27 +34,22 @@ body {
   align-items:center;
 }
 
-.min-btn {
+.window-body{ padding:10px; }
+
+.min-btn{
   background:#c0c0c0;
   border:2px outset #fff;
   width:18px;
   height:16px;
   font-size:10px;
-  line-height:10px;
   cursor:pointer;
   padding:0;
 }
-
-.min-btn:active {
-  border-style:inset;
-}
-
-.window-body { padding:10px; }
+.min-btn:active{ border-style:inset; }
 
 /* Timer */
-#timerWindow { width:360px; }
-
-#timer {
+#timerWindow{ width:360px; }
+#timer{
   font-family:monospace;
   font-size:28px;
   font-weight:bold;
@@ -65,118 +58,89 @@ body {
   background:#fff;
   border:2px solid #808080;
   width:100%;
-  box-sizing:border-box;
   text-align:center;
 }
-
-#nameInput {
+#nameInput{
   width:100%;
   padding:6px;
-  font-size:14px;
   margin-bottom:8px;
-  box-sizing:border-box;
-}
-
-.timer-buttons {
-  display:flex;
-  gap:4px;
-}
-
-.timer-buttons button {
-  flex:1;
-  padding:6px 0;
-  font-size:14px;
 }
 
 /* Leaderboard */
-#leaderboardWindow { width:480px; }
-
-#leaderboard table {
+#leaderboardWindow{ width:480px; }
+#leaderboard table{
   width:100%;
   border-collapse:collapse;
   font-family:monospace;
 }
-
-#leaderboard th, #leaderboard td {
+#leaderboard th,#leaderboard td{
   border:1px solid #808080;
-  padding:4px 2px;
+  padding:4px;
   font-size:12px;
 }
-
-#leaderboard th {
+#leaderboard th{
   background:#000080;
   color:white;
-  font-weight:bold;
 }
+.rank1{ color:red;font-weight:bold; }
 
-#leaderboard th:nth-child(1),
-#leaderboard td:nth-child(1) { text-align:center; }
-
-#leaderboard th:nth-child(2),
-#leaderboard td:nth-child(2) { text-align:left; padding-left:6px; }
-
-#leaderboard th:nth-child(3),
-#leaderboard td:nth-child(3),
-#leaderboard th:nth-child(4),
-#leaderboard td:nth-child(4) { text-align:right; padding-right:6px; }
-
-#leaderboard th:nth-child(5),
-#leaderboard td:nth-child(5) { text-align:center; }
-
-.rank1 { color:red; font-weight:bold; }
-
-/* That's Baseball */
-#baseballWindow {
+/* Baseball */
+#baseballWindow{
   width:200px;
-  text-align:center;
   bottom:50px;
   left:50px;
   top:auto !important;
 }
-
-#baseballWindow .window-body {
+#baseballWindow .window-body{
+  text-align:center;
   cursor:pointer;
   font-weight:bold;
-  font-size:14px;
   color:#000080;
 }
+#baseballWindow .window-body:hover{ text-decoration:underline; }
 
-#baseballWindow .window-body:hover {
-  text-decoration:underline;
-}
-
-/* Start bar */
-#startBar {
+/* Start Bar */
+#startBar{
   position:fixed;
   bottom:0;
   left:0;
   width:100%;
-  height:30px;
+  height:32px;
   background:#c0c0c0;
   border-top:2px solid #fff;
   display:flex;
   align-items:center;
-  padding-left:4px;
-  box-sizing:border-box;
-  font-weight:bold;
 }
 
-#startButton {
+#startButton{
   width:60px;
   height:24px;
+  margin-left:4px;
   background:#c0c0c0;
   border:2px outset #fff;
   display:flex;
   align-items:center;
   justify-content:center;
   cursor:pointer;
-  font-size:12px;
+}
+#startButton:active{ border-style:inset; }
+
+#taskbar{
+  display:flex;
+  margin-left:6px;
+  gap:4px;
 }
 
-#startButton:active { border-style:inset; }
-
-input.time-input { width:60px; text-align:right; }
-input.date-input { width:80px; text-align:right; }
+.task-btn{
+  background:#c0c0c0;
+  border:2px outset #fff;
+  padding:2px 8px;
+  cursor:pointer;
+  font-size:12px;
+}
+.task-btn.active{
+  border-style:inset;
+}
 </style>
 </head>
 <body>
@@ -185,12 +149,12 @@ input.date-input { width:80px; text-align:right; }
 <div class="window" id="timerWindow" style="top:50px; left:50px;">
   <div class="window-header">
     <span>Timer</span>
-    <button class="min-btn" onclick="toggleWindow('timerWindow')">_</button>
+    <button class="min-btn" onclick="minimizeWindow('timerWindow')">_</button>
   </div>
   <div class="window-body">
     <div id="timer">0.00</div>
-    <input id="nameInput" type="text" placeholder="Enter name..." />
-    <div class="timer-buttons">
+    <input id="nameInput" placeholder="Enter name..." />
+    <div style="display:flex;gap:4px;">
       <button onclick="startTimer()">Start</button>
       <button onclick="stopTimer()">Stop</button>
       <button onclick="resetTimer()">Reset</button>
@@ -202,18 +166,12 @@ input.date-input { width:80px; text-align:right; }
 <div class="window" id="leaderboardWindow" style="top:50px; left:450px;">
   <div class="window-header">
     <span>Leaderboard</span>
-    <button class="min-btn" onclick="toggleWindow('leaderboardWindow')">_</button>
+    <button class="min-btn" onclick="minimizeWindow('leaderboardWindow')">_</button>
   </div>
   <div class="window-body">
     <table id="leaderboard">
       <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Name</th>
-          <th>Time</th>
-          <th>Date</th>
-          <th>X</th>
-        </tr>
+        <tr><th>Rank</th><th>Name</th><th>Time</th><th>Date</th><th>X</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -224,70 +182,63 @@ input.date-input { width:80px; text-align:right; }
 <div class="window" id="baseballWindow">
   <div class="window-header">
     <span>That's Baseball</span>
-    <button class="min-btn" onclick="toggleWindow('baseballWindow')">_</button>
+    <button class="min-btn" onclick="minimizeWindow('baseballWindow')">_</button>
   </div>
   <div class="window-body" onclick="openRandomWiki()">
     Click me!
   </div>
 </div>
 
-<audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
-
+<!-- Start Bar -->
 <div id="startBar">
   <div id="startButton">Start</div>
+  <div id="taskbar"></div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "goatchase-e9502.firebaseapp.com",
-  projectId: "goatchase-e9502",
-  storageBucket: "goatchase-e9502.firebasestorage.app",
-  messagingSenderId: "16998517478",
-  appId: "1:16998517478:web:8985a2bf70d7df9bccc927"
+/* Firebase */
+const firebaseConfig={
+  apiKey:"YOUR_API_KEY",
+  authDomain:"goatchase-e9502.firebaseapp.com",
+  projectId:"goatchase-e9502"
 };
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const leaderboardCol=collection(db,"yugLeaderboard");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const leaderboardCol = collection(db,"yugLeaderboard");
-
-const timerDisplay = document.getElementById("timer");
-const nameInput = document.getElementById("nameInput");
-const board = document.querySelector("#leaderboard tbody");
+const timerDisplay=document.getElementById("timer");
+const nameInput=document.getElementById("nameInput");
+const board=document.querySelector("#leaderboard tbody");
 
 let startTime=null;
 let interval=null;
 let leaderboard=[];
+let zIndex=1;
 
 /* Timer */
-window.startTimer = function(){
+window.startTimer=function(){
   if(interval) return;
-  startTime = Date.now();
-  interval = setInterval(()=>{
-    timerDisplay.textContent = ((Date.now()-startTime)/1000).toFixed(2);
+  startTime=Date.now();
+  interval=setInterval(()=>{
+    timerDisplay.textContent=((Date.now()-startTime)/1000).toFixed(2);
   },10);
 };
-
-window.resetTimer = function(){
+window.resetTimer=function(){
   clearInterval(interval);
   interval=null;
   timerDisplay.textContent="0.00";
 };
-
-window.stopTimer = async function(){
+window.stopTimer=async function(){
   if(!interval) return;
   clearInterval(interval);
   interval=null;
-
-  const name = nameInput.value.trim();
-  if(!name) return alert("Enter a name.");
-
-  const time = parseFloat(timerDisplay.textContent);
-  const date = new Date().toLocaleDateString();
-
+  const name=nameInput.value.trim();
+  if(!name) return alert("Enter name.");
+  const time=parseFloat(timerDisplay.textContent);
+  const date=new Date().toLocaleDateString();
   await addDoc(leaderboardCol,{name,time,date});
   resetTimer();
   nameInput.value="";
@@ -301,93 +252,85 @@ function renderLeaderboard(){
     row.innerHTML=`
       <td class="${i===0?'rank1':''}">${i+1}</td>
       <td>${entry.name}</td>
-      <td><input class="time-input" type="number" step="0.01"
-        value="${entry.time.toFixed(2)}"
-        onchange="updateTime('${entry.id}', this.value)"></td>
-      <td><input class="date-input" type="text"
-        value="${entry.date}"
-        onchange="updateDate('${entry.id}', this.value)"></td>
-      <td><button onclick="deleteEntry('${entry.id}')">X</button></td>
-    `;
+      <td><input type="number" step="0.01" value="${entry.time.toFixed(2)}"
+      onchange="updateTime('${entry.id}',this.value)"></td>
+      <td>${entry.date}</td>
+      <td><button onclick="deleteEntry('${entry.id}')">X</button></td>`;
     board.appendChild(row);
   });
 }
-
-const q = query(leaderboardCol, orderBy("time"));
-onSnapshot(q, snapshot=>{
+onSnapshot(query(leaderboardCol,orderBy("time")),snap=>{
   leaderboard=[];
-  snapshot.forEach(docSnap=>{
-    leaderboard.push({id:docSnap.id,...docSnap.data()});
-  });
+  snap.forEach(d=>leaderboard.push({id:d.id,...d.data()}));
   renderLeaderboard();
 });
-
-window.updateTime = async function(id,value){
-  await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)});
+window.updateTime=async(id,val)=>{
+  await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(val)});
 };
-
-window.updateDate = async function(id,value){
-  await updateDoc(doc(db,"yugLeaderboard",id),{date:value});
-};
-
-window.deleteEntry = async function(id){
+window.deleteEntry=async(id)=>{
   await deleteDoc(doc(db,"yugLeaderboard",id));
 };
 
-/* Dragging */
+/* Drag */
 function makeDraggable(el){
-  const header = el.querySelector('.window-header');
-  let offsetX=0, offsetY=0, isDown=false;
-
-  header.addEventListener('mousedown',e=>{
+  const header=el.querySelector(".window-header");
+  let offsetX=0,offsetY=0,isDown=false;
+  header.addEventListener("mousedown",e=>{
     isDown=true;
     offsetX=e.clientX-el.offsetLeft;
     offsetY=e.clientY-el.offsetTop;
-    el.style.zIndex=1000;
+    el.style.zIndex=++zIndex;
   });
-
-  document.addEventListener('mousemove',e=>{
+  document.addEventListener("mousemove",e=>{
     if(!isDown) return;
-    el.style.left=(e.clientX-offsetX)+'px';
-    el.style.top=(e.clientY-offsetY)+'px';
+    el.style.left=(e.clientX-offsetX)+"px";
+    el.style.top=(e.clientY-offsetY)+"px";
   });
-
-  document.addEventListener('mouseup',()=>{ isDown=false; });
+  document.addEventListener("mouseup",()=>isDown=false);
 }
+document.querySelectorAll(".window").forEach(makeDraggable);
 
-makeDraggable(document.getElementById('timerWindow'));
-makeDraggable(document.getElementById('leaderboardWindow'));
-makeDraggable(document.getElementById('baseballWindow'));
+/* Minimize to taskbar */
+const taskbar=document.getElementById("taskbar");
 
-/* Minimize */
-window.toggleWindow = function(id){
+window.minimizeWindow=function(id){
   const win=document.getElementById(id);
-  const body=win.querySelector('.window-body');
-  body.style.display = body.style.display==="none" ? "block" : "none";
+  win.style.display="none";
+
+  if(document.getElementById("task-"+id)) return;
+
+  const btn=document.createElement("div");
+  btn.className="task-btn";
+  btn.id="task-"+id;
+  btn.textContent=win.querySelector(".window-header span").textContent;
+
+  btn.onclick=function(){
+    win.style.display="block";
+    win.style.zIndex=++zIndex;
+    taskbar.removeChild(btn);
+  };
+
+  taskbar.appendChild(btn);
 };
 
-/* Random Baseball Wikipedia */
-window.openRandomWiki = function(){
-  const pages=[
-    "Major_League_Baseball",
-    "World_Series",
-    "Babe_Ruth",
-    "Jackie_Robinson",
-    "Hank_Aaron",
-    "Barry_Bonds",
-    "Shohei_Ohtani",
-    "Negro_league_baseball",
-    "Perfect_game_(baseball)",
-    "No-hitter",
-    "Baseball_statistics",
-    "Fenway_Park",
-    "Wrigley_Field"
-  ];
+/* Truly Random Baseball Wikipedia */
+window.openRandomWiki=async function(){
+  try{
+    const res=await fetch(
+      "https://en.wikipedia.org/w/api.php?action=query&list=random&rnnamespace=0&rnlimit=1&format=json&origin=*"
+    );
+    const data=await res.json();
+    const title=data.query.random[0].title;
 
-  const page=pages[Math.floor(Math.random()*pages.length)];
-  window.open(`https://en.wikipedia.org/wiki/${page}`,"_blank");
+    if(title.toLowerCase().includes("baseball")){
+      window.open("https://en.wikipedia.org/wiki/"+encodeURIComponent(title),"_blank");
+    } else {
+      openRandomWiki(); // retry until baseball-related
+    }
+  }catch(e){
+    window.open("https://en.wikipedia.org/wiki/Baseball","_blank");
+  }
 };
 </script>
-
 </body>
 </html>
