@@ -103,46 +103,21 @@ body {
 /* Leaderboard */
 #leaderboardWindow { width:480px; height:400px; }
 #leaderboardWindow .window-body {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding:0;
+  padding:4px;
+  height: calc(100% - 4px);
+  overflow-y:auto; /* allow scrolling */
 }
-#leaderboard {
-  width: 100%;
-  flex:1;
-  border-collapse: collapse;
-  font-family: monospace;
-  table-layout: fixed;
-  display:block;
-  overflow-y:auto;
-}
-#leaderboard thead {
-  display:table;
+#leaderboard table {
   width:100%;
-  table-layout: fixed;
-  background:#000080;
-  color:white;
-  font-weight:bold;
-}
-#leaderboard tbody {
-  display:block;
-  overflow-y:auto;
-  max-height: calc(100% - 28px); /* header height */
-}
-#leaderboard tbody tr {
-  display:table;
-  width:100%;
-  table-layout:fixed;
+  border-collapse:collapse;
+  font-family:monospace;
 }
 #leaderboard th, #leaderboard td {
   border:1px solid #808080;
   padding:4px 6px;
   font-size:12px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
 }
+#leaderboard th { background:#000080; color:white; font-weight:bold; }
 #leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; width:50px; }
 #leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:180px; }
 #leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
