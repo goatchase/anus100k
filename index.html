@@ -476,7 +476,7 @@ window.openRandomBaseballWiki = async function() {
       "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=baseball&format=json&srlimit=50"
     );
     const data = await res.json();
-    if(!data.query || !data.query.search || data.query.search.length === 0) {
+    if (!data.query || !data.query.search || data.query.search.length === 0) {
       throw new Error("No baseball pages found.");
     }
     const page = data.query.search[Math.floor(Math.random() * data.query.search.length)];
@@ -485,11 +485,15 @@ window.openRandomBaseballWiki = async function() {
     // Create new internal window
     const win = document.createElement('div');
     win.className = 'window';
-    win.style.top = '100px';
-    win.style.left = '100px';
     win.style.width = '600px';
     win.style.height = '400px';
     win.style.overflow = 'hidden';
+
+    // Position to the right of the page
+    const pageWidth = window.innerWidth;
+    const winWidth = 600;
+    win.style.left = (pageWidth - winWidth - 20) + 'px'; // 20px from right edge
+    win.style.top = '100px';
 
     // Window header
     const header = document.createElement('div');
@@ -498,7 +502,7 @@ window.openRandomBaseballWiki = async function() {
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
 
-    // Title
+    // Title span
     const titleSpan = document.createElement('span');
     titleSpan.textContent = page.title;
 
@@ -522,11 +526,11 @@ window.openRandomBaseballWiki = async function() {
     closeBtn.textContent = 'X';
     closeBtn.addEventListener('click', () => win.remove());
 
-    // Append buttons to container
+    // Add buttons to container
     btnContainer.appendChild(minBtn);
     btnContainer.appendChild(closeBtn);
 
-    // Append title and buttons to header
+    // Add title and buttons to header
     header.appendChild(titleSpan);
     header.appendChild(btnContainer);
     win.appendChild(header);
@@ -536,6 +540,7 @@ window.openRandomBaseballWiki = async function() {
     body.className = 'window-body';
     body.style.padding = '0';
     body.style.height = 'calc(100% - 24px)';
+
     const iframe = document.createElement('iframe');
     iframe.src = url;
     iframe.style.width = '100%';
@@ -550,7 +555,7 @@ window.openRandomBaseballWiki = async function() {
     // Make draggable
     makeDraggable(win);
 
-  } catch(err) {
+  } catch (err) {
     alert("Error fetching random baseball article.");
     console.error(err);
   }
