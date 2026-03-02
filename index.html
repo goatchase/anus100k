@@ -492,15 +492,26 @@ window.openRandomBaseballWiki = async function() {
     // Window header
     const header = document.createElement('div');
     header.className = 'window-header';
-    header.innerHTML = `<span>${page.title}</span> <button class="min-btn">_</button>`;
-    win.appendChild(header);
 
-    // Minimize button
-    const minBtn = header.querySelector('.min-btn');
-    minBtn.addEventListener('click', ()=> {
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'min-btn';
+    closeBtn.textContent = 'X';
+    closeBtn.addEventListener('click', () => win.remove());
+
+    // Optional minimize button
+    const minBtn = document.createElement('button');
+    minBtn.className = 'min-btn';
+    minBtn.textContent = '_';
+    minBtn.addEventListener('click', () => {
       const body = win.querySelector('.window-body');
       body.style.display = body.style.display === "none" ? "block" : "none";
     });
+
+    header.innerHTML = `<span>${page.title}</span>`;
+    header.appendChild(minBtn);
+    header.appendChild(closeBtn);
+    win.appendChild(header);
 
     // Window body with iframe
     const body = document.createElement('div');
@@ -516,7 +527,6 @@ window.openRandomBaseballWiki = async function() {
     win.appendChild(body);
 
     document.body.appendChild(win);
-
     makeDraggable(win);
 
   } catch(err) {
