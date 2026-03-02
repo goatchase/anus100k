@@ -489,11 +489,14 @@ window.openRandomBaseballWiki = async function() {
     win.style.height = '400px';
     win.style.overflow = 'hidden';
 
-    // Position to the right of the page
+    // Position bottom right (above start bar)
     const pageWidth = window.innerWidth;
+    const pageHeight = window.innerHeight;
     const winWidth = 600;
+    const winHeight = 400;
+    const startBarHeight = 30; // your start bar
     win.style.left = (pageWidth - winWidth - 20) + 'px'; // 20px from right edge
-    win.style.top = '100px';
+    win.style.top = (pageHeight - winHeight - startBarHeight - 20) + 'px'; // 20px above start bar
 
     // Window header
     const header = document.createElement('div');
@@ -502,7 +505,7 @@ window.openRandomBaseballWiki = async function() {
     header.style.justifyContent = 'space-between';
     header.style.alignItems = 'center';
 
-    // Title span
+    // Title
     const titleSpan = document.createElement('span');
     titleSpan.textContent = page.title;
 
@@ -511,13 +514,34 @@ window.openRandomBaseballWiki = async function() {
     btnContainer.style.display = 'flex';
     btnContainer.style.gap = '2px';
 
-    // Minimize button
-    const minBtn = document.createElement('button');
-    minBtn.className = 'min-btn';
-    minBtn.textContent = '_';
-    minBtn.addEventListener('click', () => {
-      const body = win.querySelector('.window-body');
-      body.style.display = body.style.display === "none" ? "block" : "none";
+    // Maximize button
+    const maxBtn = document.createElement('button');
+    maxBtn.className = 'min-btn';
+    maxBtn.textContent = '⬜';
+    let isMaximized = false;
+    let prevStyle = {};
+    maxBtn.addEventListener('click', () => {
+      if (!isMaximized) {
+        // Save previous position & size
+        prevStyle = {
+          left: win.style.left,
+          top: win.style.top,
+          width: win.style.width,
+          height: win.style.height
+        };
+        win.style.left = '0';
+        win.style.top = '0';
+        win.style.width = '100%';
+        win.style.height = '100%';
+        isMaximized = true;
+      } else {
+        // Restore previous position & size
+        win.style.left = prevStyle.left;
+        win.style.top = prevStyle.top;
+        win.style.width = prevStyle.width;
+        win.style.height = prevStyle.height;
+        isMaximized = false;
+      }
     });
 
     // Close button
@@ -527,7 +551,7 @@ window.openRandomBaseballWiki = async function() {
     closeBtn.addEventListener('click', () => win.remove());
 
     // Add buttons to container
-    btnContainer.appendChild(minBtn);
+    btnContainer.appendChild(maxBtn);
     btnContainer.appendChild(closeBtn);
 
     // Add title and buttons to header
