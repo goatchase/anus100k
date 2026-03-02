@@ -82,6 +82,7 @@ body {
   text-align:center;
   line-height:40px;
 }
+
 /* Bubble foam */
 .bubble {
   position:absolute;
@@ -143,6 +144,10 @@ input.time-input, input.date-input {
 #baseballWindow .window-body { cursor:pointer; font-weight:bold; font-size:14px; color:#000080; }
 #baseballWindow .window-body:hover { text-decoration:underline; }
 
+/* Yug Stats Window */
+#yugStatsWindow { width:200px; }
+#yugStatsWindow .window-body { font-weight:bold; position:relative; }
+
 /* Start bar */
 #startBar {
   position:fixed;
@@ -170,6 +175,7 @@ input.time-input, input.date-input {
   font-size:12px;
 }
 #startButton:active { border-style:inset; }
+
 </style>
 </head>
 <body>
@@ -228,6 +234,24 @@ input.time-input, input.date-input {
   </div>
 </div>
 
+<!-- Yug Stats Window -->
+<div class="window" id="yugStatsWindow" style="top:50px; left:950px;">
+  <div class="window-header">
+    <span>Yug Stats</span>
+    <button class="min-btn" onclick="toggleWindow('yugStatsWindow')">_</button>
+  </div>
+  <div class="window-body">
+    <div>Total Yugs: <span id="totalYugs">0</span></div>
+    <div>Total Yug Time: <span id="totalYugTime">0.00</span> sec</div>
+    <div style="margin-top:10px; position:relative; height:120px;">
+      <img id="yugImage" 
+           src="https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/Yug.jpg" 
+           alt="Yug" 
+           style="max-width:120px; height:auto; position:relative; z-index:2;" />
+    </div>
+  </div>
+</div>
+
 <audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 
 <div id="startBar">
@@ -256,6 +280,8 @@ const timerFill = document.getElementById("timerFill");
 const timerContainer = document.getElementById("timerContainer");
 const nameInput = document.getElementById("nameInput");
 const board = document.querySelector("#leaderboard tbody");
+const totalYugsEl = document.getElementById("totalYugs");
+const totalYugTimeEl = document.getElementById("totalYugTime");
 
 let startTime=null;
 let interval=null;
@@ -276,6 +302,8 @@ window.startTimer = function(){
   if(interval) return;
   startTime = Date.now();
   interval = setInterval(updateTimerDisplay, 10);
+  bubbles.forEach(b=>b.remove());
+  bubbles=[];
   createBubbles();
 };
 window.resetTimer = function(){
@@ -310,6 +338,21 @@ function updateTimerDisplay(){
 }
 
 // Firestore functions
+function updateYugStats() {
+  const totalYugs = leaderboard.length * 2;
+  const totalTime = leaderboard.reduce((sum, e) => sum + e.time, 0);
+  totalYugsEl.textContent = totalYugs;
+  totalYugTimeEl.textContent = totalTime.toFixed(2);
+}
+
+function updateFastestTime(){
+  if(leaderboard.length===0){
+    fastestTime=Infinity;
+    return;
+  }
+  fastestTime = Math.min(...leaderboard.map(e=>e.time));
+}
+
 function renderLeaderboard(){
   board.innerHTML="";
   leaderboard.forEach((entry,i)=>{
@@ -328,13 +371,7 @@ function renderLeaderboard(){
     board.appendChild(row);
   });
   updateFastestTime();
-}
-function updateFastestTime(){
-  if(leaderboard.length===0){
-    fastestTime=Infinity;
-    return;
-  }
-  fastestTime = Math.min(...leaderboard.map(e=>e.time));
+  updateYugStats();
 }
 
 const q = query(leaderboardCol, orderBy("time"));
@@ -351,6 +388,7 @@ onSnapshot(q, snapshot=>{
 window.updateTime = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)});
   updateFastestTime();
+  updateYugStats();
 };
 window.updateDate = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{date:value});
@@ -358,17 +396,18 @@ window.updateDate = async function(id,value){
 window.deleteEntry = async function(id){
   await deleteDoc(doc(db,"yugLeaderboard",id));
   updateFastestTime();
+  updateYugStats();
 };
 
 // Bubbles
-function createBubbles(){
+function createBubbles(container=timerContainer){
   const count = 20;
   for(let i=0;i<count;i++){
     const b = document.createElement('div');
     b.className='bubble';
-    b.style.left = Math.random()*timerContainer.offsetWidth+'px';
+    b.style.left = Math.random()*container.offsetWidth+'px';
     b.style.animationDuration = (1 + Math.random()*1.5)+'s';
-    timerContainer.appendChild(b);
+    container.appendChild(b);
     bubbles.push(b);
   }
 }
@@ -394,6 +433,7 @@ function makeDraggable(el){
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
+makeDraggable(document.getElementById('yugStatsWindow'));
 
 // Minimize
 window.toggleWindow = function(id){
@@ -403,8 +443,18 @@ window.toggleWindow = function(id){
 };
 
 // Random baseball wiki
-window.openRandomBaseballWiki = function(){
-  window.open("https://en.wikipedia.org/wiki/Special:RandomInCategory/Baseball","_blank");
+window.openRandomBaseballWiki = async function(){
+  try {
+    const res = await fetch(
+      "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=random&rnnamespace=0&rnlimit=1&format=json&rnfilterredir=nonredirect&srsearch=baseball"
+    );
+    const data = await res.json();
+    const page = data.query.random[0];
+    window.open(`https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`, "_blank");
+  } catch(err){
+    alert("Error fetching random baseball article.");
+    console.error(err);
+  }
 };
 </script>
 
