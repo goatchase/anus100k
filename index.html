@@ -470,10 +470,13 @@ window.toggleWindow = function(id){
 window.openRandomBaseballWiki = async function(){
   try {
     const res = await fetch(
-      "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=random&rnnamespace=0&rnlimit=1&format=json&rnfilterredir=nonredirect&srsearch=baseball"
+      "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=random&rnnamespace=0&rnlimit=20&format=json"
     );
     const data = await res.json();
-    const page = data.query.random[0];
+    // Filter random pages that have "baseball" in the title
+    const baseballPages = data.query.random.filter(p => p.title.toLowerCase().includes("baseball"));
+    if(baseballPages.length === 0) throw new Error("No baseball pages found, try again!");
+    const page = baseballPages[Math.floor(Math.random()*baseballPages.length)];
     window.open(`https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`, "_blank");
   } catch(err){
     alert("Error fetching random baseball article.");
