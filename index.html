@@ -403,8 +403,19 @@ window.toggleWindow = function(id){
 };
 
 // Random baseball wiki
-window.openRandomBaseballWiki = function(){
-  window.open("https://en.wikipedia.org/wiki/Special:RandomInCategory/Baseball","_blank");
+// Open a random proper baseball article
+window.openRandomBaseballWiki = async function(){
+  try {
+    const res = await fetch(
+      "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=random&rnnamespace=0&rnlimit=1&format=json&rnfilterredir=nonredirect&srsearch=baseball"
+    );
+    const data = await res.json();
+    const page = data.query.random[0];
+    window.open(`https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`, "_blank");
+  } catch(err){
+    alert("Error fetching random baseball article.");
+    console.error(err);
+  }
 };
 </script>
 
