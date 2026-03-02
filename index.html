@@ -467,18 +467,20 @@ window.toggleWindow = function(id){
 };
 
 // Random baseball wiki
-window.openRandomBaseballWiki = async function(){
+window.openRandomBaseballWiki = async function() {
   try {
+    // Search for pages with 'baseball', get 50 results
     const res = await fetch(
-      "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=random&rnnamespace=0&rnlimit=20&format=json"
+      "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=baseball&format=json&srlimit=50"
     );
     const data = await res.json();
-    // Filter random pages that have "baseball" in the title
-    const baseballPages = data.query.random.filter(p => p.title.toLowerCase().includes("baseball"));
-    if(baseballPages.length === 0) throw new Error("No baseball pages found, try again!");
-    const page = baseballPages[Math.floor(Math.random()*baseballPages.length)];
+    if(!data.query || !data.query.search || data.query.search.length === 0) {
+      throw new Error("No baseball pages found.");
+    }
+    // Pick a random page from search results
+    const page = data.query.search[Math.floor(Math.random() * data.query.search.length)];
     window.open(`https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`, "_blank");
-  } catch(err){
+  } catch(err) {
     alert("Error fetching random baseball article.");
     console.error(err);
   }
