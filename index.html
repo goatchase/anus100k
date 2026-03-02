@@ -93,6 +93,7 @@ body {
   background:white;
   opacity:0.8;
   animation: rise 2s linear infinite;
+  z-index:1;
 }
 @keyframes rise {
   0% { transform: translateY(0) scale(0.8); opacity:0.8; }
@@ -146,7 +147,10 @@ input.time-input, input.date-input {
 
 /* Yug Stats Window */
 #yugStatsWindow { width:200px; }
-#yugStatsWindow .window-body { font-weight:bold; position:relative; }
+#yugStatsWindow .window-body { font-weight:bold; position:relative; overflow:hidden; }
+
+/* Yug image z-index */
+#yugStatsWindow #yugImage { position:relative; z-index:2; max-width:120px; height:auto; }
 
 /* Start bar */
 #startBar {
@@ -175,7 +179,6 @@ input.time-input, input.date-input {
   font-size:12px;
 }
 #startButton:active { border-style:inset; }
-
 </style>
 </head>
 <body>
@@ -242,12 +245,11 @@ input.time-input, input.date-input {
   </div>
   <div class="window-body">
     <div>Total Yugs: <span id="totalYugs">0</span></div>
-    <div>Total Yug Time: <span id="totalYugTime">0.00</span> sec</div>
+    <div>Total Yug Time: <span id="totalYugTime">0.00</span> min</div>
     <div style="margin-top:10px; position:relative; height:120px;">
       <img id="yugImage" 
-           src="https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_REPO/main/Yug.jpg" 
-           alt="Yug" 
-           style="max-width:120px; height:auto; position:relative; z-index:2;" />
+           src="https://raw.githubusercontent.com/goatchase/anus100k/main/Yug.jpg" 
+           alt="Yug" />
     </div>
   </div>
 </div>
@@ -288,6 +290,7 @@ let interval=null;
 let leaderboard=[];
 let fastestTime=Infinity;
 let bubbles = [];
+let yugBubbles = [];
 
 // Helper: format date MM/DD/YY
 function formatDate(d){
@@ -342,7 +345,7 @@ function updateYugStats() {
   const totalYugs = leaderboard.length * 2;
   const totalTime = leaderboard.reduce((sum, e) => sum + e.time, 0);
   totalYugsEl.textContent = totalYugs;
-  totalYugTimeEl.textContent = totalTime.toFixed(2);
+  totalYugTimeEl.textContent = (totalTime/60).toFixed(2) + " min";
 }
 
 function updateFastestTime(){
@@ -411,6 +414,27 @@ function createBubbles(container=timerContainer){
     bubbles.push(b);
   }
 }
+
+// Yug Stats bubbles
+function createYugBubbles(){
+  const container = document.getElementById('yugStatsWindow').querySelector('.window-body');
+  yugBubbles.forEach(b=>b.remove());
+  yugBubbles=[];
+  const count = 15;
+  for(let i=0;i<count;i++){
+    const b = document.createElement('div');
+    b.className='bubble';
+    b.style.left = Math.random()*container.offsetWidth+'px';
+    b.style.bottom = '0px';
+    b.style.width = (3 + Math.random()*4)+'px';
+    b.style.height = b.style.width;
+    b.style.animationDuration = (1.5 + Math.random()*2)+'s';
+    container.appendChild(b);
+    yugBubbles.push(b);
+  }
+}
+createYugBubbles();
+setInterval(createYugBubbles, 10000);
 
 // Draggable windows
 function makeDraggable(el){
