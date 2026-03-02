@@ -50,7 +50,7 @@ body {
 
 /* Timer */
 #timerWindow { width:360px; }
-#nameInput { width:100%; padding:6px; font-size:14px; margin-top:12px; } /* added spacing from timer */
+#nameInput { width:100%; padding:6px; font-size:14px; margin-top:12px; } /* spacing from timer */
 .timer-buttons { display:flex; gap:4px; margin-top:6px; }
 .timer-buttons button { flex:1; padding:6px 0; font-size:14px; }
 
@@ -84,6 +84,11 @@ body {
   pointer-events:none;
   opacity:0.8;
   z-index:1;
+  animation: foamMove 0.5s infinite alternate;
+}
+@keyframes foamMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 5px 5px; }
 }
 #timerText {
   position:relative;
@@ -96,13 +101,39 @@ body {
 }
 
 /* Leaderboard */
-#leaderboardWindow { width:480px; }
-#leaderboard table {
-  width:100%;
-  height:100%;
-  border-collapse:collapse;
-  font-family:monospace;
+#leaderboardWindow { width:480px; height:400px; }
+#leaderboardWindow .window-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding:0;
+}
+#leaderboard {
+  width: 100%;
+  flex:1;
+  border-collapse: collapse;
+  font-family: monospace;
   table-layout: fixed;
+  display:block;
+  overflow-y:auto;
+}
+#leaderboard thead {
+  display:table;
+  width:100%;
+  table-layout: fixed;
+  background:#000080;
+  color:white;
+  font-weight:bold;
+}
+#leaderboard tbody {
+  display:block;
+  overflow-y:auto;
+  max-height: calc(100% - 28px); /* header height */
+}
+#leaderboard tbody tr {
+  display:table;
+  width:100%;
+  table-layout:fixed;
 }
 #leaderboard th, #leaderboard td {
   border:1px solid #808080;
@@ -112,7 +143,6 @@ body {
   text-overflow:ellipsis;
   white-space:nowrap;
 }
-#leaderboard th { background:#000080; color:white; font-weight:bold; }
 #leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; width:50px; }
 #leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:180px; }
 #leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
@@ -186,7 +216,7 @@ input.date-input { width:80px; text-align:right; }
     <span>Leaderboard</span>
     <button class="min-btn" onclick="toggleWindow('leaderboardWindow')">_</button>
   </div>
-  <div class="window-body" style="height:400px;">
+  <div class="window-body">
     <table id="leaderboard">
       <thead>
         <tr>
@@ -301,7 +331,6 @@ function renderLeaderboard(){
   });
   updateFastestTime();
 }
-
 function updateFastestTime(){
   if(leaderboard.length===0){
     fastestTime=Infinity;
@@ -335,7 +364,6 @@ window.deleteEntry = async function(id){
 function makeDraggable(el){
   const header = el.querySelector('.window-header');
   let offsetX=0, offsetY=0, isDown=false, topZ=1000;
-
   header.addEventListener('mousedown',e=>{
     isDown=true;
     offsetX=e.clientX-el.offsetLeft;
@@ -350,7 +378,6 @@ function makeDraggable(el){
   });
   document.addEventListener('mouseup',()=>{ isDown=false; });
 }
-
 makeDraggable(document.getElementById('timerWindow'));
 makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
