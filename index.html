@@ -50,53 +50,6 @@ body {
 
 /* Timer */
 #timerWindow { width: 300px; }
-
-/* Leaderboard Window */
-#leaderboardWindow { 
-  width: calc(100% - 380px); /* fills page minus timer margin */
-  left: 370px; /* closer to timer */
-  top: 50px; 
-}
-#leaderboardWindow .window-body {
-  padding:10px;
-  max-height:600px;
-  overflow-y:auto;
-}
-#leaderboard table {
-  width:100%;
-  border-collapse:collapse;
-  font-family: monospace;
-}
-#leaderboard th, #leaderboard td {
-  border:1px solid #808080;
-  padding:4px 6px;
-  font-size:12px;
-}
-#leaderboard th {
-  background:#000080;
-  color:white;
-  font-weight:bold;
-}
-#leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; width:50px; }
-#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:180px; }
-#leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
-#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:4px; width:auto; }
-#leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; width:50px; }
-.rank1 { color:red; font-weight:bold; }
-
-/* Inputs fill cells with beer progress */
-input.time-input, input.date-input {
-  width:100%;
-  box-sizing:border-box;
-  text-align:right;
-  border:1px solid #808080;
-  padding:2px 4px;
-  font-size:12px;
-  border-radius:3px;
-  transition: background 0.5s ease;
-}
-
-/* Timer elements */
 #nameInput { 
   width: 100%; 
   padding: 4px; 
@@ -106,6 +59,8 @@ input.time-input, input.date-input {
 }
 .timer-buttons { display:flex; gap:4px; margin-top:6px; }
 .timer-buttons button { flex:1; padding:4px 0; font-size:12px; cursor:pointer; }
+
+/* Timer bar */
 #timerContainer {
   position:relative;
   width:100%;
@@ -152,19 +107,52 @@ input.time-input, input.date-input {
   100% { transform: translateY(-50px) scale(0.8); opacity:0; }
 }
 
+/* Leaderboard */
+#leaderboardWindow { width:480px; }
+#leaderboardWindow .window-body {
+  padding:10px;
+  max-height:600px;
+  overflow-y:auto;
+}
+#leaderboard table {
+  width:100%;
+  border-collapse:collapse;
+  font-family: monospace;
+}
+#leaderboard th, #leaderboard td {
+  border:1px solid #808080;
+  padding:4px 6px;
+  font-size:12px;
+}
+#leaderboard th {
+  background:#000080;
+  color:white;
+  font-weight:bold;
+}
+#leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; width:50px; }
+#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:180px; }
+#leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
+#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:4px; width:auto; }
+#leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; width:50px; }
+.rank1 { color:red; font-weight:bold; }
+
+/* Inputs fill cells */
+input.time-input, input.date-input {
+  width:100%;
+  box-sizing:border-box;
+  text-align:right;
+  border:1px solid #808080;
+  padding:2px 4px;
+  font-size:12px;
+}
+
 /* That's Baseball */
 #baseballWindow { width:200px; text-align:center; bottom:50px; left:50px; top:auto !important; }
 #baseballWindow .window-body { cursor:pointer; font-weight:bold; font-size:14px; color:#000080; }
 #baseballWindow .window-body:hover { text-decoration:underline; }
 
 /* Yug Stats Window */
-#yugStatsWindow { 
-  width:200px; 
-  right: 20px;
-  bottom: 60px;
-  top: auto !important;
-  left: auto;
-}
+#yugStatsWindow { width:200px; }
 #yugStatsWindow .window-body { font-weight:bold; position:relative; overflow:hidden; }
 #yugStatsWindow #yugImage { position:relative; z-index:2; max-width:120px; height:auto; }
 
@@ -195,7 +183,6 @@ input.time-input, input.date-input {
   font-size:12px;
 }
 #startButton:active { border-style:inset; }
-
 </style>
 </head>
 <body>
@@ -221,7 +208,7 @@ input.time-input, input.date-input {
 </div>
 
 <!-- Leaderboard Window -->
-<div class="window" id="leaderboardWindow">
+<div class="window" id="leaderboardWindow" style="top:50px; left:450px;">
   <div class="window-header">
     <span>Leaderboard</span>
     <button class="min-btn" onclick="toggleWindow('leaderboardWindow')">_</button>
@@ -254,7 +241,7 @@ input.time-input, input.date-input {
 </div>
 
 <!-- Yug Stats Window -->
-<div class="window" id="yugStatsWindow">
+<div class="window" id="yugStatsWindow" style="top:50px; left:950px;">
   <div class="window-header">
     <span>Yug Stats</span>
     <button class="min-btn" onclick="toggleWindow('yugStatsWindow')">_</button>
@@ -370,32 +357,24 @@ function updateFastestTime(){
   fastestTime = Math.min(...leaderboard.map(e=>e.time));
 }
 
-// Render leaderboard with beer progress
-function renderLeaderboard() {
-  board.innerHTML = "";
-  updateFastestTime();
+function renderLeaderboard(){
+  board.innerHTML="";
   leaderboard.forEach((entry,i)=>{
-    let percent = (fastestTime / entry.time) * 100;
-    if(percent>100) percent=100;
-    const row = document.createElement("tr");
+    const row=document.createElement("tr");
     row.innerHTML=`
       <td class="${i===0?'rank1':''}">${i+1}</td>
       <td>${entry.name}</td>
-      <td>
-        <input class="time-input" type="number" step="0.01"
-          value="${entry.time.toFixed(2)}"
-          onchange="updateTime('${entry.id}', this.value)"
-          style="background: linear-gradient(to right, #f4d35e ${percent}%, #fff ${percent}%); transition: background 0.5s ease;">
-      </td>
-      <td>
-        <input class="date-input" type="text"
-          value="${entry.date}"
-          onchange="updateDate('${entry.id}', this.value)">
-      </td>
+      <td><input class="time-input" type="number" step="0.01"
+        value="${entry.time.toFixed(2)}"
+        onchange="updateTime('${entry.id}', this.value)"></td>
+      <td><input class="date-input" type="text"
+        value="${entry.date}"
+        onchange="updateDate('${entry.id}', this.value)"></td>
       <td><button onclick="deleteEntry('${entry.id}')">X</button></td>
     `;
     board.appendChild(row);
   });
+  updateFastestTime();
   updateYugStats();
 }
 
@@ -412,14 +391,16 @@ onSnapshot(q, snapshot=>{
 
 window.updateTime = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)});
-  renderLeaderboard();
+  updateFastestTime();
+  updateYugStats();
 };
 window.updateDate = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{date:value});
 };
 window.deleteEntry = async function(id){
   await deleteDoc(doc(db,"yugLeaderboard",id));
-  renderLeaderboard();
+  updateFastestTime();
+  updateYugStats();
 };
 
 // Timer bubbles
@@ -479,12 +460,131 @@ makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 makeDraggable(document.getElementById('yugStatsWindow'));
 
-// Minimize windows
+// Minimize
 window.toggleWindow = function(id){
   const win=document.getElementById(id);
   const body=win.querySelector('.window-body');
   body.style.display = body.style.display==="none" ? "block" : "none";
 };
+
+// That's Baseball internal window
+// That's Baseball internal window
+window.openRandomBaseballWiki = async function() {
+  try {
+    // Fetch random baseball pages
+    const res = await fetch(
+      "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=baseball&format=json&srlimit=50"
+    );
+    const data = await res.json();
+    if (!data.query || !data.query.search || data.query.search.length === 0) {
+      throw new Error("No baseball pages found.");
+    }
+    const page = data.query.search[Math.floor(Math.random() * data.query.search.length)];
+    const url = `https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`;
+
+    // Create new internal window
+    const win = document.createElement('div');
+    win.className = 'window';
+    win.style.width = '600px';
+    win.style.height = '400px';
+    win.style.overflow = 'hidden';
+
+    // Position bottom right (above start bar)
+    const pageWidth = window.innerWidth;
+    const pageHeight = window.innerHeight;
+    const winWidth = 600;
+    const winHeight = 400;
+    const startBarHeight = 30; // your start bar
+    win.style.left = (pageWidth - winWidth - 20) + 'px'; // 20px from right edge
+    win.style.top = (pageHeight - winHeight - startBarHeight - 20) + 'px'; // 20px above start bar
+
+    // Window header
+    const header = document.createElement('div');
+    header.className = 'window-header';
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+
+    // Title
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = page.title;
+
+    // Buttons container
+    const btnContainer = document.createElement('div');
+    btnContainer.style.display = 'flex';
+    btnContainer.style.gap = '2px';
+
+    // Maximize button
+    const maxBtn = document.createElement('button');
+    maxBtn.className = 'min-btn';
+    maxBtn.textContent = '⬜';
+    let isMaximized = false;
+    let prevStyle = {};
+    maxBtn.addEventListener('click', () => {
+      if (!isMaximized) {
+        // Save previous position & size
+        prevStyle = {
+          left: win.style.left,
+          top: win.style.top,
+          width: win.style.width,
+          height: win.style.height
+        };
+        win.style.left = '0';
+        win.style.top = '0';
+        win.style.width = '100%';
+        win.style.height = '100%';
+        isMaximized = true;
+      } else {
+        // Restore previous position & size
+        win.style.left = prevStyle.left;
+        win.style.top = prevStyle.top;
+        win.style.width = prevStyle.width;
+        win.style.height = prevStyle.height;
+        isMaximized = false;
+      }
+    });
+
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'min-btn';
+    closeBtn.textContent = 'X';
+    closeBtn.addEventListener('click', () => win.remove());
+
+    // Add buttons to container
+    btnContainer.appendChild(maxBtn);
+    btnContainer.appendChild(closeBtn);
+
+    // Add title and buttons to header
+    header.appendChild(titleSpan);
+    header.appendChild(btnContainer);
+    win.appendChild(header);
+
+    // Window body with iframe
+    const body = document.createElement('div');
+    body.className = 'window-body';
+    body.style.padding = '0';
+    body.style.height = 'calc(100% - 24px)';
+
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    body.appendChild(iframe);
+    win.appendChild(body);
+
+    // Add to document
+    document.body.appendChild(win);
+
+    // Make draggable
+    makeDraggable(win);
+
+  } catch (err) {
+    alert("Error fetching random baseball article.");
+    console.error(err);
+  }
+};
 </script>
+
 </body>
 </html>
