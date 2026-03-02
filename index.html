@@ -124,11 +124,19 @@ body {
 #leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; width:50px; }
 #leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:180px; }
 #leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
-#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:6px; width:80px; }
+#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:4px; width:auto; }
 #leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; width:50px; }
 .rank1 { color:red; font-weight:bold; }
-input.time-input { width:60px; text-align:right; }
-input.date-input { width:80px; text-align:right; }
+
+/* Inputs fill cells */
+input.time-input, input.date-input {
+  width:100%;
+  box-sizing:border-box;
+  text-align:right;
+  border:1px solid #808080;
+  padding:2px 4px;
+  font-size:12px;
+}
 
 /* That's Baseball */
 #baseballWindow { width:200px; text-align:center; bottom:50px; left:50px; top:auto !important; }
@@ -268,7 +276,7 @@ window.startTimer = function(){
   if(interval) return;
   startTime = Date.now();
   interval = setInterval(updateTimerDisplay, 10);
-  createBubbles(); // start bubbles
+  createBubbles();
 };
 window.resetTimer = function(){
   clearInterval(interval);
@@ -277,7 +285,7 @@ window.resetTimer = function(){
   timerText.textContent="0.00";
   timerFill.style.width="0%";
   bubbles.forEach(b=>b.remove());
-  bubbles = [];
+  bubbles=[];
 };
 window.stopTimer = async function(){
   if(!interval) return;
@@ -334,7 +342,6 @@ onSnapshot(q, snapshot=>{
   leaderboard=[];
   snapshot.forEach(docSnap=>{
     const data = docSnap.data();
-    // reformat date to MM/DD/YY if needed
     data.date = formatDate(new Date(data.date));
     leaderboard.push({id:docSnap.id,...data});
   });
