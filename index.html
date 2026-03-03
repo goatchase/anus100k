@@ -88,10 +88,10 @@ body {
   line-height:40px;
 }
 
-/* Bubble foam */
+/* Bubble foam above timer */
 .bubble {
   position:absolute;
-  bottom:0;
+  bottom:40px; /* float above timer bar */
   width:4px;
   height:4px;
   border-radius:50%;
@@ -135,19 +135,8 @@ body {
 #leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; width:50px; }
 .rank1 { color:red; font-weight:bold; }
 
-/* Inputs fill cells with beer progress */
-input.time-input {
-  width:100%;
-  box-sizing:border-box;
-  text-align:right;
-  border:1px solid #808080;
-  padding:2px 4px;
-  font-size:12px;
-  background-size: 100% 100%;
-}
-
 /* Inputs fill cells */
-input.date-input {
+input.time-input, input.date-input {
   width:100%;
   box-sizing:border-box;
   text-align:right;
@@ -193,6 +182,25 @@ input.date-input {
   font-size:12px;
 }
 #startButton:active { border-style:inset; }
+.start-menu {
+  position:absolute;
+  bottom:30px;
+  left:4px;
+  display:flex;
+  gap:4px;
+}
+.start-icon {
+  width:60px;
+  height:24px;
+  background:#c0c0c0;
+  border:2px outset #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  cursor:pointer;
+}
+.start-icon:active { border-style:inset; }
 </style>
 </head>
 <body>
@@ -201,7 +209,7 @@ input.date-input {
 <div class="window" id="timerWindow" style="top:50px; left:50px;">
   <div class="window-header">
     <span>Timer</span>
-    <button class="min-btn" onclick="toggleWindow('timerWindow')">_</button>
+    <button class="min-btn" onclick="minimizeWindow('timerWindow')">_</button>
   </div>
   <div class="window-body">
     <div id="timerContainer">
@@ -221,7 +229,7 @@ input.date-input {
 <div class="window" id="leaderboardWindow">
   <div class="window-header">
     <span>Leaderboard</span>
-    <button class="min-btn" onclick="toggleWindow('leaderboardWindow')">_</button>
+    <button class="min-btn" onclick="minimizeWindow('leaderboardWindow')">_</button>
   </div>
   <div class="window-body">
     <table id="leaderboard">
@@ -243,7 +251,7 @@ input.date-input {
 <div class="window" id="baseballWindow">
   <div class="window-header">
     <span>That's Baseball</span>
-    <button class="min-btn" onclick="toggleWindow('baseballWindow')">_</button>
+    <button class="min-btn" onclick="minimizeWindow('baseballWindow')">_</button>
   </div>
   <div class="window-body" onclick="openRandomBaseballWiki()">
     ⚾ Click me!
@@ -254,7 +262,7 @@ input.date-input {
 <div class="window" id="yugStatsWindow">
   <div class="window-header">
     <span>Yug Stats</span>
-    <button class="min-btn" onclick="toggleWindow('yugStatsWindow')">_</button>
+    <button class="min-btn" onclick="minimizeWindow('yugStatsWindow')">_</button>
   </div>
   <div class="window-body">
     <div>Total Yugs: <span id="totalYugs">0</span></div>
@@ -269,9 +277,11 @@ input.date-input {
 
 <div id="startBar">
   <div id="startButton">Start</div>
+  <div class="start-menu" id="startMenu"></div>
 </div>
 
 <script type="module">
+// Firebase imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -304,23 +314,15 @@ let previousFastest = Infinity;
 let bubbles = [];
 let yugBubbles = [];
 
-// Helper: format date MM/DD/YY
-function formatDate(d){
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  const yy = String(d.getFullYear()).slice(-2);
-  return `${mm}/${dd}/${yy}`;
-}
-
-// Timer functions
+// --- Timer Functions ---
 window.startTimer = function(){
   if(interval) return;
   startTime = Date.now();
-  interval = setInterval(updateTimerDisplay, 10);
+  interval = setInterval(updateTimerDisplay,10);
   bubbles.forEach(b=>b.remove());
   bubbles=[];
   createBubbles();
-  updateFastestTime(); // ensure timer bar knows current fastest
+  updateFastestTime();
 };
 
 window.resetTimer = function(){
@@ -346,7 +348,6 @@ window.stopTimer = async function(){
   nameInput.value="";
 };
 
-// Timer update
 function updateTimerDisplay(){
   if(!startTime) return;
   const elapsed = (Date.now()-startTime)/1000;
@@ -357,14 +358,19 @@ function updateTimerDisplay(){
   }
 }
 
-// Firestore functions
+// --- Firestore Functions ---
+function formatDate(d){
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  const yy = String(d.getFullYear()).slice(-2);
+  return `${mm}/${dd}/${yy}`;
+}
 function updateYugStats() {
   const totalYugs = leaderboard.length * 2;
   const totalTime = leaderboard.reduce((sum, e) => sum + e.time, 0);
   totalYugsEl.textContent = totalYugs;
   totalYugTimeEl.textContent = (totalTime/60).toFixed(2) + " min";
 }
-
 function updateFastestTime(){
   if(leaderboard.length===0){
     fastestTime=Infinity;
@@ -377,7 +383,6 @@ function updateFastestTime(){
   previousFastest = newFastest;
   fastestTime = newFastest;
 }
-
 function renderLeaderboard(){
   board.innerHTML="";
   if (leaderboard.length === 0) return;
@@ -406,7 +411,6 @@ function renderLeaderboard(){
   });
   updateYugStats();
 }
-
 const q = query(leaderboardCol, orderBy("time"));
 onSnapshot(q, snapshot=>{
   leaderboard=[];
@@ -417,7 +421,6 @@ onSnapshot(q, snapshot=>{
   updateFastestTime();
   renderLeaderboard();
 });
-
 window.updateTime = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)});
   updateFastestTime();
@@ -432,7 +435,7 @@ window.deleteEntry = async function(id){
   updateYugStats();
 };
 
-// Timer bubbles
+// --- Timer Bubbles ---
 function createBubbles(container=timerContainer){
   const count = 20;
   for(let i=0;i<count;i++){
@@ -445,7 +448,7 @@ function createBubbles(container=timerContainer){
   }
 }
 
-// Yug Stats bubbles
+// --- Yug Stats Bubbles ---
 function createYugBubbles(){
   const container = document.getElementById('yugStatsWindow').querySelector('.window-body');
   yugBubbles.forEach(b=>b.remove());
@@ -466,7 +469,7 @@ function createYugBubbles(){
 createYugBubbles();
 setInterval(createYugBubbles, 10000);
 
-// Draggable windows
+// --- Draggable Windows ---
 function makeDraggable(el){
   const header = el.querySelector('.window-header');
   let offsetX=0, offsetY=0, isDown=false, topZ=1000;
@@ -489,110 +492,84 @@ makeDraggable(document.getElementById('leaderboardWindow'));
 makeDraggable(document.getElementById('baseballWindow'));
 makeDraggable(document.getElementById('yugStatsWindow'));
 
-// Minimize
-window.toggleWindow = function(id){
-  const win=document.getElementById(id);
-  const body=win.querySelector('.window-body');
-  body.style.display = body.style.display==="none" ? "block" : "none";
-};
+// --- Minimize to Start Menu ---
+const startMenu = document.getElementById('startMenu');
+function minimizeWindow(id){
+  const win = document.getElementById(id);
+  win.style.display = 'none';
+  const icon = document.createElement('div');
+  icon.className='start-icon';
+  icon.textContent = win.querySelector('.window-header span').textContent;
+  icon.onclick = ()=>{
+    win.style.display='block';
+    icon.remove();
+  };
+  startMenu.appendChild(icon);
+}
 
-// That's Baseball popup — TOP RIGHT
+// --- Start Button opens all windows ---
+document.getElementById('startButton').addEventListener('click',()=>{
+  ['timerWindow','leaderboardWindow','baseballWindow','yugStatsWindow'].forEach(id=>{
+    document.getElementById(id).style.display='block';
+  });
+});
+
+// --- That's Baseball popup TOP RIGHT ---
 window.openRandomBaseballWiki = async function() {
   try {
     const res = await fetch(
       "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=baseball&format=json&srlimit=50"
     );
     const data = await res.json();
-    if (!data.query || !data.query.search || data.query.search.length === 0) {
-      throw new Error("No baseball pages found.");
-    }
+    if (!data.query || !data.query.search || data.query.search.length === 0) throw new Error("No baseball pages found.");
     const page = data.query.search[Math.floor(Math.random() * data.query.search.length)];
     const url = `https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`;
-
     const win = document.createElement('div');
     win.className = 'window';
     win.style.width = '600px';
     win.style.height = '400px';
-    win.style.overflow = 'hidden';
+    win.style.top = '20px';
+    win.style.left = (window.innerWidth - 620)+'px';
 
-    const pageWidth = window.innerWidth;
-    const margin = 20; // distance from top and right edges
-    win.style.top = margin + 'px';
-    win.style.left = (pageWidth - 600 - margin) + 'px';
-
-    // Header
     const header = document.createElement('div');
     header.className = 'window-header';
-    header.style.display = 'flex';
-    header.style.justifyContent = 'space-between';
-    header.style.alignItems = 'center';
+    header.style.display='flex';
+    header.style.justifyContent='space-between';
+    header.style.alignItems='center';
     const titleSpan = document.createElement('span');
     titleSpan.textContent = page.title;
     const btnContainer = document.createElement('div');
-    btnContainer.style.display = 'flex';
-    btnContainer.style.gap = '2px';
+    btnContainer.style.display='flex'; btnContainer.style.gap='2px';
 
-    // Maximize button
     const maxBtn = document.createElement('button');
-    maxBtn.className = 'min-btn';
-    maxBtn.textContent = '⬜';
-    let isMaximized = false;
-    let prevStyle = {};
-    maxBtn.addEventListener('click', () => {
-      if (!isMaximized) {
-        prevStyle = {
-          left: win.style.left,
-          top: win.style.top,
-          width: win.style.width,
-          height: win.style.height
-        };
-        win.style.left = '0';
-        win.style.top = '0';
-        win.style.width = '100%';
-        win.style.height = '100%';
-        isMaximized = true;
-      } else {
-        win.style.left = prevStyle.left;
-        win.style.top = prevStyle.top;
-        win.style.width = prevStyle.width;
-        win.style.height = prevStyle.height;
-        isMaximized = false;
+    maxBtn.className='min-btn'; maxBtn.textContent='⬜';
+    let isMax=false; let prevStyle={};
+    maxBtn.addEventListener('click',()=>{ 
+      if(!isMax){
+        prevStyle={left:win.style.left,top:win.style.top,width:win.style.width,height:win.style.height};
+        win.style.left='0'; win.style.top='0'; win.style.width='100%'; win.style.height='100%'; isMax=true;
+      }else{
+        win.style.left=prevStyle.left; win.style.top=prevStyle.top;
+        win.style.width=prevStyle.width; win.style.height=prevStyle.height; isMax=false;
       }
     });
 
-    // Close button
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'min-btn';
-    closeBtn.textContent = 'X';
-    closeBtn.addEventListener('click', () => win.remove());
+    const closeBtn = document.createElement('button'); closeBtn.className='min-btn'; closeBtn.textContent='X';
+    closeBtn.addEventListener('click',()=>win.remove());
 
-    btnContainer.appendChild(maxBtn);
-    btnContainer.appendChild(closeBtn);
-    header.appendChild(titleSpan);
-    header.appendChild(btnContainer);
+    btnContainer.appendChild(maxBtn); btnContainer.appendChild(closeBtn);
+    header.appendChild(titleSpan); header.appendChild(btnContainer);
     win.appendChild(header);
 
-    // Body with iframe
-    const body = document.createElement('div');
-    body.className = 'window-body';
-    body.style.padding = '0';
-    body.style.height = 'calc(100% - 24px)';
-
-    const iframe = document.createElement('iframe');
-    iframe.src = url;
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    body.appendChild(iframe);
-    win.appendChild(body);
+    const body = document.createElement('div'); body.className='window-body';
+    body.style.padding='0'; body.style.height='calc(100% - 24px)';
+    const iframe = document.createElement('iframe'); iframe.src=url; iframe.style.width='100%'; iframe.style.height='100%'; iframe.style.border='none';
+    body.appendChild(iframe); win.appendChild(body);
 
     document.body.appendChild(win);
     makeDraggable(win);
 
-  } catch (err) {
-    alert("Error fetching random baseball article.");
-    console.error(err);
-  }
+  } catch(err){ alert("Error fetching random baseball article."); console.error(err);}
 };
 </script>
 </body>
