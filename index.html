@@ -989,132 +989,106 @@ window.toggleWindow = function(id){
 // That's Baseball internal window
 
 window.openRandomBaseballWiki = async function() {
-
   try {
-
     const res = await fetch(
-
       "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=baseball&format=json&srlimit=50"
-
     );
-
     const data = await res.json();
-
     if (!data.query || !data.query.search || data.query.search.length === 0) {
-
       throw new Error("No baseball pages found.");
-
     }
 
     const page = data.query.search[Math.floor(Math.random() * data.query.search.length)];
-
     const url = `https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`;
 
- 
-
     const win = document.createElement('div');
-
     win.className = 'window';
-
     win.style.width = '600px';
-
     win.style.height = '400px';
-
     win.style.overflow = 'hidden';
 
     const pageWidth = window.innerWidth;
+    const margin = 20; // distance from top and right edges
 
-    const pageHeight = window.innerHeight;
+    win.style.top = margin + 'px';
+    win.style.left = (pageWidth - 600 - margin) + 'px'; // top-right
 
-    const winWidth = 600;
-
-    const winHeight = 400;
-
-    const startBarHeight = 30;
-
-    win.style.left = (pageWidth - winWidth - 20) + 'px';
-
-    win.style.top = (pageHeight - winHeight - startBarHeight - 20) + 'px';
-
- 
-
+    // Header
     const header = document.createElement('div');
-
     header.className = 'window-header';
-
     header.style.display = 'flex';
-
     header.style.justifyContent = 'space-between';
-
     header.style.alignItems = 'center';
 
- 
-
     const titleSpan = document.createElement('span');
-
     titleSpan.textContent = page.title;
 
- 
-
     const btnContainer = document.createElement('div');
-
     btnContainer.style.display = 'flex';
-
     btnContainer.style.gap = '2px';
 
- 
-
+    // Maximize button
     const maxBtn = document.createElement('button');
-
     maxBtn.className = 'min-btn';
-
     maxBtn.textContent = '⬜';
-
     let isMaximized = false;
-
     let prevStyle = {};
-
     maxBtn.addEventListener('click', () => {
-
       if (!isMaximized) {
-
         prevStyle = {
-
           left: win.style.left,
-
           top: win.style.top,
-
           width: win.style.width,
-
           height: win.style.height
-
         };
-
         win.style.left = '0';
-
         win.style.top = '0';
-
         win.style.width = '100%';
-
         win.style.height = '100%';
-
         isMaximized = true;
-
       } else {
-
         win.style.left = prevStyle.left;
-
         win.style.top = prevStyle.top;
-
         win.style.width = prevStyle.width;
-
         win.style.height = prevStyle.height;
-
         isMaximized = false;
-
       }
-
     });
+
+    // Close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'min-btn';
+    closeBtn.textContent = 'X';
+    closeBtn.addEventListener('click', () => win.remove());
+
+    btnContainer.appendChild(maxBtn);
+    btnContainer.appendChild(closeBtn);
+    header.appendChild(titleSpan);
+    header.appendChild(btnContainer);
+    win.appendChild(header);
+
+    // Body with iframe
+    const body = document.createElement('div');
+    body.className = 'window-body';
+    body.style.padding = '0';
+    body.style.height = 'calc(100% - 24px)';
+
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    body.appendChild(iframe);
+    win.appendChild(body);
+
+    document.body.appendChild(win);
+    makeDraggable(win);
+
+  } catch (err) {
+    alert("Error fetching random baseball article.");
+    console.error(err);
+  }
+};
 
  
 
