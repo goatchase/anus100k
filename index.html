@@ -300,7 +300,6 @@ const totalYugTimeEl = document.getElementById("totalYugTime");
 let startTime=null;
 let interval=null;
 let leaderboard=[];
-let fastestTime=Infinity;
 let bubbles = [];
 let yugBubbles = [];
 
@@ -346,10 +345,6 @@ function updateTimerDisplay(){
   if(!startTime) return;
   const elapsed = (Date.now()-startTime)/1000;
   timerText.textContent = elapsed.toFixed(2);
-  if(fastestTime<Infinity){
-    let percent = Math.min((elapsed/fastestTime)*100,100);
-    timerFill.style.width = percent+"%";
-  }
 }
 
 // Firestore functions
@@ -360,19 +355,13 @@ function updateYugStats() {
   totalYugTimeEl.textContent = (totalTime/60).toFixed(2) + " min";
 }
 
-function updateFastestTime(){
-  if(leaderboard.length===0){
-    fastestTime=Infinity;
-    return;
-  }
-  fastestTime = Math.min(...leaderboard.map(e=>e.time));
-}
-
+// Render leaderboard with #1 entry as bar reference
 function renderLeaderboard(){
   board.innerHTML="";
+  const topTime = leaderboard.length ? leaderboard[0].time : Infinity;
   leaderboard.forEach((entry,i)=>{
+    const percentFill = topTime < Infinity ? Math.min(entry.time / topTime * 100, 100) : 0;
     const row=document.createElement("tr");
-    const percentFill = fastestTime<Infinity ? Math.min(entry.time/fastestTime*100,100) : 0;
     row.innerHTML=`
       <td class="${i===0?'rank1':''}">${i+1}</td>
       <td>${entry.name}</td>
@@ -387,7 +376,6 @@ function renderLeaderboard(){
     `;
     board.appendChild(row);
   });
-  updateFastestTime();
   updateYugStats();
 }
 
@@ -404,16 +392,12 @@ onSnapshot(q, snapshot=>{
 
 window.updateTime = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)});
-  updateFastestTime();
-  updateYugStats();
 };
 window.updateDate = async function(id,value){
   await updateDoc(doc(db,"yugLeaderboard",id),{date:value});
 };
 window.deleteEntry = async function(id){
   await deleteDoc(doc(db,"yugLeaderboard",id));
-  updateFastestTime();
-  updateYugStats();
 };
 
 // Timer bubbles
@@ -502,9 +486,10 @@ window.openRandomBaseballWiki = async function() {
     const pageHeight = window.innerHeight;
     const winWidth = 600;
     const winHeight = 400;
-    const startBarHeight = 30;
+
+    // Top-right
     win.style.left = (pageWidth - winWidth - 20) + 'px';
-    win.style.top = (pageHeight - winHeight - startBarHeight - 20) + 'px';
+    win.style.top = '20px';
 
     const header = document.createElement('div');
     header.className = 'window-header';
