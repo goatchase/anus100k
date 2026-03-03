@@ -358,11 +358,13 @@ function updateYugStats() {
 // Render leaderboard with #1 entry as bar reference
 function renderLeaderboard(){
   board.innerHTML="";
-  const topTime = leaderboard.length ? leaderboard[0].time : Infinity;
-  leaderboard.forEach((entry,i)=>{
-    const percentFill = topTime < Infinity ? Math.min(entry.time / topTime * 100, 100) : 0;
-    const row=document.createElement("tr");
-    row.innerHTML=`
+  if(leaderboard.length === 0) return;
+  
+  const topTime = leaderboard[0].time; // #1 entry time
+  leaderboard.forEach((entry, i) => {
+    const percentFill = i === 0 ? 100 : (entry.time / topTime) * 100; // #1 is full bar
+    const row = document.createElement("tr");
+    row.innerHTML = `
       <td class="${i===0?'rank1':''}">${i+1}</td>
       <td>${entry.name}</td>
       <td><input class="time-input" type="number" step="0.01"
@@ -376,6 +378,7 @@ function renderLeaderboard(){
     `;
     board.appendChild(row);
   });
+
   updateYugStats();
 }
 
