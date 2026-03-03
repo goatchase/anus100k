@@ -1,684 +1,1191 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>THE YAK GAUNTLET</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"/>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <style>
-    body {
-      font-family: 'Roboto', sans-serif;
-      margin: 0;
-      padding-left: 80px;
-      padding-right: 80px;
-      padding-top: 20px;
-      background-color: #f4f4f4;
-      color: #001f3f;
-      text-transform: uppercase;
-      font-size: 12pt;
-    }
-    h1 {
-      font-size: 20pt;
-      text-align: center;
-      color: #001f3f;
-      font-weight: bold;
-      margin-bottom: 5px;
-    }
-    .subtitle {
-      text-align: center;
-      font-size: 10pt;
-      margin-bottom: 20px;
-      color: #001f3f;
-    }
 
-.controls-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Barstool Yug Station - Retro 95</title>
+
+ 
+
+<style>
+
+body {
+
+  font-family:'MS Sans Serif', Tahoma, Geneva, sans-serif;
+
+  font-size:12px;
+
+  background:#008080;
+
+  color:black;
+
+  margin:0;
+
+  padding:20px;
+
+}
+
+* { box-sizing: border-box; }
+
+ 
+
+/* Windows */
+
+.window {
+
+  background:#c0c0c0;
+
+  border:2px solid #808080;
+
+  position:absolute;
+
+  box-shadow:2px 2px 0px #fff inset;
+
+  cursor:default;
+
+}
+
+.window-header {
+
+  background:#000080;
+
+  color:white;
+
+  font-weight:bold;
+
+  padding:2px 5px;
+
+  cursor:move;
+
+  user-select:none;
+
+  display:flex;
+
+  justify-content:space-between;
+
+  align-items:center;
+
+}
+
+.min-btn {
+
+  background:#c0c0c0;
+
+  border:2px outset #fff;
+
+  width:18px;
+
+  height:16px;
+
+  font-size:10px;
+
+  line-height:10px;
+
+  cursor:pointer;
+
+  padding:0;
+
+}
+
+.min-btn:active { border-style:inset; }
+
+.window-body { padding:10px; }
+
+ 
+
+/* Timer */
+
+#timerWindow { width: 300px; }
+
+#nameInput {
+
   width: 100%;
-  margin-bottom: 20px;
-  gap: 10px;
-  margin: 0 auto;
+
+  padding: 4px;
+
+  font-size: 12px;
+
+  margin-top: 12px;
+
+  box-sizing: border-box;
+
 }
 
-.controls-row {
-  display: flex;
-  width: 100%;
-  max-width: 3000px;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-	  
-.form-row {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  flex-wrap: nowrap;
-  gap: 10px;
-}
+.timer-buttons { display:flex; gap:4px; margin-top:6px; }
 
-.second-row {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
+.timer-buttons button { flex:1; padding:4px 0; font-size:12px; cursor:pointer; }
 
-.left-group,
-.right-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 10px;
+ 
+
+/* Timer bar */
+
+#timerContainer {
+
+  position:relative;
+
+  width:100%;
+
+  height:40px;
+
+  background:#fff;
+
+  border:2px solid #808080;
+
+  overflow:hidden;
+
+  border-radius:4px;
+
+  margin-bottom:6px;
+
 }
 
-.left-group {
-  justify-content: left;
+#timerFill {
+
+  position:absolute;
+
+  left:0; top:0;
+
+  height:100%;
+
+  width:0%;
+
+  background: linear-gradient(to top, #f4d35e 0%, #ffd966 80%);
+
+  z-index:0;
+
 }
 
-.right-group {
-  justify-content: right;
+#timerText {
+
+  position:relative;
+
+  z-index:2;
+
+  font-family:monospace;
+
+  font-size:28px;
+
+  font-weight:bold;
+
+  text-align:center;
+
+  line-height:40px;
+
 }
 
-@media (max-width: 768px) {
-  .second-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  .left-group,
-  .right-group {
-    justify-content: center;
-  }
+ 
+
+/* Bubble foam */
+
+.bubble {
+
+  position:absolute;
+
+  bottom:0;
+
+  width:4px;
+
+  height:4px;
+
+  border-radius:50%;
+
+  background:white;
+
+  opacity:0.8;
+
+  animation: rise 2s linear infinite;
+
+  z-index:1;
+
 }
 
-    form {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    form input, form select, form button {
-      padding: 5px;
-      font-size: 1em;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    form button {
-      background-color: #990000;
-      color: white;
-      cursor: pointer;
-    }
-    form button:hover {
-      background-color: #770000;
-    }
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      margin-bottom: 10px;
-    }
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      font-size: 1em;
-    }
-    .top-controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      align-items: flex-end;
-    }
-    .edit-button, .unfilter-button, .open-stats-button {
-      background-color: #007bff;
-      color: white;
-      padding: 5px 10px;
-      border: none;
-      cursor: pointer;
-      border-radius: 4px;
-      font-size: 1em;
-    }
-    .edit-button:hover, .unfilter-button:hover, .open-stats-button:hover {
-      background-color: #0056b3;
-    }
-    select, input[type="search"] {
-      padding: 5px;
-      font-size: 1em;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
+@keyframes rise {
 
-    #scoreboard thead th {
-  	position: sticky;
-  	top: 0;
-  	background-color: #f4f4f4; /* or whatever your table header background is */
-  	z-index: 10; /* make sure it stays above table rows */
-  	border-bottom: 2px solid #ddd; /* optional: to visually separate header */
-	}
-    #page-header {
-  	position: sticky;
-	}
-    .table-wrapper {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
-    table#scoreboard {
-      width: 100%;
-      margin: 0 auto;
-      border-collapse: collapse;
-      table-layout: auto;
-    }
-    table {
-      width: 100%;
-      margin: 0 auto;
-      border-collapse: collapse;
-      table-layout: auto;
-    }
-    th, td {
-      padding: 5px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-      cursor: default;
-      user-select: none;
-    }
-    th.sortable {
-      cursor: pointer;
-    }
-    th.sortable:hover {
-      background-color: #e0e0e0;
-    }
-    th.sorted-asc::after {
-      content: " ▲";
-      font-size: 0.7em;
-    }
-    th.sorted-desc::after {
-      content: " ▼";
-      font-size: 0.7em;
-    }
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-    .leader {
-      background-color: #ccffcc !important;
-    }
-    .division-leader {
-      background-color: #dceeff !important;
-    }
-    .today-entry {
-      background-color: #fffacd !important;
-    }
-    .stopwatch {
-      font-size: 1em;
-      margin-left: 6px;
-    }
-    .gold { color: #001f3f; }
-    .blue { color: #001f3f; }
-    @media (max-width: 600px) {
-      .top-bar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .filters,
-      .top-controls {
-        flex-direction: column;
-        width: 100%;
-        gap: 5px;
-      }
-      .filter-group {
-        width: 100%;
-      }
-      .top-controls input,
-      .top-controls button {
-        width: 100%;
-      }
-      .subtitle-img {
-      	height: auto;
-	width: 50%;
-	max-width: 50px;
-	vertical-align: middle;
-	margin-right: 8px;
-      }
-    }
-  </style>
+  0% { transform: translateY(0) scale(0.8); opacity:0.8; }
+
+  50% { transform: translateY(-30px) scale(1); opacity:0.9; }
+
+  100% { transform: translateY(-50px) scale(0.8); opacity:0; }
+
+}
+
+ 
+
+/* Leaderboard */
+
+#leaderboardWindow { width:700px; top:50px; left:370px; }
+
+#leaderboardWindow .window-body {
+
+  padding:10px;
+
+  max-height:600px;
+
+  overflow-y:auto;
+
+}
+
+#leaderboard table {
+
+  width:100%;
+
+  border-collapse:collapse;
+
+  font-family: monospace;
+
+}
+
+#leaderboard th, #leaderboard td {
+
+  border:1px solid #808080;
+
+  padding:4px 6px;
+
+  font-size:12px;
+
+}
+
+#leaderboard th {
+
+  background:#000080;
+
+  color:white;
+
+  font-weight:bold;
+
+}
+
+#leaderboard th:nth-child(1), #leaderboard td:nth-child(1) { text-align:center; width:50px; }
+
+#leaderboard th:nth-child(2), #leaderboard td:nth-child(2) { text-align:left; padding-left:6px; width:200px; }
+
+#leaderboard th:nth-child(3), #leaderboard td:nth-child(3),
+
+#leaderboard th:nth-child(4), #leaderboard td:nth-child(4) { text-align:right; padding-right:4px; width:auto; }
+
+#leaderboard th:nth-child(5), #leaderboard td:nth-child(5) { text-align:center; width:50px; }
+
+.rank1 { color:red; font-weight:bold; }
+
+ 
+
+/* Inputs fill cells with beer progress */
+
+input.time-input {
+
+  width:100%;
+
+  box-sizing:border-box;
+
+  text-align:right;
+
+  border:1px solid #808080;
+
+  padding:2px 4px;
+
+  font-size:12px;
+
+  background-size: 100% 100%;
+
+}
+
+ 
+
+/* Inputs fill cells */
+
+input.date-input {
+
+  width:100%;
+
+  box-sizing:border-box;
+
+  text-align:right;
+
+  border:1px solid #808080;
+
+  padding:2px 4px;
+
+  font-size:12px;
+
+}
+
+ 
+
+/* That's Baseball */
+
+#baseballWindow { width:200px; text-align:center; bottom:50px; left:50px; top:auto !important; }
+
+#baseballWindow .window-body { cursor:pointer; font-weight:bold; font-size:14px; color:#000080; }
+
+#baseballWindow .window-body:hover { text-decoration:underline; }
+
+ 
+
+/* Yug Stats Window */
+
+#yugStatsWindow { width:200px; bottom:50px; right:20px; top:auto !important; }
+
+#yugStatsWindow .window-body { font-weight:bold; position:relative; overflow:hidden; }
+
+#yugStatsWindow #yugImage { position:relative; z-index:2; max-width:120px; height:auto; }
+
+ 
+
+/* Start bar */
+
+#startBar {
+
+  position:fixed;
+
+  bottom:0;
+
+  left:0;
+
+  width:100%;
+
+  height:30px;
+
+  background:#c0c0c0;
+
+  border-top:2px solid #fff;
+
+  display:flex;
+
+  align-items:center;
+
+  padding-left:4px;
+
+  box-sizing:border-box;
+
+  font-weight:bold;
+
+}
+
+#startButton {
+
+  width:60px;
+
+  height:24px;
+
+  background:#c0c0c0;
+
+  border:2px outset #fff;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  cursor:pointer;
+
+  font-size:12px;
+
+}
+
+#startButton:active { border-style:inset; }
+
+</style>
+
 </head>
+
 <body>
 
-  <h1>THE YAK GAUNTLET</h1>
-  <div class="subtitle">
-	<img src="YG2.png" class="subtitle-img" />
+ 
+
+<!-- Timer Window -->
+
+<div class="window" id="timerWindow" style="top:50px; left:50px;">
+
+  <div class="window-header">
+
+    <span>Timer</span>
+
+    <button class="min-btn" onclick="toggleWindow('timerWindow')">_</button>
+
   </div>
 
-  <div class="controls-wrapper">
-  <!-- First row: form centered -->
-  <div class="controls-row form-row">
-    <form id="entryForm">
-      <input id="name" placeholder="Name" required />
-      <select id="division" required>
-        <option value="" disabled selected>Select Division</option>
-      </select>
-      <select id="category" required>
-        <option value="" disabled selected>Select Category</option>
-      </select>
-      <input id="time" placeholder="Time (mm ss.ss)" required />
-      <input id="date" type="date" required />
-      <button type="submit">Submit</button>
-    </form>
-  </div>
+  <div class="window-body">
 
-  <!-- Second row: filters left, controls right -->
-  <div class="controls-row second-row">
-    <div class="left-group">
-      <div class="filter-group">
-        <label for="divisionFilter">Division</label>
-        <select id="divisionFilter"><option value="All">All</option></select>
-      </div>
-      <div class="filter-group">
-        <label for="categoryFilter">Category</label>
-        <select id="categoryFilter"><option value="All">All</option></select>
-      </div>
-      <button id="unfilterButton" class="unfilter-button">Unfilter</button>
+    <div id="timerContainer">
+
+      <div id="timerFill"></div>
+
+      <div id="timerText">0.00</div>
+
     </div>
 
-    <div class="right-group">
-      <input id="searchInput" type="search" placeholder="Search name" />
-      <button id="editButton" class="edit-button">Edit</button>
-      <button id="randomButton" class="open-stats-button">Random</button>
-      <button id="openStatsButton" class="open-stats-button">Stats</button>
+    <input id="nameInput" type="text" placeholder="Enter name..." />
+
+    <div class="timer-buttons">
+
+      <button onclick="startTimer()">Start</button>
+
+      <button onclick="stopTimer()">Stop</button>
+
+      <button onclick="resetTimer()">Reset</button>
+
     </div>
+
   </div>
+
 </div>
 
-<div class="table-wrapper">
-  <table id="scoreboard">
-    <thead>
-      <tr>
-        <th class="sortable" data-column="rank">Rank</th>
-        <th class="sortable" data-column="name">Name</th>
-        <th class="sortable" data-column="division">Division</th>
-        <th class="sortable" data-column="category">Category</th>
-        <th class="sortable" data-column="time">Time</th>
-        <th class="sortable" data-column="date">Date</th>
-        <th id="actionHeader" style="display: none;">Actions</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+ 
+
+<!-- Leaderboard Window -->
+
+<div class="window" id="leaderboardWindow">
+
+  <div class="window-header">
+
+    <span>Leaderboard</span>
+
+    <button class="min-btn" onclick="toggleWindow('leaderboardWindow')">_</button>
+
+  </div>
+
+  <div class="window-body">
+
+    <table id="leaderboard">
+
+      <thead>
+
+        <tr>
+
+          <th>Rank</th>
+
+          <th>Name</th>
+
+          <th>Time</th>
+
+          <th>Date</th>
+
+          <th>X</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody></tbody>
+
+    </table>
+
+  </div>
+
 </div>
 
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('date').valueAsDate = new Date();
-    const firebaseConfig = {
-      apiKey: "AIzaSyCLIgqUBUH-9OLNbPihVrNmy7UaEKzDKZ0",
-      authDomain: "goatchase-e9502.firebaseapp.com",
-      projectId: "goatchase-e9502",
-      storageBucket: "goatchase-e9502.appspot.com",
-      messagingSenderId: "16998517478",
-      appId: "1:16998517478:web:6386aff8c1d1da2accc927",
-      measurementId: "G-YWLJGQG0XD"
-    };
+ 
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const entriesCollection = db.collection("entries");
+<!-- That's Baseball -->
 
-    const form = document.getElementById('entryForm');
-    const scoreboard = document.getElementById('scoreboard').querySelector('tbody');
-    const editButton = document.getElementById('editButton');
-    const unfilterButton = document.getElementById('unfilterButton');
-    const openStatsButton = document.getElementById('openStatsButton');
-    const searchInput = document.getElementById('searchInput');
-    const divisionFilter = document.getElementById('divisionFilter');
-    const categoryFilter = document.getElementById('categoryFilter');
-    const actionHeader = document.getElementById('actionHeader');
-    const divisionSelect = document.getElementById('division');
-    const categorySelect = document.getElementById('category');
+<div class="window" id="baseballWindow">
 
-    let entries = [];
-    let isEditMode = false;
-    const editPassword = "benjaminmintz1"; // 🔐 Change this password as needed
+  <div class="window-header">
 
-    // Sort state
-    let currentSort = {
-      column: 'rank', // default sorting by rank (time ascending)
-      direction: 'asc' // or 'desc'
-    };
+    <span>That's Baseball</span>
 
-   let lastSubmittedTime = null;
+    <button class="min-btn" onclick="toggleWindow('baseballWindow')">_</button>
 
-    function formatDate(input) {
-      const d = new Date(input);
-      return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${d.getFullYear()}`;
-    }
+  </div>
 
-    function parseTimeToSeconds(timeStr) {
-      const parts = timeStr.trim().split(" ");
-      if (parts.length !== 2) return NaN;
-      const [min, sec] = parts.map(parseFloat);
-      return min * 60 + sec;
-    }
+  <div class="window-body" onclick="openRandomBaseballWiki()">
 
-    function formatTime(seconds) {
-      const min = Math.floor(seconds / 60);
-      const sec = (seconds % 60).toFixed(2).padStart(5, '0');
-      return `${String(min).padStart(2,'0')} ${sec}`;
-    }
+    ⚾ Click me!
 
-    function getDaysSince(dateStr) {
-      const date = new Date(dateStr);
-      const now = new Date();
-      const diffTime = now - date;
-      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    }
+  </div>
 
-    function updateFilterOptions() {
-      const divisions = [...new Set(entries.map(e => e.division))].sort();
-      const categories = [...new Set(entries.map(e => e.category))].sort();
+</div>
 
-      divisionFilter.innerHTML = '<option value="All">All</option>' +
-        divisions.map(d => `<option value="${d}">${d}</option>`).join('');
-      categoryFilter.innerHTML = '<option value="All">All</option>' +
-        categories.map(c => `<option value="${c}">${c}</option>`).join('');
+ 
 
-      divisionSelect.innerHTML = '<option value="" disabled selected>Select Division</option>' +
-        divisions.map(d => `<option value="${d}">${d}</option>`).join('');
-      categorySelect.innerHTML = '<option value="" disabled selected>Select Category</option>' +
-        categories.map(c => `<option value="${c}">${c}</option>`).join('');
-    }
+<!-- Yug Stats Window -->
 
-    function compareEntries(a, b, column) {
-      switch (column) {
-        case 'rank':
-        case 'time':
-          // sort by totalSeconds
-          return a.totalSeconds - b.totalSeconds;
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'division':
-          return a.division.localeCompare(b.division);
-        case 'category':
-          return a.category.localeCompare(b.category);
-        case 'date':
-          return new Date(a.date) - new Date(b.date);
-        default:
-          return 0;
-      }
-    }
+<div class="window" id="yugStatsWindow">
 
-    async function renderScoreboard() {
-      scoreboard.innerHTML = '';
+  <div class="window-header">
 
-      // Calculate totalSeconds for sorting & finding leaders
-      entries.forEach(entry => {
-        entry.totalSeconds = parseTimeToSeconds(entry.time);
-      });
+    <span>Yug Stats</span>
 
-      // Find best overall and division leaders from all entries (unfiltered)
-      let bestOverall = null;
-      const bestByDivision = {};
-      entries.forEach(entry => {
-        if (!bestOverall || entry.totalSeconds < bestOverall.totalSeconds) bestOverall = entry;
-        if (!bestByDivision[entry.division] || entry.totalSeconds < bestByDivision[entry.division].totalSeconds) {
-          bestByDivision[entry.division] = entry;
-        }
-      });
+    <button class="min-btn" onclick="toggleWindow('yugStatsWindow')">_</button>
 
-      // Apply filters and search
-      let filteredEntries = entries.filter(entry =>
-        entry.name.toUpperCase().includes(searchInput.value.toUpperCase()) &&
-        (divisionFilter.value === 'All' || entry.division === divisionFilter.value) &&
-        (categoryFilter.value === 'All' || entry.category === categoryFilter.value)
-      );
+  </div>
 
-      // Sort filtered entries by current sort column and direction
-      filteredEntries.sort((a, b) => {
-        let cmp = compareEntries(a, b, currentSort.column);
-        return currentSort.direction === 'asc' ? cmp : -cmp;
-      });
+  <div class="window-body">
 
-      // Add sorted-asc/desc classes to headers
-      document.querySelectorAll('th.sortable').forEach(th => {
-        th.classList.remove('sorted-asc', 'sorted-desc');
-        if (th.dataset.column === currentSort.column) {
-          th.classList.add(currentSort.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
-        }
-      });
+    <div>Total Yugs: <span id="totalYugs">0</span></div>
 
-      const todayStr = new Date().toISOString().split('T')[0];
+    <div>Total Yug Time: <span id="totalYugTime">0.00</span></div>
 
-      filteredEntries.forEach((entry, index) => {
-        const row = document.createElement('tr');
+    <div style="margin-top:10px; position:relative; height:120px;">
 
-        const entryDateOnly = new Date(entry.date).toISOString().split('T')[0];
-        const isToday = entryDateOnly === todayStr;
-        const isLeader = entry === bestOverall;
-        const isDivisionLeader = bestByDivision[entry.division] === entry;
+      <img id="yugImage" src="https://raw.githubusercontent.com/goatchase/anus100k/main/Yug.jpg" alt="Yug" />
 
-        if (isLeader) row.classList.add('leader');
-        else if (isDivisionLeader) row.classList.add('division-leader');
-        if (isToday) row.classList.add('today-entry');
+    </div>
 
-        const daysSince = getDaysSince(entry.date);
-        let iconHTML = '';
+  </div>
 
-        if (isLeader) iconHTML = `<span class="stopwatch gold" title="Days since: ${daysSince}">🥇${daysSince} days</span>`;
-        else if (isDivisionLeader) iconHTML = `<span class="stopwatch blue" title="Days since: ${daysSince}">⏱️${daysSince} days</span>`;
+</div>
 
-        row.innerHTML = `
-          <td>${index + 1}</td>
-          <td contenteditable="${isEditMode}">${entry.name}</td>
-          <td contenteditable="${isEditMode}">${entry.division}</td>
-          <td contenteditable="${isEditMode}">${entry.category}</td>
-          <td contenteditable="${isEditMode}">${formatTime(entry.totalSeconds)} ${iconHTML}</td>
-          <td contenteditable="${isEditMode}">${formatDate(entry.date)}</td>
-          <td style="display: ${isEditMode ? 'table-cell' : 'none'}">
-            <button class="delete-button" data-id="${entry.id}">Delete</button>
-          </td>
-        `;
-        scoreboard.appendChild(row);
-      });
+ 
 
-      updateFilterOptions();
+<audio id="airhorn" src="https://www.soundjay.com/misc/sounds/air-horn.mp3"></audio>
 
-if (lastSubmittedTime !== null) {
-  try {
-    const rows = scoreboard.querySelectorAll('tr');
-    for (const row of rows) {
-      const timeCell = row.cells[4];
-      if (!timeCell) continue;
+ 
 
-      const parts = timeCell.textContent.trim().split(' ');
-      if (parts.length < 2) continue;
+<div id="startBar">
 
-      const timeText = parts[0] + ' ' + parts[1]; // "mm ss.ss"
-      const timeInRow = parseTimeToSeconds(timeText);
-      if (isNaN(timeInRow)) continue;
+  <div id="startButton">Start</div>
 
-      if (Math.abs(timeInRow - lastSubmittedTime) < 0.01) {
-        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        row.style.backgroundColor = '#ffffaa';
-        setTimeout(() => row.style.backgroundColor = '', 1500);
-        break;
-      }
-    }
-  } catch (err) {
-    console.error("Scroll logic failed:", err);
-  }
-  lastSubmittedTime = null;
+</div>
+
+ 
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
+import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+ 
+
+const firebaseConfig = {
+
+  apiKey: "YOUR_API_KEY",
+
+  authDomain: "goatchase-e9502.firebaseapp.com",
+
+  projectId: "goatchase-e9502",
+
+  storageBucket: "goatchase-e9502.firebasestorage.app",
+
+  messagingSenderId: "16998517478",
+
+  appId: "1:16998517478:web:8985a2bf70d7df9bccc927"
+
+};
+
+ 
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+const leaderboardCol = collection(db,"yugLeaderboard");
+
+ 
+
+const timerText = document.getElementById("timerText");
+
+const timerFill = document.getElementById("timerFill");
+
+const timerContainer = document.getElementById("timerContainer");
+
+const nameInput = document.getElementById("nameInput");
+
+const board = document.querySelector("#leaderboard tbody");
+
+const totalYugsEl = document.getElementById("totalYugs");
+
+const totalYugTimeEl = document.getElementById("totalYugTime");
+
+ 
+
+let startTime=null;
+
+let interval=null;
+
+let leaderboard=[];
+
+let fastestTime=Infinity;
+
+let bubbles = [];
+
+let yugBubbles = [];
+
+ 
+
+// Helper: format date MM/DD/YY
+
+function formatDate(d){
+
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+
+  const dd = String(d.getDate()).padStart(2,'0');
+
+  const yy = String(d.getFullYear()).slice(-2);
+
+  return `${mm}/${dd}/${yy}`;
+
 }
 
-document.querySelectorAll('.delete-button').forEach(button => {
-  button.addEventListener('click', (e) => {
-    const entryId = e.target.dataset.id;
-    deleteEntry(entryId);
+ 
+
+// Timer functions
+
+window.startTimer = function(){
+
+  if(interval) return;
+
+  startTime = Date.now();
+
+  interval = setInterval(updateTimerDisplay, 10);
+
+  bubbles.forEach(b=>b.remove());
+
+  bubbles=[];
+
+  createBubbles();
+
+};
+
+window.resetTimer = function(){
+
+  clearInterval(interval);
+
+  interval=null;
+
+  startTime=null;
+
+  timerText.textContent="0.00";
+
+  timerFill.style.width="0%";
+
+  bubbles.forEach(b=>b.remove());
+
+  bubbles=[];
+
+};
+
+window.stopTimer = async function(){
+
+  if(!interval) return;
+
+  clearInterval(interval);
+
+  interval=null;
+
+  const name = nameInput.value.trim();
+
+  if(!name) return alert("Enter a name.");
+
+  const time = parseFloat(timerText.textContent);
+
+  const date = formatDate(new Date());
+
+  await addDoc(leaderboardCol,{name,time,date});
+
+  resetTimer();
+
+  nameInput.value="";
+
+};
+
+function updateTimerDisplay(){
+
+  if(!startTime) return;
+
+  const elapsed = (Date.now()-startTime)/1000;
+
+  timerText.textContent = elapsed.toFixed(2);
+
+  if(fastestTime<Infinity){
+
+    let percent = Math.min((elapsed/fastestTime)*100,100);
+
+    timerFill.style.width = percent+"%";
+
+  }
+
+}
+
+ 
+
+// Firestore functions
+
+function updateYugStats() {
+
+  const totalYugs = leaderboard.length * 2;
+
+  const totalTime = leaderboard.reduce((sum, e) => sum + e.time, 0);
+
+  totalYugsEl.textContent = totalYugs;
+
+  totalYugTimeEl.textContent = (totalTime/60).toFixed(2) + " min";
+
+}
+
+ 
+
+function updateFastestTime(){
+
+  if(leaderboard.length===0){
+
+    fastestTime=Infinity;
+
+    return;
+
+  }
+
+  fastestTime = Math.min(...leaderboard.map(e=>e.time));
+
+}
+
+ 
+
+function renderLeaderboard(){
+
+  board.innerHTML="";
+
+ 
+
+  if (leaderboard.length === 0) return;
+
+ 
+
+  const fastest = leaderboard[0].time; // #1 time
+
+ 
+
+  leaderboard.forEach((entry,i)=>{
+
+    const row=document.createElement("tr");
+
+ 
+
+    const percentFill = Math.min((fastest / entry.time) * 100, 100);
+
+ 
+
+    row.innerHTML=`
+
+      <td class="${i===0?'rank1':''}">${i+1}</td>
+
+      <td>${entry.name}</td>
+
+      <td>
+
+        <input class="time-input" type="number" step="0.01"
+
+          value="${entry.time.toFixed(2)}"
+
+          style="background: linear-gradient(to right, #f4d35e ${percentFill}%, transparent ${percentFill}%);"
+
+          onchange="updateTime('${entry.id}', this.value)">
+
+      </td>
+
+      <td>
+
+        <input class="date-input" type="text"
+
+          value="${entry.date}"
+
+          onchange="updateDate('${entry.id}', this.value)">
+
+      </td>
+
+      <td><button onclick="deleteEntry('${entry.id}')">X</button></td>
+
+    `;
+
+ 
+
+    board.appendChild(row);
+
   });
+
+ 
+
+  updateYugStats();
+
+}
+
+ 
+
+const q = query(leaderboardCol, orderBy("time"));
+
+onSnapshot(q, snapshot=>{
+
+  leaderboard=[];
+
+  snapshot.forEach(docSnap=>{
+
+    const data = docSnap.data();
+
+    data.date = formatDate(new Date(data.date));
+
+    leaderboard.push({id:docSnap.id,...data});
+
+  });
+
+  renderLeaderboard();
+
 });
 
-      document.querySelectorAll('.delete-button').forEach(button => {
-        button.addEventListener('click', (e) => {
-          const entryId = e.target.dataset.id;
-          deleteEntry(entryId);
-        });
-      });
-    }
+ 
 
-    async function fetchEntries() {
-      const snapshot = await entriesCollection.get();
-      entries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderScoreboard();
-    }
+window.updateTime = async function(id,value){
 
-    async function addEntry(entry) {
-      await entriesCollection.add(entry);
-      fetchEntries();
-    }
+  await updateDoc(doc(db,"yugLeaderboard",id),{time:parseFloat(value)});
 
-    async function deleteEntry(id) {
-      if (confirm("Delete this entry?")) {
-        await entriesCollection.doc(id).delete();
-        fetchEntries();
-      }
-    }
+  updateFastestTime();
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+  updateYugStats();
 
-      const name = document.getElementById('name').value.trim();
-      const division = divisionSelect.value;
-      const category = categorySelect.value;
-      const time = document.getElementById('time').value.trim();
-      const dateInput = document.getElementById('date').value; // e.g. "2025-05-29"
+};
 
-      if (!name || !division || !category || !time || !dateInput) {
-        alert("Please fill in all fields.");
-        return;
-      }
+window.updateDate = async function(id,value){
 
-      // Extract year, month, day from the dateInput string
-      const [year, month, day] = dateInput.split('-').map(Number);
+  await updateDoc(doc(db,"yugLeaderboard",id),{date:value});
 
-      // Get current time components
-      const now = new Date();
-      const hours = now.getHours();
-      const minutes = now.getMinutes();
-      const seconds = now.getSeconds();
-      const milliseconds = now.getMilliseconds();
+};
 
-      // Create a Date object with local time on selected day + current time
-      const combinedDate = new Date(year, month - 1, day, hours, minutes, seconds, milliseconds);
+window.deleteEntry = async function(id){
 
-      // Convert to ISO string for Firestore (UTC)
-      const dateTimeString = combinedDate.toISOString();
+  await deleteDoc(doc(db,"yugLeaderboard",id));
 
-      lastSubmittedTime = parseTimeToSeconds(time);
-      await addEntry({ name, division, category, time, date: dateTimeString });
+  updateFastestTime();
 
-      form.reset();
-    });
+  updateYugStats();
 
-    // 🔐 Password-protected edit toggle
-    editButton.addEventListener('click', () => {
-      if (!isEditMode) {
-        const input = prompt("Enter edit password:");
-        if (input !== editPassword) {
-          alert("Incorrect password.");
-          return;
-        }
-      }
-      isEditMode = !isEditMode;
-      editButton.textContent = isEditMode ? "Done" : "Edit";
-      if (isEditMode) {
-        const saveButton = document.createElement('button');
-        saveButton.textContent = 'Save Changes';
-        saveButton.id = 'saveChangesButton';
-        saveButton.className = 'edit-button';
-        editButton.after(saveButton);
+};
 
-        saveButton.addEventListener('click', async () => {
-          const rows = scoreboard.querySelectorAll('tr');
-          for (let index = 0; index < rows.length; index++) {
-            const row = rows[index];
-            const entry = entries[index];
-            const cells = row.querySelectorAll('td');
-            const newName = cells[1].innerText.trim();
-            const newDivision = cells[2].innerText.trim();
-            const newCategory = cells[3].innerText.trim();
-            const newTime = cells[4].innerText.trim().split(' ')[0] + ' ' + cells[4].innerText.trim().split(' ')[1]; // "mm ss.ss"
-            const newDateText = cells[5].innerText.trim();
-            // Parse mm/dd/yyyy to yyyy-mm-dd
-            const [m, d, y] = newDateText.split('/');
-            const newDate = new Date(y, m - 1, d).toISOString();
+ 
 
-            await entriesCollection.doc(entry.id).update({
-              name: newName,
-              division: newDivision,
-              category: newCategory,
-              time: newTime,
-              date: newDate,
-            });
-          }
-          alert('Changes saved.');
-          fetchEntries();
-          isEditMode = false;
-          editButton.textContent = "Edit";
-          saveButton.remove();
-        });
-      } else {
-        const saveButton = document.getElementById('saveChangesButton');
-        if (saveButton) saveButton.remove();
-      }
-      renderScoreboard();
-    });
+// Timer bubbles
 
-    unfilterButton.addEventListener('click', () => {
-      divisionFilter.value = 'All';
-      categoryFilter.value = 'All';
-      searchInput.value = '';
-      renderScoreboard();
-    });
+function createBubbles(container=timerContainer){
 
-    openStatsButton.addEventListener('click', () => {
-      window.open('stats.html', '_blank');
-    });
+  const count = 20;
 
-    document.getElementById('randomButton').addEventListener('click', () => {
-      if (entries.length === 0) return;
-      const randIndex = Math.floor(Math.random() * entries.length);
-      const randEntry = entries[randIndex];
-      alert(`Random Entry:\nName: ${randEntry.name}\nDivision: ${randEntry.division}\nCategory: ${randEntry.category}\nTime: ${randEntry.time}\nDate: ${formatDate(randEntry.date)}`);
-    });
+  for(let i=0;i<count;i++){
 
-    divisionFilter.addEventListener('change', renderScoreboard);
-    categoryFilter.addEventListener('change', renderScoreboard);
-    searchInput.addEventListener('input', renderScoreboard);
+    const b = document.createElement('div');
 
-    // Add sorting on header click
-    document.querySelectorAll('th.sortable').forEach(th => {
-      th.addEventListener('click', () => {
-        const col = th.dataset.column;
-        if (currentSort.column === col) {
-          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-        } else {
-          currentSort.column = col;
-          currentSort.direction = 'asc';
-        }
-        renderScoreboard();
-      });
-    });
+    b.className='bubble';
 
-    fetchEntries();
+    b.style.left = Math.random()*container.offsetWidth+'px';
+
+    b.style.animationDuration = (1 + Math.random()*1.5)+'s';
+
+    container.appendChild(b);
+
+    bubbles.push(b);
+
+  }
+
+}
+
+ 
+
+// Yug Stats bubbles
+
+function createYugBubbles(){
+
+  const container = document.getElementById('yugStatsWindow').querySelector('.window-body');
+
+  yugBubbles.forEach(b=>b.remove());
+
+  yugBubbles=[];
+
+  const count = 15;
+
+  for(let i=0;i<count;i++){
+
+    const b = document.createElement('div');
+
+    b.className='bubble';
+
+    b.style.left = Math.random()*container.offsetWidth+'px';
+
+    b.style.bottom = '0px';
+
+    b.style.width = (3 + Math.random()*4)+'px';
+
+    b.style.height = b.style.width;
+
+    b.style.animationDuration = (1.5 + Math.random()*2)+'s';
+
+    container.appendChild(b);
+
+    yugBubbles.push(b);
+
+  }
+
+}
+
+createYugBubbles();
+
+setInterval(createYugBubbles, 10000);
+
+ 
+
+// Draggable windows
+
+function makeDraggable(el){
+
+  const header = el.querySelector('.window-header');
+
+  let offsetX=0, offsetY=0, isDown=false, topZ=1000;
+
+  header.addEventListener('mousedown',e=>{
+
+    isDown=true;
+
+    offsetX=e.clientX-el.offsetLeft;
+
+    offsetY=e.clientY-el.offsetTop;
+
+    topZ++;
+
+    el.style.zIndex=topZ;
+
   });
+
+  document.addEventListener('mousemove',e=>{
+
+    if(!isDown) return;
+
+    el.style.left=(e.clientX-offsetX)+'px';
+
+    el.style.top=(e.clientY-offsetY)+'px';
+
+  });
+
+  document.addEventListener('mouseup',()=>{ isDown=false; });
+
+}
+
+makeDraggable(document.getElementById('timerWindow'));
+
+makeDraggable(document.getElementById('leaderboardWindow'));
+
+makeDraggable(document.getElementById('baseballWindow'));
+
+makeDraggable(document.getElementById('yugStatsWindow'));
+
+ 
+
+// Minimize
+
+window.toggleWindow = function(id){
+
+  const win=document.getElementById(id);
+
+  const body=win.querySelector('.window-body');
+
+  body.style.display = body.style.display==="none" ? "block" : "none";
+
+};
+
+ 
+
+// That's Baseball internal window
+
+window.openRandomBaseballWiki = async function() {
+
+  try {
+
+    const res = await fetch(
+
+      "https://en.wikipedia.org/w/api.php?origin=*&action=query&list=search&srsearch=baseball&format=json&srlimit=50"
+
+    );
+
+    const data = await res.json();
+
+    if (!data.query || !data.query.search || data.query.search.length === 0) {
+
+      throw new Error("No baseball pages found.");
+
+    }
+
+    const page = data.query.search[Math.floor(Math.random() * data.query.search.length)];
+
+    const url = `https://en.wikipedia.org/wiki/${page.title.replace(/ /g,'_')}`;
+
+ 
+
+    const win = document.createElement('div');
+
+    win.className = 'window';
+
+    win.style.width = '600px';
+
+    win.style.height = '400px';
+
+    win.style.overflow = 'hidden';
+
+    const pageWidth = window.innerWidth;
+
+    const pageHeight = window.innerHeight;
+
+    const winWidth = 600;
+
+    const winHeight = 400;
+
+    const startBarHeight = 30;
+
+    win.style.left = (pageWidth - winWidth - 20) + 'px';
+
+    win.style.top = (pageHeight - winHeight - startBarHeight - 20) + 'px';
+
+ 
+
+    const header = document.createElement('div');
+
+    header.className = 'window-header';
+
+    header.style.display = 'flex';
+
+    header.style.justifyContent = 'space-between';
+
+    header.style.alignItems = 'center';
+
+ 
+
+    const titleSpan = document.createElement('span');
+
+    titleSpan.textContent = page.title;
+
+ 
+
+    const btnContainer = document.createElement('div');
+
+    btnContainer.style.display = 'flex';
+
+    btnContainer.style.gap = '2px';
+
+ 
+
+    const maxBtn = document.createElement('button');
+
+    maxBtn.className = 'min-btn';
+
+    maxBtn.textContent = '⬜';
+
+    let isMaximized = false;
+
+    let prevStyle = {};
+
+    maxBtn.addEventListener('click', () => {
+
+      if (!isMaximized) {
+
+        prevStyle = {
+
+          left: win.style.left,
+
+          top: win.style.top,
+
+          width: win.style.width,
+
+          height: win.style.height
+
+        };
+
+        win.style.left = '0';
+
+        win.style.top = '0';
+
+        win.style.width = '100%';
+
+        win.style.height = '100%';
+
+        isMaximized = true;
+
+      } else {
+
+        win.style.left = prevStyle.left;
+
+        win.style.top = prevStyle.top;
+
+        win.style.width = prevStyle.width;
+
+        win.style.height = prevStyle.height;
+
+        isMaximized = false;
+
+      }
+
+    });
+
+ 
+
+    const closeBtn = document.createElement('button');
+
+    closeBtn.className = 'min-btn';
+
+    closeBtn.textContent = 'X';
+
+    closeBtn.addEventListener('click', () => win.remove());
+
+ 
+
+    btnContainer.appendChild(maxBtn);
+
+    btnContainer.appendChild(closeBtn);
+
+    header.appendChild(titleSpan);
+
+    header.appendChild(btnContainer);
+
+    win.appendChild(header);
+
+ 
+
+    const body = document.createElement('div');
+
+    body.className = 'window-body';
+
+    body.style.padding = '0';
+
+    body.style.height = 'calc(100% - 24px)';
+
+ 
+
+    const iframe = document.createElement('iframe');
+
+    iframe.src = url;
+
+    iframe.style.width = '100%';
+
+    iframe.style.height = '100%';
+
+    iframe.style.border = 'none';
+
+    body.appendChild(iframe);
+
+    win.appendChild(body);
+
+ 
+
+    document.body.appendChild(win);
+
+    makeDraggable(win);
+
+ 
+
+  } catch (err) {
+
+    alert("Error fetching random baseball article.");
+
+    console.error(err);
+
+  }
+
+};
+
 </script>
+
+ 
+
 </body>
+
 </html>
